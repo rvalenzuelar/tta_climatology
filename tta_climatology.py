@@ -8,11 +8,5 @@ import parse_data
 # 	czd=parse_data.czd(y)
 # 	print 'ok'
 
-bby=parse_data.bby(1998)
-czd=parse_data.czd(1998)
-
-
-
-
-
-
+bby = parse_data.bby(1998, hourly=True)
+czd = parse_data.czd(1998, hourly=True)
