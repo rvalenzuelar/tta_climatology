@@ -3,10 +3,10 @@ import parse_data
 
 from ctext import ctext
 
-txtHeader1 = '{:^35} ||| {:^35}'
+txtHeader1 = '{:^35} || {:^35}'
 print txtHeader1.format('beg', 'end')
 
-txtHeader2 = '{:^16} | {:^16} ||| {:^16} {:^16}'
+txtHeader2 = '{:^16} | {:^16} || {:^16} {:^16}'
 print txtHeader2.format('bby', 'czd', 'czd', 'bby')
 
 t = ctext('{}')
@@ -25,7 +25,7 @@ for y in [1998] + range(2001, 2013):
         else:
                 te = t.text + ' | ' + t.text
 
-        txtDate = tb + ' ||| ' + te
+        txtDate = tb + ' || ' + te
 
         fmt = '%Y-%m-%d %H:%M'
         b_bby = beg_bby.strftime(fmt)
