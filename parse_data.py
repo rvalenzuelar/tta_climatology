@@ -9,10 +9,10 @@ import os
 base_dir = os.path.expanduser('~')
 
 
-def bby(year=None, hourly=False):
+def surface_bby(year=None, hourly=False):
 
     y = str(year)[-2:]
-    fbby = base_dir+'/SURFACE/climatology/BBY'+y+'_Sfcmet'
+    fbby = base_dir + '/SURFACE/climatology/BBY' + y + '_Sfcmet'
     matbby = sio.loadmat(fbby)
     sfcbby = matbby['Sfcmet_bby']
     # cols=sfc.dtype.names
@@ -39,8 +39,109 @@ def bby(year=None, hourly=False):
         return BBY
 
 
-def get_statistical(df, minutes=None):
+def surface_czd(year=None, hourly=True):
 
+    y = str(year)[-2:]
+    f = base_dir + '/SURFACE/climatology/avg60_CZC' + y + '_nortype'
+    mat = sio.loadmat(f)
+    rainczd = mat['avg_czc_sprof_rtype_precip60'][0]
+    begd = mat['avg_czc_sprof_begdayt60'][0]
+    # endd=mat['avg_czc_sprof_enddayt60'][0]
+    date = []
+    for n in range(begd.size):
+        date.append(datenum_to_datetime(begd[n]))
+    d = {'precip': rainczd}
+    CZD = pd.DataFrame(data=d, index=date)
+    CZD = quality_control(CZD)
+
+    return CZD
+
+
+def bby_surf_dates(year=None):
+
+    y = str(year)[-2:]
+    f = base_dir + '/SURFACE/climatology/BBY' + y + '_Sfcmet'
+    mat = sio.loadmat(f)
+    b = mat['Sfcmet_bby']['dayt'][0][0][0][0]
+    e = mat['Sfcmet_bby']['dayt'][0][-1][0][0]
+
+    beg = datenum_to_datetime(b)
+    end = datenum_to_datetime(e)
+
+    return beg, end
+
+
+def czd_surf_dates(year=None):
+
+    y = str(year)[-2:]
+    f = base_dir + '/SURFACE/climatology/avg60_CZC' + y + '_nortype'
+    mat = sio.loadmat(f)
+    b = mat['avg_czc_sprof_begdayt60'][0][0]
+    e = mat['avg_czc_sprof_begdayt60'][0][-1]
+
+    beg = datenum_to_datetime(b)
+    end = datenum_to_datetime(e)
+
+    return beg, end
+    # return mat['avg_czc_sprof_begdayt60']
+
+
+def windprof_bby(year=None):
+
+    y = str(year)[-2:]
+    fbby = base_dir + '/WINDPROF/climatology/BBY' + y + '_915lapwind'
+    matbby = sio.loadmat(fbby)
+    timest = matbby['bby915lapwind']['begdayt'][0]
+    ws = matbby['bby915lapwind']['wspd'][0]
+    wd = matbby['bby915lapwind']['wdir'][0]
+    hgt = matbby['bby915lapwind']['htmsl'][0]
+
+    timestamp = [datenum_to_datetime(t) for t in timest]
+
+    return hgt
+
+    # len_hgt = len(hgt[0][0])
+    # len_time = len(hgt)
+
+    # wspd = np.zeros(len_hgt)
+    # wdir = np.zeros(len_hgt)
+    # for s, d in zip(ws, wd):
+    #     s = s.flatten()
+    #     print s.shape
+    #     print s
+    #     # print wspd.shape
+    #     # return s, wspd
+    #     wspd = np.vstack((wspd, s))
+    #     # wdir = np.vstack((wdir, d))
+
+    # return wspd.T
+
+
+def check_wprof_hgt(year=None):
+
+    y = str(year)[-2:]
+    fbby = base_dir + '/WINDPROF/climatology/BBY' + y + '_915lapwind'
+    matbby = sio.loadmat(fbby)
+    hgt = matbby['bby915lapwind']['htmsl'][0]
+
+    ngates = []
+    fg = 99999.
+    lg = -99999.
+    for h in hgt:
+        ngates.append(len(h[0]))
+        if h[0].min() < fg:
+            fg = h[0].min()
+        if h[0].max() > lg:
+            lg = h[0].max()
+    ngates = np.array(ngates)
+
+    txt = 'Year: {:4s}, ngates_min:{:4d}, ngates_max:{:4d},' + \
+        ' first_gate:{:4d}, last_gate:{:4d}'
+
+    print txt.format(y, int(ngates.min()), int(ngates.max()), int(fg), int(lg))
+
+
+def get_statistical(df, minutes=None):
     '''
     mean for tempc
     mean for rh
@@ -48,7 +149,7 @@ def get_statistical(df, minutes=None):
     mean for wspd, wdir
     sum for precip
     '''
-    grp = pd.TimeGrouper(str(minutes)+'T')
+    grp = pd.TimeGrouper(str(minutes) + 'T')
     dfg = df.groupby(grp)
     tempc = dfg['tempc'].mean()
     rh = dfg['rh'].mean()
@@ -70,24 +171,6 @@ def get_statistical(df, minutes=None):
     newdf = pd.DataFrame(data=d, index=newIndex)
 
     return newdf
-
-
-def czd(year=None):
-
-    y = str(year)[-2:]
-    fczd = base_dir+'/SURFACE/climatology/avg60_CZC'+y+'_nortype'
-    matczd = sio.loadmat(fczd)
-    rainczd = matczd['avg_czc_sprof_rtype_precip60'][0]
-    begd = matczd['avg_czc_sprof_begdayt60'][0]
-    # endd=matczd['avg_czc_sprof_enddayt60'][0]
-    date = []
-    for n in range(begd.size):
-        date.append(datenum_to_datetime(begd[n]))
-    d = {'precip': rainczd}
-    CZD = pd.DataFrame(data=d, index=date)
-    CZD = quality_control(CZD)
-
-    return CZD
 
 
 def quality_control(df):
@@ -159,13 +242,14 @@ def average_wind(wdir, wspd):
             av_wdir = np.round(math.degrees(phi), 1)
             if av_wdir < 0:
                 av_wdir += 360
-            av_wspd = int(round(r*10))/10.0
+            av_wspd = int(round(r * 10)) / 10.0
             return av_wdir, av_wspd
     else:
         return None, None
 
 
 def datenum_to_datetime(datenum):
+
     from datetime import datetime, timedelta
     """
     Convert Matlab datenum into Python datetime.

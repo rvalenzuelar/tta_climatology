@@ -1,12 +1,8 @@
 
 import parse_data
 
+# bby = parse_data.bby(2001, hourly=True)
+# czd = parse_data.czd(2001, hourly=True)
 
-# for y in [1998]+range(2001,2013):
-# 	print y
-# 	bby=parse_data.bby(y)
-# 	czd=parse_data.czd(y)
-# 	print 'ok'
+# wp_bby = parse_data.windprof_bby(year=1998)
 
-bby = parse_data.bby(1998, hourly=True)
-czd = parse_data.czd(1998, hourly=True)
