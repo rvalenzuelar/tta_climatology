@@ -5,140 +5,192 @@ import numpy as np
 import pandas as pd
 import os
 
+from scipy.interpolate import interp1d
+from datetime import datetime, timedelta
 
 base_dir = os.path.expanduser('~')
+windprofpath = base_dir + '/WINDPROF/climatology/BBY{}_915lapwind'
+surfacepath_bby = base_dir + '/SURFACE/climatology/BBY{}_Sfcmet'
+surfacepath_czd = base_dir + '/SURFACE/climatology/avg60_CZC{}_nortype'
 
 
-def surface_bby(year=None, hourly=False):
+class windprof:
 
-    y = str(year)[-2:]
-    fbby = base_dir + '/SURFACE/climatology/BBY' + y + '_Sfcmet'
-    matbby = sio.loadmat(fbby)
-    sfcbby = matbby['Sfcmet_bby']
-    # cols=sfc.dtype.names
-    date, tempc, rh, pmb, wspd, wdir, precip = [], [], [], [], [], [], []
-    for n in range(sfcbby.size):
-        date.append(datenum_to_datetime(sfcbby[:, n][0][0][0][0]))
-        tempc.append(sfcbby[:, n][0][1][0][0])
-        rh.append(sfcbby[:, n][0][2][0][0])
-        pmb.append(sfcbby[:, n][0][3][0][0])
-        wspd.append(sfcbby[:, n][0][4][0][0])
-        wdir.append(sfcbby[:, n][0][5][0][0])
-        precip.append(sfcbby[:, n][0][6][0][0])
-    d = {'tempc': tempc, 'rh': rh, 'pmb': pmb, 'wspd': wspd, 'wdir': wdir,
-         'precip': precip}
-    BBY = pd.DataFrame(data=d, index=date)
-    if year == 2001:
-        '2001 has weird values beginning the mat file'
-        BBY = BBY.ix[67:]
-    BBY = quality_control(BBY)
+    def __init__(self, year=None, first_gate=False):
+        '''
+        The lowest gate common to all wprof dataset is 158 m
+        and the highest is 3753 m. This function interpolate
+        to a common grid between 160 and 3750 m with
+        92 m of vertical resolution (40 gates)
+        '''
 
-    if hourly:
-        return get_statistical(BBY, minutes=60)
-    else:
-        return BBY
+        y = str(year)[-2:]
+        f = windprofpath.format(y)
+        mat = sio.loadmat(f)
+        timest = mat['bby915lapwind']['begdayt'][0]
+        timestamp = [datenum_to_datetime(t) for t in timest]
 
+        ws = mat['bby915lapwind']['wspd'][0]
+        wd = mat['bby915lapwind']['wdir'][0]
+        hgt = mat['bby915lapwind']['htmsl'][0]
+        len_hgt = len(hgt[0])
+        newh = np.linspace(160, 3750, 40)
+        wspd = np.zeros(len(newh))
+        wdir = np.zeros(len(newh))
 
-def surface_czd(year=None, hourly=True):
+        for s, d, h in zip(ws, wd, hgt):
+            fs = interp1d(h[0], s[0])
+            fd = interp1d(h[0], d[0])
+            news = fs(newh)
+            newd = fd(newh)
+            wspd = np.vstack((wspd, news))
+            wdir = np.vstack((wdir, newd))
 
-    y = str(year)[-2:]
-    f = base_dir + '/SURFACE/climatology/avg60_CZC' + y + '_nortype'
-    mat = sio.loadmat(f)
-    rainczd = mat['avg_czc_sprof_rtype_precip60'][0]
-    begd = mat['avg_czc_sprof_begdayt60'][0]
-    # endd=mat['avg_czc_sprof_enddayt60'][0]
-    date = []
-    for n in range(begd.size):
-        date.append(datenum_to_datetime(begd[n]))
-    d = {'precip': rainczd}
-    CZD = pd.DataFrame(data=d, index=date)
-    CZD = quality_control(CZD)
+        if first_gate:
+            ws = wspd[1:, 0]
+            wd = wdir[1:, 0]
+            d = {'wspd': ws, 'wdir': wd}
+            self.dframe = pd.DataFrame(data=d, index=timestamp)
+            self.time = np.array(timestamp)
+        else:
+            self.ws = wspd.T
+            self.wd = wdir.T
+            self.time = np.array(timestamp)
 
-    return CZD
+        self.hgt = newh
+        self.year = year
 
+    def check(self):
 
-def bby_surf_dates(year=None):
+        import matplotlib.pyplot as plt
 
-    y = str(year)[-2:]
-    f = base_dir + '/SURFACE/climatology/BBY' + y + '_Sfcmet'
-    mat = sio.loadmat(f)
-    b = mat['Sfcmet_bby']['dayt'][0][0][0][0]
-    e = mat['Sfcmet_bby']['dayt'][0][-1][0][0]
+        fig, ax = plt.subplots()
 
-    beg = datenum_to_datetime(b)
-    end = datenum_to_datetime(e)
+        ax.imshow(self.ws, aspect='auto', origin='lower', interpolation='none')
 
-    return beg, end
+        fig.suptitle('BBY Windprof wspd [mm]')
+        fig.subplots_adjust(bottom=0.1, top=0.95, left=0.05, right=0.95)
+        plt.show(block=False)
 
+    def check_beg_end(self):
 
-def czd_surf_dates(year=None):
+        beg = self.time[0]
+        end = self.time[-1]
 
-    y = str(year)[-2:]
-    f = base_dir + '/SURFACE/climatology/avg60_CZC' + y + '_nortype'
-    mat = sio.loadmat(f)
-    b = mat['avg_czc_sprof_begdayt60'][0][0]
-    e = mat['avg_czc_sprof_begdayt60'][0][-1]
+        return beg, end
 
-    beg = datenum_to_datetime(b)
-    end = datenum_to_datetime(e)
+    def check_hgt(self, year=None):
+        '''
+        check altitude of gates  during the
+        seasonal observations
+        '''
+        y = str(self.year)[-2:]
+        f = windprofpath.format(y)
+        hgt = sio.loadmat(f)['bby915lapwind']['htmsl'][0]
+        ng, fg, lg = [], [], []
+        for h in hgt:
+            ng.append(len(h[0]))
+            fg.append(h[0][0])
+            lg.append(h[0][-1])
 
-    return beg, end
-    # return mat['avg_czc_sprof_begdayt60']
+        ngates = np.array(ng)
+        firstg = np.array(fg)
+        lastg = np.array(lg)
 
+        txt = 'Year: {:4s}, ngates_min:{:4d}, ngates_max:{:4d},' + \
+            ' first_gate:{:4d}, last_gate:{:4d}'
 
-def windprof_bby(year=None):
+        print txt.format(y, int(ngates.min()), int(ngates.max()),
+                         int(firstg.max()), int(lastg.min()))
 
-    y = str(year)[-2:]
-    fbby = base_dir + '/WINDPROF/climatology/BBY' + y + '_915lapwind'
-    matbby = sio.loadmat(fbby)
-    timest = matbby['bby915lapwind']['begdayt'][0]
-    ws = matbby['bby915lapwind']['wspd'][0]
-    wd = matbby['bby915lapwind']['wdir'][0]
-    hgt = matbby['bby915lapwind']['htmsl'][0]
+    def check_time_gaps(self):
 
-    timestamp = [datenum_to_datetime(t) for t in timest]
-
-    return hgt
-
-    # len_hgt = len(hgt[0][0])
-    # len_time = len(hgt)
-
-    # wspd = np.zeros(len_hgt)
-    # wdir = np.zeros(len_hgt)
-    # for s, d in zip(ws, wd):
-    #     s = s.flatten()
-    #     print s.shape
-    #     print s
-    #     # print wspd.shape
-    #     # return s, wspd
-    #     wspd = np.vstack((wspd, s))
-    #     # wdir = np.vstack((wdir, d))
-
-    # return wspd.T
+        gidx, ghrs, gdys = time_gaps(self.time)
+        print 'Gaps index'
+        print gidx
+        print 'Gaps hours'
+        print ghrs
+        print 'Gaps days'
+        print gdys
 
 
-def check_wprof_hgt(year=None):
+class surface:
 
-    y = str(year)[-2:]
-    fbby = base_dir + '/WINDPROF/climatology/BBY' + y + '_915lapwind'
-    matbby = sio.loadmat(fbby)
-    hgt = matbby['bby915lapwind']['htmsl'][0]
+    def __init__(self, location=None, year=None, hourly=True):
 
-    ngates = []
-    fg = 99999.
-    lg = -99999.
-    for h in hgt:
-        ngates.append(len(h[0]))
-        if h[0].min() < fg:
-            fg = h[0].min()
-        if h[0].max() > lg:
-            lg = h[0].max()
-    ngates = np.array(ngates)
+        if location == 'bby':
 
-    txt = 'Year: {:4s}, ngates_min:{:4d}, ngates_max:{:4d},' + \
-        ' first_gate:{:4d}, last_gate:{:4d}'
+            y = str(year)[-2:]
+            f = surfacepath_bby.format(y)
+            sfc = sio.loadmat(f)['Sfcmet_bby']
+            # cols=sfc.dtype.names
+            date, tempc, rh, pmb, wspd, wdir, precip = \
+                [], [], [], [], [], [], []
+            for n in range(sfc.size):
+                date.append(datenum_to_datetime(sfc['dayt'][0][n][0][0]))
+                # tempc.append(sfc['tamb'][0][n][0][0])
+                # rh.append(sfc['rh'][0][n][0][0])
+                # pmb.append(sfc['pmb'][0][n][0][0])
+                wspd.append(sfc['wspd'][0][n][0][0])
+                wdir.append(sfc['wdir'][0][n][0][0])
+                precip.append(sfc['precip'][0][n][0][0])
+            d = {'wspd': wspd, 'wdir': wdir, 'precip': precip}
+            dframe = pd.DataFrame(data=d, index=date)
+            if year == 2001:
+                '2001 has weird values beginning the mat file'
+                dframe = dframe.ix[67:]
+            dframe = quality_control(dframe)
 
-    print txt.format(y, int(ngates.min()), int(ngates.max()), int(fg), int(lg))
+            if hourly:
+                self.dframe = get_statistical(dframe, minutes=60)
+                self.hourly = True
+            else:
+                self.dframe = dframe
+                self.hourly = False
+
+        elif location == 'czd':
+
+            y = str(year)[-2:]
+            f = surfacepath_czd.format(y)
+            mat = sio.loadmat(f)
+            rainczd = mat['avg_czc_sprof_rtype_precip60'][0]
+            begd = mat['avg_czc_sprof_begdayt60'][0]
+            # endd=mat['avg_czc_sprof_enddayt60'][0]
+            date = []
+            for n in range(begd.size):
+                date.append(datenum_to_datetime(begd[n]))
+            d = {'precip': rainczd}
+            dframe = pd.DataFrame(data=d, index=date)
+            dframe = quality_control(dframe)
+            self.dframe = dframe
+            self.hourly = True
+
+    def check_beg_end(self):
+
+        dates = self.dframe.index
+        beg = dates[0]
+        end = dates[-1]
+
+        return beg, end
+
+    def check_time_gaps(self):
+
+        if self.hourly:
+            gidx, ghrs, gdys = time_gaps(self.dframe.index.astype(datetime))
+            print 'Gaps index'
+            print gidx
+            print 'Gaps hours'
+            print ghrs
+            print 'Gaps days'
+            print gdys
+        else:
+            print 'Data needs to be hourly'
+
+
+'''
+    Common functions
+***************************************************
+'''
 
 
 def get_statistical(df, minutes=None):
@@ -149,11 +201,11 @@ def get_statistical(df, minutes=None):
     mean for wspd, wdir
     sum for precip
     '''
+    tempc, rh, pmb, wspd, wdir, precip = [None] * 6
+
     grp = pd.TimeGrouper(str(minutes) + 'T')
     dfg = df.groupby(grp)
-    tempc = dfg['tempc'].mean()
-    rh = dfg['rh'].mean()
-    pmb = dfg['pmb'].mean()
+
     precip = dfg['precip'].sum()
     wdirh, wspdh = dfg.wdir, dfg.wspd
     wd, ws = [], []
@@ -161,14 +213,19 @@ def get_statistical(df, minutes=None):
         d, s = average_wind(gwd, gws)
         wd.append(d)
         ws.append(s)
-
     wdir = np.asarray(wd)
     wspd = np.asarray(ws)
     newIndex = precip.index
 
-    d = {'tempc': tempc, 'rh': rh, 'pmb': pmb, 'wspd': wspd, 'wdir': wdir,
-         'precip': precip}
+    d = {'wspd': wspd, 'wdir': wdir, 'precip': precip}
     newdf = pd.DataFrame(data=d, index=newIndex)
+
+    if 'tempc' in df:
+        newdf['tempc'] = dfg['tempc'].mean()
+    if 'rh' in df:
+        newdf['rh'] = dfg['rh'].mean()
+    if 'pmb' in df:
+        newdf['pmb'] = dfg['pmb'].mean()
 
     return newdf
 
@@ -249,8 +306,6 @@ def average_wind(wdir, wspd):
 
 
 def datenum_to_datetime(datenum):
-
-    from datetime import datetime, timedelta
     """
     Convert Matlab datenum into Python datetime.
     :param datenum: Date in datenum format
@@ -268,3 +323,78 @@ def datenum_to_datetime(datenum):
         + timedelta(minutes=int(minutes)) \
         + timedelta(seconds=round(seconds)) \
         - timedelta(days=366)
+
+
+def format_xaxis(ax, time_array):
+    '''
+    assume time_array is in hours
+    '''
+
+    nhrs = len(time_array)
+    if nhrs > 1 and nhrs <= 72:
+        date_fmt1 = '%H\n%d-%b'
+        date_fmt2 = '%H'
+    else:
+        date_fmt1 = '%d\n%b'
+        date_fmt2 = '%d'
+
+    ' time is start hour'
+    new_xticks = np.asarray(range(len(time_array)))
+    xtlabel = []
+    for t in time_array:
+        if np.mod(t.hour, 3) == 0:
+            xtlabel.append(t.strftime(date_fmt))
+        else:
+            xtlabel.append('')
+    ax.set_xticks(new_xticks)
+    ax.set_xticklabels(xtlabel)
+
+
+def format_yaxis(ax, hgt_array, **kwargs):
+
+    hgt_res = np.unique(np.diff(hgt_array))[0]
+    if 'toplimit' in kwargs:
+        toplimit = kwargs['toplimit']
+        ''' extentd hgt to toplimit km so all
+        time-height sections have a common yaxis'''
+        hgt = np.arange(hgt_array[0], toplimit, hgt_res)
+    f = interp1d(hgt, range(len(hgt)))
+    ys = np.arange(np.ceil(hgt[0]), hgt[-1], 0.2)
+    new_yticks = f(ys)
+    ytlabel = ['{:2.1f}'.format(y) for y in ys]
+    ax.set_yticks(new_yticks + 0.5)
+    ax.set_yticklabels(ytlabel)
+
+
+def get_date_index(datetime_array, mode):
+
+    good = []
+    i = 0
+    if mode == 'start_day':
+        for i, t in enumerate(datetime_array):
+            if (t.hour == 0) and (t.minute == 0):
+                good.append(i)
+                i += 1
+    elif mode == 'start_month':
+        for i, t in enumerate(datetime_array):
+            if (t.day == 1) and (t.hour == 0) and (t.minute == 0):
+                good.append(i)
+                i += 1
+
+    return np.array(good)
+
+
+def time_gaps(datetime_array):
+    '''
+    assumes hourly spaced datetime_array
+    '''
+
+    diff = np.diff(datetime_array)
+    gaps_idx = np.where(diff != timedelta(0, 3600))[0]
+    if gaps_idx.size > 0:
+        gaps = diff[gaps_idx]
+        gaps_hours = [(g.seconds / 3600) - 1 for g in gaps]
+        gaps_days = [g.days for g in gaps]
+        return gaps_idx, gaps_hours, gaps_days
+    else:
+        return None, None, None
