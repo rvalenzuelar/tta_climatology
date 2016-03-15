@@ -3,6 +3,7 @@
 
     Run with iPython:
     %run -i tta_climatology.py
+    so script can check local namespace
 
     Raul Valenzuela
     raul.valenzuela@colorado.edu

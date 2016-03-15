@@ -33,28 +33,37 @@ class windprof:
         ws = mat['bby915lapwind']['wspd'][0]
         wd = mat['bby915lapwind']['wdir'][0]
         hgt = mat['bby915lapwind']['htmsl'][0]
-        len_hgt = len(hgt[0])
+
         newh = np.linspace(160, 3750, 40)
         wspd = np.zeros(len(newh))
         wdir = np.zeros(len(newh))
 
+        first = True
         for s, d, h in zip(ws, wd, hgt):
+            ''' for each hourly profile '''
             fs = interp1d(h[0], s[0])
             fd = interp1d(h[0], d[0])
             news = fs(newh)
             newd = fd(newh)
-            wspd = np.vstack((wspd, news))
-            wdir = np.vstack((wdir, newd))
+            if first:
+                wspd = news
+                wdir = newd
+                first = False
+            else:
+                wspd = np.vstack((wspd, news))
+                wdir = np.vstack((wdir, newd))
 
         if first_gate:
-            ws = wspd[1:, 0]
-            wd = wdir[1:, 0]
+            ws = wspd[:, 0]
+            wd = wdir[:, 0]
             d = {'wspd': ws, 'wdir': wd}
             self.dframe = pd.DataFrame(data=d, index=timestamp)
             self.time = np.array(timestamp)
         else:
-            self.ws = wspd.T
-            self.wd = wdir.T
+            # self.ws = wspd.T
+            # self.wd = wdir.T
+            d = {'wspd': wspd.tolist(), 'wdir': wdir.tolist()}
+            self.dframe = pd.DataFrame(data=d, index=timestamp)
             self.time = np.array(timestamp)
 
         self.hgt = newh
@@ -264,6 +273,9 @@ def average_wind(wdir, wspd):
                 of wind directions
     wspd  -- Pandas DataFrame group (or numpy array)
                 of wind speeds
+
+    If array is 1D each value is function of time
+    If array is 2D axis=0 is height and axis=1 is time
     '''
 
     import cmath
@@ -278,31 +290,84 @@ def average_wind(wdir, wspd):
         wdir = wdir.copy()
         wspd = wspd.copy()
 
-    wind_vector_sum = None
+    array_dim = len(wdir.shape)
     wdir += 180
     wdir = np.radians(wdir)
-    n_wind = len(wspd)
-    # print 'new wind'
-    if n_wind >= 2:
-        for i in range(0, n_wind):
-            wind_polar = cmath.rect(wspd[i], wdir[i] - math.pi)
-            # print wind_polar
-            if wind_vector_sum is None:
-                wind_vector_sum = wind_polar
-            else:
-                wind_vector_sum += wind_polar
 
-        r, phi = cmath.polar(wind_vector_sum / n_wind)
-        if np.isnan(r) and np.isnan(phi):
-            return np.nan, np.nan
+    if array_dim == 1:
+        ''' if 1D array '''
+        n_wind = len(wspd)
+        if n_wind >= 2:
+            wind_vector_sum = None
+            for i in range(n_wind):
+                wind_polar = cmath.rect(wspd[i], wdir[i] - math.pi)
+                if wind_vector_sum is None:
+                    wind_vector_sum = wind_polar
+                else:
+                    wind_vector_sum += wind_polar
+
+            r, phi = cmath.polar(wind_vector_sum / n_wind)
+            if np.isnan(r) and np.isnan(phi):
+                return np.nan, np.nan
+            else:
+                av_wdir = np.round(math.degrees(phi), 1)
+                if av_wdir < 0:
+                    av_wdir += 360
+                av_wspd = int(round(r * 10)) / 10.0
+                return av_wdir, av_wspd
         else:
-            av_wdir = np.round(math.degrees(phi), 1)
-            if av_wdir < 0:
-                av_wdir += 360
-            av_wspd = int(round(r * 10)) / 10.0
-            return av_wdir, av_wspd
+            return None, None
+    elif array_dim == 2:
+        ''' if 2D array '''
+        hn, tn = wdir.shape
+        av_wdir_array = np.zeros((hn, 1))
+        av_wspd_array = np.zeros((hn, 1))
+        av_wsstd_array = np.zeros((hn, 1))
+        av_wdstd_array = np.zeros((hn, 1))
+        wsnans = np.zeros((hn, 1))
+        wdnans = np.zeros((hn, 1))
+        for n in range(hn):
+            if tn >= 2:
+                spd = wspd[n, :]
+                dirr = wdir[n, :]
+                wind_vector_sum = None
+                wind_vectors = np.array([])
+                wsnan = 0
+                wdnan = 0
+                for i in range(tn):
+                    if ~np.isnan(spd[i]) and ~np.isnan(dirr[i]):
+                        wind_polar = cmath.rect(spd[i], dirr[i] - math.pi)
+                        wind_vectors = np.append(wind_vectors, wind_polar)
+                    else:
+                        wsnan += 1
+                        wdnan += 1
+                ''' mean '''
+                r, phi = cmath.polar(wind_vectors.mean())
+                av_wdir = np.round(math.degrees(phi), 1)
+                if av_wdir < 0:
+                    av_wdir += 360
+                av_wspd = int(round(r * 10)) / 10.0
+                av_wdir_array[n] = av_wdir
+                av_wspd_array[n] = av_wspd
+                ''' std dev '''
+                re = wind_vectors.real.std()
+                im = wind_vectors.imag.std()
+                r_std, phi_std = cmath.polar(complex(re, im))
+                wdir_std = np.round(math.degrees(phi_std), 1)
+                wspd_std = np.round(math.degrees(r_std), 1)
+                av_wdstd_array[n] = wdir_std
+                av_wsstd_array[n] = wspd_std
+                ''' nans '''
+                wsnans[n] = wsnan
+                wdnans[n] = wdnan
+            else:
+                av_wdir_array[n] = None
+                av_wspd_array[n] = None
+                av_wdstd_array[n] = None
+                av_wsstd_array[n] = None
+        return av_wdir_array, av_wspd_array, av_wdstd_array, av_wsstd_array, wdnans, wsnans
     else:
-        return None, None
+        print('Arrays need to be 1D or 2D')
 
 
 def datenum_to_datetime(datenum):
