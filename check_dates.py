@@ -1,6 +1,4 @@
-import numpy as np
 import parse_data
-
 from ctext import ctext
 
 txtHeader1 = '\nSurface\n{:^35} || {:^35}'
