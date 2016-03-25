@@ -141,6 +141,9 @@ class tta_analysis:
 
         self.time_beg = time_beg
         self.time_end = time_end
+        self.count_try = count_try
+        self.count_except = count_except
+        self.count_while = count_while
         self.precip_bby = precip_bby
         self.precip_czd = precip_czd
         self.bool = tta_bool
