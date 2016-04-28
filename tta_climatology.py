@@ -62,7 +62,7 @@ for n, y in enumerate([1998] + range(2001, 2013)):
     ''' if tta_list does not exist then make it '''
     if len(tta_list) == n:
         tta = tta_analysis(y)
-        tta.start()
+        tta.start(wdir_surf=125, wdir_wprof=170)
         tta_list.append(tta)
 
     ''' if tta_list exist then make the table '''
