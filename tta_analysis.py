@@ -27,7 +27,7 @@ class tta_analysis:
         self.average_wprof_spd = None
         self.average_wprof_dir = None
 
-    def start(self):
+    def start(self, wdir_surf=None, wdir_wprof=None):
 
         bby = parse_data.surface('bby', self.year)
         czd = parse_data.surface('czd', self.year)
@@ -86,7 +86,9 @@ class tta_analysis:
                 precip_bby.append(pbby)
                 precip_czd.append(pczd)
 
-                tta_condition = (surf_wd <= 125) and (wpr_wd0 <= 170)
+                cond1 = (surf_wd <= wdir_surf)
+                cond2 = (wpr_wd0 <= wdir_wprof)
+                tta_condition = cond1 and cond2
 
                 if tta_condition and bool_buffer.all():
                     tta_bool = np.append(tta_bool, [True])
@@ -167,6 +169,8 @@ class tta_analysis:
         self.wprof_hgt = wprof.hgt
 
     def print_count(self):
+
+        ''' need fix it, printing wrong statistics '''
 
         ntta_bools = self.bool.size
         nczds = self.precip_czd.size
