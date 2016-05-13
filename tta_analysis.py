@@ -27,7 +27,7 @@ class tta_analysis:
         self.average_wprof_spd = None
         self.average_wprof_dir = None
 
-    def start(self, wdir_surf=None, wdir_wprof=None):
+    def start(self, wdir_surf=None, wdir_wprof=None, nhours=None):
 
         bby = parse_data.surface('bby', self.year)
         czd = parse_data.surface('czd', self.year)
@@ -50,7 +50,7 @@ class tta_analysis:
 
         onehr = timedelta(hours=1)
         time = time_beg
-        bool_buffer = np.array([False] * 5)
+        bool_buffer = np.array([False] * nhours)
         precip_czd = []
         precip_bby = []
         precip_bby_excluded = []
@@ -99,11 +99,11 @@ class tta_analysis:
                         tta_bool = np.append(tta_bool, bool_buffer)
                 else:
                     bufsum = bool_buffer.sum()
-                    if bufsum == 0 or bufsum == 5:
+                    if bufsum == 0 or bufsum == nhours:
                         tta_bool = np.append(tta_bool, [False])
                     else:
                         tta_bool = np.append(tta_bool, [False] * (bufsum + 1))
-                    bool_buffer = np.array([False] * 5)
+                    bool_buffer = np.array([False] * nhours)
                     count = 0
                 count_try += 1
             except KeyError:

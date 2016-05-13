@@ -24,12 +24,12 @@ class clist(list):
             self.insert(index, np.nan)
 
 
-def make_tta_list(year_list, wdir_surf=None, wdir_wprof=None):
+def make_tta_list(year_list, wdir_surf=125, wdir_wprof=170, nhours=5):
 
     tta_list = []
     for y in year_list:
         tta = tta_analysis(y)
-        tta.start(wdir_surf=wdir_surf, wdir_wprof=wdir_wprof)
+        tta.start(wdir_surf=wdir_surf, wdir_wprof=wdir_wprof, nhours=nhours)
         ptta = tta.tta_precip_bby + tta.tta_precip_czd
         pnotta = tta.notta_precip_bby + tta.notta_precip_czd
         tta_ratio = tta.tta_precip_czd / tta.tta_precip_bby
