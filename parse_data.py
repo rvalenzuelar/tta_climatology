@@ -7,7 +7,9 @@ import os
 
 from scipy.interpolate import interp1d
 from datetime import datetime, timedelta
+from rv_utilities import datenum_to_datetime
 
+''' global variables '''
 base_dir = os.path.expanduser('~')
 windprofpath = base_dir + '/WINDPROF/climatology/BBY{}_915lapwind'
 surfacepath_bby = base_dir + '/SURFACE/climatology/BBY{}_Sfcmet'
@@ -368,26 +370,6 @@ def average_wind(wdir, wspd):
         return av_wdir_array, av_wspd_array, av_wdstd_array, av_wsstd_array, wdnans, wsnans
     else:
         print('Arrays need to be 1D or 2D')
-
-
-def datenum_to_datetime(datenum):
-    """
-    Convert Matlab datenum into Python datetime.
-    :param datenum: Date in datenum format
-    :return:        Datetime object corresponding to datenum.
-
-    source: https://gist.github.com/vicow
-    """
-    days = datenum % 1
-    hours = days % 1 * 24
-    minutes = hours % 1 * 60
-    seconds = minutes % 1 * 60
-    return datetime.fromordinal(int(datenum)) \
-        + timedelta(days=int(days)) \
-        + timedelta(hours=int(hours)) \
-        + timedelta(minutes=int(minutes)) \
-        + timedelta(seconds=round(seconds)) \
-        - timedelta(days=366)
 
 
 def format_xaxis(ax, time_array):
