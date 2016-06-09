@@ -10,11 +10,16 @@ from datetime import datetime, timedelta
 from rv_utilities import datenum_to_datetime
 
 ''' global variables '''
-base_dir = os.path.expanduser('~')
+# base_dir = os.path.expanduser('~')
+base_dir = '/localdata'
 windprofpath = base_dir + '/WINDPROF/climatology/BBY{}_915lapwind'
 surfacepath_bby = base_dir + '/SURFACE/climatology/BBY{}_Sfcmet'
 surfacepath_czd = base_dir + '/SURFACE/climatology/avg60_CZC{}_nortype'
 
+# earliest and latest dates of
+# windprofile 13-season dataset
+date0 = '{}-09-29 23:00'
+date1 = '{}-05-30 22:00'
 
 class windprof:
 
@@ -36,25 +41,40 @@ class windprof:
         wd = mat['bby915lapwind']['wdir'][0]
         hgt = mat['bby915lapwind']['htmsl'][0]
 
-        newh = np.linspace(160, 3750, 40)
-        wspd = np.zeros(len(newh))
-        wdir = np.zeros(len(newh))
+        # determine common reference time 
+        # through all seasons
+        wp_st = timestamp[0].year
+        wp_en = timestamp[-1].year
+        # fix 2002 issue:
+        if wp_st == wp_en:
+            wp_st = wp_en-1
+        dates_ref = pd.date_range(start=date0.format(wp_st),
+                                   end =date1.format(wp_en),
+                                   freq='1H')
+        df_ref = pd.DataFrame(data={'index':range(len(dates_ref))},
+                              index=dates_ref)        
 
-        first = True
-        for s, d, h in zip(ws, wd, hgt):
+        idx_ref = df_ref.loc[timestamp].values
+
+        # common time-height array for each season
+        num_hgt_gates = 40
+        num_time_gates = dates_ref.size
+        wspd = np.zeros((num_time_gates,num_hgt_gates))+np.nan
+        wdir = np.zeros((num_time_gates,num_hgt_gates))+np.nan
+
+        # interpolate to common profile grid and fill
+        # into a common time grid for each season
+        newh = np.linspace(160, 3750, num_hgt_gates)
+        for s, d, h, i in zip(ws, wd, hgt,idx_ref):
             ''' for each hourly profile '''
             fs = interp1d(h[0], s[0])
             fd = interp1d(h[0], d[0])
             news = fs(newh)
             newd = fd(newh)
-            if first:
-                wspd = news
-                wdir = newd
-                first = False
-            else:
-                wspd = np.vstack((wspd, news))
-                wdir = np.vstack((wdir, newd))
+            wspd[i[0],:]=news
+            wdir[i[0],:]=newd
 
+        # return either first wp gate or entire array
         if first_gate:
             ws = wspd[:, 0]
             wd = wdir[:, 0]
@@ -62,11 +82,9 @@ class windprof:
             self.dframe = pd.DataFrame(data=d, index=timestamp)
             self.time = np.array(timestamp)
         else:
-            # self.ws = wspd.T
-            # self.wd = wdir.T
             d = {'wspd': wspd.tolist(), 'wdir': wdir.tolist()}
-            self.dframe = pd.DataFrame(data=d, index=timestamp)
-            self.time = np.array(timestamp)
+            self.dframe = pd.DataFrame(data=d, index=dates_ref)
+            self.time = np.array(dates_ref)
 
         self.hgt = newh
         self.year = year

@@ -1,3 +1,8 @@
+'''
+    Raul Valenzuela
+    raul.valenzuela@colorado.edu
+
+'''
 
 import parse_data as pr
 import matplotlib.pyplot as plt
@@ -11,8 +16,10 @@ wd_notta = []
 
 for y in [1998]+range(2001, 2013):
 
+    print 'Analyzing year {}'.format(y)
     tta = tta_analysis(y)
-    tta.start()
+    tta.start(wdir_surf=125,wdir_wprof=170,
+              rain_czd=0.25,nhours=5)
 
     wspd_tta = tta.wprof_ws[tta.bool].T
     wdir_tta = tta.wprof_wd[tta.bool].T

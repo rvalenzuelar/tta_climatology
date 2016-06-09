@@ -27,7 +27,8 @@ class tta_analysis:
         self.average_wprof_spd = None
         self.average_wprof_dir = None
 
-    def start(self, wdir_surf=None, wdir_wprof=None, nhours=None):
+    def start(self, wdir_surf=None, wdir_wprof=None, 
+              rain_bby=None,rain_czd=None,nhours=None):
 
         bby = parse_data.surface('bby', self.year)
         czd = parse_data.surface('czd', self.year)
@@ -88,7 +89,19 @@ class tta_analysis:
 
                 cond1 = (surf_wd <= wdir_surf)
                 cond2 = (wpr_wd0 <= wdir_wprof)
-                tta_condition = cond1 and cond2
+                if rain_bby and rain_czd:
+                    cond3 = (pbby >= rain_bby)
+                    cond4 = (pczd >= rain_czd)
+                    tta_condition = cond1 and cond2 and \
+                                    cond3 and cond4
+                elif rain_czd:
+                    cond3 = (pczd >= rain_czd)
+                    tta_condition = cond1 and cond2 and cond3
+                elif rain_bby:
+                    cond3 = (pbby >= rain_bby)
+                    tta_condition = cond1 and cond2 and cond3
+                else:
+                    tta_condition = cond1 and cond2
 
                 if tta_condition and bool_buffer.all():
                     tta_bool = np.append(tta_bool, [True])
