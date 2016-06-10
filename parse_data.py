@@ -84,7 +84,7 @@ class windprof:
         else:
             d = {'wspd': wspd.tolist(), 'wdir': wdir.tolist()}
             self.dframe = pd.DataFrame(data=d, index=dates_ref)
-            self.time = np.array(dates_ref)
+            self.time = dates_ref
 
         self.hgt = newh
         self.year = year
@@ -156,7 +156,8 @@ class surface:
             date, tempc, rh, pmb, wspd, wdir, precip = \
                 [], [], [], [], [], [], []
             for n in range(sfc.size):
-                date.append(datenum_to_datetime(sfc['dayt'][0][n][0][0]))
+                dt = datenum_to_datetime(sfc['dayt'][0][n][0][0])
+                date.append(pd.to_datetime(dt)) # actually converts to Timestamp
                 # tempc.append(sfc['tamb'][0][n][0][0])
                 # rh.append(sfc['rh'][0][n][0][0])
                 # pmb.append(sfc['pmb'][0][n][0][0])
@@ -187,7 +188,8 @@ class surface:
             # endd=mat['avg_czc_sprof_enddayt60'][0]
             date = []
             for n in range(begd.size):
-                date.append(datenum_to_datetime(begd[n]))
+                dt = datenum_to_datetime(begd[n])
+                date.append(pd.to_datetime(dt))
             d = {'precip': rainczd}
             dframe = pd.DataFrame(data=d, index=date)
             dframe = quality_control(dframe)

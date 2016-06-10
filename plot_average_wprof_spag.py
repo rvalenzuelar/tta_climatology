@@ -15,7 +15,7 @@ sp_notta = []
 wd_notta = []
 
 # for y in [1998]+range(2001, 2013):
-for y in [2003]:
+for y in [1998]:
 
     print 'Analyzing year {}'.format(y)
     tta = tta_analysis(y)
@@ -65,6 +65,7 @@ hs, labs = ax[0].get_legend_handles_labels()
 ax[0].legend(hs, labs, loc=4)
 ax[1].plot(wdtta_mean, y, color=green1, linewidth=lw, label='TTA')
 ax[1].plot(wdnotta_mean, y, color=green2, linewidth=lw, label='NO-TTA')
+ax[1].set_xlim([0,360])
 ax[1].set_xlabel('wind direction [deg]')
 hs, labs = ax[1].get_legend_handles_labels()
 ax[1].legend(hs, labs, loc=0)
