@@ -1,4 +1,8 @@
+'''
+    Raul Valenzuela
+    raul.valenzuela@colorado.edu
 
+'''
 
 import scipy.io as sio
 import numpy as np
@@ -16,10 +20,6 @@ windprofpath = base_dir + '/WINDPROF/climatology/BBY{}_915lapwind'
 surfacepath_bby = base_dir + '/SURFACE/climatology/BBY{}_Sfcmet'
 surfacepath_czd = base_dir + '/SURFACE/climatology/avg60_CZC{}_nortype'
 
-# earliest and latest dates of
-# windprofile 13-season dataset
-date0 = '{}-09-29 23:00'
-date1 = '{}-05-30 22:00'
 
 class windprof:
 
@@ -30,6 +30,11 @@ class windprof:
         to a common grid between 160 and 3750 m with
         92 m of vertical resolution (40 gates)
         '''
+
+        # earliest and latest dates of
+        # windprofile 13-season dataset
+        date0 = '{}-09-29 23:00'
+        date1 = '{}-05-30 22:00'
 
         y = str(year)[-2:]
         f = windprofpath.format(y)
@@ -145,7 +150,9 @@ class windprof:
 
 class surface:
 
-    def __init__(self, location=None, year=None, hourly=True):
+    def __init__(self, location=None, year=None, hourly=True,
+                        fill_gaps=True):
+
 
         if location == 'bby':
 
@@ -157,13 +164,16 @@ class surface:
                 [], [], [], [], [], [], []
             for n in range(sfc.size):
                 dt = datenum_to_datetime(sfc['dayt'][0][n][0][0])
-                date.append(pd.to_datetime(dt)) # actually converts to Timestamp
+                # converts to Timestamp
+                date.append(pd.to_datetime(dt))
+
                 # tempc.append(sfc['tamb'][0][n][0][0])
                 # rh.append(sfc['rh'][0][n][0][0])
                 # pmb.append(sfc['pmb'][0][n][0][0])
                 wspd.append(sfc['wspd'][0][n][0][0])
                 wdir.append(sfc['wdir'][0][n][0][0])
                 precip.append(sfc['precip'][0][n][0][0])
+
             d = {'wspd': wspd, 'wdir': wdir, 'precip': precip}
             dframe = pd.DataFrame(data=d, index=date)
             if year == 2001:
@@ -183,16 +193,24 @@ class surface:
             y = str(year)[-2:]
             f = surfacepath_czd.format(y)
             mat = sio.loadmat(f)
+
+            # precip is hourly accumulated
             rainczd = mat['avg_czc_sprof_rtype_precip60'][0]
             begd = mat['avg_czc_sprof_begdayt60'][0]
-            # endd=mat['avg_czc_sprof_enddayt60'][0]
-            date = []
-            for n in range(begd.size):
-                dt = datenum_to_datetime(begd[n])
-                date.append(pd.to_datetime(dt))
-            d = {'precip': rainczd}
-            dframe = pd.DataFrame(data=d, index=date)
+            
+            # convert to python datetime
+            idates = [datenum_to_datetime(d) for d in begd]
+
+            if fill_gaps:
+                # Fills gaps with NaN values
+                data={'precip':rainczd}
+                dframe = fill_surface_gaps(data,idates)
+            else:
+                d = {'precip': rainczd}
+                dframe = pd.DataFrame(data=d, index=idates)
+
             dframe = quality_control(dframe)
+
             self.dframe = dframe
             self.hourly = True
 
@@ -207,13 +225,14 @@ class surface:
     def check_time_gaps(self):
 
         if self.hourly:
-            gidx, ghrs, gdys = time_gaps(self.dframe.index.astype(datetime))
-            print 'Gaps index'
-            print gidx
-            print 'Gaps hours'
-            print ghrs
-            print 'Gaps days'
-            print gdys
+            idx = self.dframe.index
+            s = pd.Series(idx)
+            dif = s - s.shift()
+            gaps = dif > timedelta(hours=1)
+            if gaps.any():
+                print(dif[gaps])
+            else:
+                print('No time gaps found for hourly time serie')
         else:
             print 'Data needs to be hourly'
 
@@ -222,6 +241,29 @@ class surface:
     Common functions
 ***************************************************
 '''
+
+def fill_surface_gaps(idata,idates):
+
+    
+    st = idates[0]
+    en = idates[-1]
+
+    dates_ref = pd.date_range(start=st,
+                               end =en,
+                               freq='1H')
+
+    columns=[k for k,v in idata.iteritems()]
+
+    # creates df filled with NaNs
+    df_ref = pd.DataFrame(index=dates_ref,
+                          columns=columns)        
+
+    for k,v in idata.iteritems():
+        df_ref.loc[idates,k]=v
+
+
+    return df_ref
+
 
 
 def get_statistical(df, minutes=None):
