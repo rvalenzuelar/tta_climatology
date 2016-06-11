@@ -61,8 +61,6 @@ class tta_analysis:
 
             ''' these are obs included in the analysis, then we
                 determine if they are tta or no-tta '''
-            # wpr_wd_inc.append(wprof.dframe.loc[time].wdir)
-            # wpr_ws_inc.append(wprof.dframe.loc[time].wspd)
             rainfall_bby=np.append(rainfall_bby,pbby)
             rainfall_czd=np.append(rainfall_czd,pczd)
 
@@ -75,6 +73,7 @@ class tta_analysis:
                 count_exclude += 1
                 time += onehr
                 continue
+
 
 
             ''' check conditions '''
@@ -127,8 +126,8 @@ class tta_analysis:
         self.time_end = time_end
         self.count_while = count_while
         self.count_exclude = count_exclude
-        self.total_rainfall_bby = rainfall_bby.sum()
-        self.total_rainfall_czd = rainfall_czd.sum()
+        self.total_rainfall_bby = np.nansum(rainfall_bby)
+        self.total_rainfall_czd = np.nansum(rainfall_czd)
         self.bool = tta_bool
         self.tta_rainfall_czd = np.nansum(rainfall_czd[tta_bool])
         self.tta_rainfall_bby = np.nansum(rainfall_bby[tta_bool])
@@ -140,40 +139,50 @@ class tta_analysis:
         self.rainfall_czd_after_analysis = rczd_after
         self.nwprof_before = nwprof_before
         self.nwprof_after = nwprof_after
-        # self.wprof_wd = np.array(wpr_wd_inc)
-        # self.wprof_ws = np.array(wpr_ws_inc)
         self.wprof_hgt = wprof.hgt
 
         print('TTA analysis finished')
 
-    def print_count(self):
+    def print_stats(self,header=False):
 
-        ''' need fix it, printing wrong statistics '''
+        if header:
+            hdr='TOT TBB NBB TOT TCZ NCZ TTA NTT TTA NTT BBY CZD'.split()
+            fmt='{:3} {:3} {:3} ' + \
+                '{:4} {:3} {:4} ' + \
+                '{:2} {:2} ' + \
+                '{:3} {:4} ' + \
+                '{:2} {:2}'
+            print(fmt.format(*hdr))
 
-        ntta_bools = self.bool.size
-        nczds = self.precip_czd.size
-        nbbys = self.precip_bby.size
-        nexcept_bby = self.except_bby
-        nexcept_czd = self.except_czd
-        nexcept_wprof = self.except_wprof
-        nwprof_before = self.nwprof_before
-        nwprof_after = self.nwprof_after
 
-        string = 'Year:{}, tta:{}, bby:{}, czd:{}, ' + \
-            'exbby:{}, exczd:{}, exwprof:{}, wprof_bef:{}, ' + \
-            'wprof_aft:{}'
+        bby_total = self.total_rainfall_bby
+        bby_tta =  self.tta_rainfall_bby
+        bby_notta =  self.notta_rainfall_bby
 
-        if ntta_bools == nczds == nbbys:
-            t = string
-        else:
-            t = ctext(string).red()
+        czd_total = self.total_rainfall_czd
+        czd_tta =  self.tta_rainfall_czd
+        czd_notta =  self.notta_rainfall_czd        
 
-        print t.format(self.year,
-                       ntta_bools,
-                       nbbys,
-                       nczds,
-                       nexcept_bby,
-                       nexcept_czd,
-                       nexcept_wprof,
-                       nwprof_before,
-                       nwprof_after)
+        tta_ratio = czd_tta/float(bby_tta)
+        notta_ratio = czd_notta/float(bby_notta)
+
+        tta_hours = self.bool.sum()
+        notta_hours = self.count_while-tta_hours
+
+        rain_perc_bby = 100*(bby_tta/float(bby_total))
+        rain_perc_czd = 100*(czd_tta/float(czd_total))
+
+        bby_col = '{:3.0f} {:3.0f} {:3.0f} '
+        czd_col = '{:4.0f} {:3.0f} {:4.0f} '
+        rto_col = '{:2.1f} {:2.1f} '
+        hrs_col = '{:3.0f} {:4.0f} '
+        prc_col = '%{:2.0f} %{:2.0f}'
+
+        col1 = bby_col.format(bby_total,bby_tta,bby_notta)
+        col2 = czd_col.format(czd_total,czd_tta,czd_notta)
+        col3 = rto_col.format(tta_ratio, notta_ratio)
+        col4 = hrs_col.format(tta_hours, notta_hours)
+        col5 = prc_col.format(rain_perc_bby,rain_perc_czd)
+
+        print(col1+col2+col3+col4+col5)
+        
