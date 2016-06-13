@@ -6,11 +6,20 @@
 
 	from tta_analysis import tta_analysis
 
-	tta_stats = tta_analysis(1998)
-	tta_stats.start(wdir_surf=125,wdir_wprof=170,
+	tta = tta_analysis(1998)
+
+	tta.start(wdir_surf=125,wdir_wprof=170,
+					rain_bby=0.25,nhours=5)
+	tta.print_stats()
+
+	--- or ---
+
+	# creates pandas dataframe
+
+	tta.start_df(wdir_surf=125,wdir_wprof=170,
 					rain_bby=0.25,nhours=5)
 
-	tta_stats.print_stats()
+	df = tta.df
 
 '''
 
@@ -163,8 +172,7 @@ class tta_analysis:
 
 
 	def start_df(self, wdir_surf=None, wdir_wprof=None, 
-			  rain_bby=None,rain_czd=None,nhours=None,
-			  return_df=False):
+			  rain_bby=None,rain_czd=None,nhours=None):
 
 		'''
 			this version uses pandas dataframe
@@ -214,7 +222,7 @@ class tta_analysis:
 		rng = pd.date_range(start=time_beg,end=time_end,freq='1H')
 
 		cols = ['wdsrf','wdwpr','rbby','rczd','tta','consecutive']
-		df=pd.DataFrame(index=rng,columns=cols)
+		df = pd.DataFrame(index=rng,columns=cols)
 
 		while (time <= time_end):
 
@@ -307,10 +315,7 @@ class tta_analysis:
 		self.tta_hours = tta_hours
 		self.notta_hours = notta_hours
 		self.wprof_hgt = wprof.hgt
-
-
-		if return_df:
-			return df
+		self.df = df
 
 		# print('TTA analysis finished')
 
