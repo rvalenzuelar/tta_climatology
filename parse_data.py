@@ -2,6 +2,13 @@
     Raul Valenzuela
     raul.valenzuela@colorado.edu
 
+    Example:
+
+    import parse_data as parse
+    bby = parse_data.surface('bby', 1998)
+    czd = parse_data.surface('czd', 1998)
+    wprof = parse_data.windprof(1998)    
+
 '''
 
 import scipy.io as sio
@@ -15,7 +22,8 @@ from rv_utilities import datenum_to_datetime
 
 ''' global variables '''
 # base_dir = os.path.expanduser('~')
-base_dir = '/localdata'
+# base_dir = '/localdata'
+base_dir = os.environ['TTA_PATH']
 windprofpath = base_dir + '/WINDPROF/climatology/BBY{}_915lapwind'
 surfacepath_bby = base_dir + '/SURFACE/climatology/BBY{}_Sfcmet'
 surfacepath_czd = base_dir + '/SURFACE/climatology/avg60_CZC{}_nortype'
@@ -274,7 +282,7 @@ def get_statistical(df, minutes=None):
     mean for wspd, wdir
     sum for precip
     '''
-    tempc, rh, pmb, wspd, wdir, precip = [None] * 6
+    tempc, rh, pmb, wspd, wdir, precip = [np.nan] * 6
 
     grp = pd.TimeGrouper(str(minutes) + 'T')
     dfg = df.groupby(grp)
