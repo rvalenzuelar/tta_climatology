@@ -2,17 +2,24 @@
     Raul Valenzuela
     raul.valenzuela@colorado.edu
 
+    Example:
+
+    import plot_wprof_histogram as pwh
+
+    pwh.plot(year=[2012],target='wdir')
+
 '''
 
 import parse_data
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
 from rv_utilities import pandas2stack, add_colorbar
 from tta_analysis import tta_analysis
 
 def plot(year=None,target=None,pngsuffix=False,
-		 normalized=True):
+		 normalized=True,contourf=True):
 
 	name={'wdir':'Wind Direction',
 	      'wspd':'Wind Speed'}
@@ -28,37 +35,60 @@ def plot(year=None,target=None,pngsuffix=False,
 		hist_xticks = np.arange(0,40,5)
 		hist_xlim = [0,35]
 
+	' tta analysis parameters '
+	wdsurf = 125
+	wdwpro = 170
+	rainbb = None
+	nhours = 5
 
-	wdsurf=125
-	wdwpro=170
-	rainbb=0.25
-	nhours=5
-	ttastats = tta_analysis(year)
-	ttastats.start(wdir_surf=wdsurf,
-				   wdir_wprof=wdwpro,
-				   rain_bby=rainbb,
-				   nhours=nhours)
-	stats_beg=ttastats.time_beg
-	stats_end=ttastats.time_end
-	stats_dates = pd.date_range(start=stats_beg,
-								end=stats_end,
-								freq='1H')
-	tta_dates = stats_dates[ttastats.bool]
-	notta_dates = stats_dates[~ttastats.bool]
+	first = True		
+	for y in year:
+		print('Processing year {}'.format(y))
 
+		' tta analysis '
+		tta = tta_analysis(y)
+		tta.start_df(wdir_surf=wdsurf,
+					   wdir_wprof=wdwpro,
+					   rain_bby=rainbb,
+					   nhours=nhours)
+		
+		wdSrfIsNan = np.isnan(tta.df.wdsrf.values.astype(float))
+		wdWprIsNan = np.isnan(tta.df.wdwpr.values.astype(float))
+		exclude = wdSrfIsNan | wdWprIsNan # logic or
 
-	wprof_df = parse_data.windprof(year)
+		' retrieve dates '
+		include_dates = tta.df[~exclude].index
+		tta_dates =tta.df[tta.df.consecutive].index
+		notta_dates =tta.df[~exclude & ~tta.df.consecutive].index
 
-	wprof = wprof_df.dframe[target]
-	wprof_tta = wprof.loc[tta_dates]
-	wprof_notta = wprof.loc[notta_dates]
+		' read wprof '
+		wprof_df = parse_data.windprof(y)
+		wprof = wprof_df.dframe[target]		
 
-	wp = np.squeeze(pandas2stack(wprof))
-	wp_tta = np.squeeze(pandas2stack(wprof_tta))
-	wp_notta = np.squeeze(pandas2stack(wprof_notta))
+		' wprof partition '
+		wprof = wprof.loc[include_dates]	# subset wdir
+		wprof_tta = wprof.loc[tta_dates]	# subset tta
+		wprof_notta = wprof.loc[notta_dates]# subset notta
+		s1 = np.squeeze(pandas2stack(wprof))
+		s2 = np.squeeze(pandas2stack(wprof_tta))
+		s3 = np.squeeze(pandas2stack(wprof_notta))
 
+		if first:
+			wp = s1
+			wp_tta = s2
+			wp_notta = s3
+			first = False
+		else:
+			wp = np.hstack((wp,s1))
+			wp_tta = np.hstack((wp_tta,s2))
+			wp_notta = np.hstack((wp_notta, s3))
+
+	_,wp_hours = wp.shape
+	_,tta_hours = wp_tta.shape
+	_,notta_hours = wp_notta.shape
+
+	' makes CFAD '
 	hist_array = np.empty((40,len(bins)-1,3))
-
 	for hgt in range(wp.shape[0]):
 	    
 	    row1 = wp[hgt,:]
@@ -67,18 +97,17 @@ def plot(year=None,target=None,pngsuffix=False,
 
 	    for n,r in enumerate([row1,row2,row3]):
 
-		    freq,bins=np.histogram(r[~np.isnan(r)],
-		                            bins=bins,
-		                            density=normalized)
-		    hist_array[hgt,:,n]=freq
-
+			' following CFAD Yuter et al (1995) '
+			freq,bins=np.histogram(r[~np.isnan(r)],
+									bins=bins)
+			hist_array[hgt,:,n]=100.*(freq/float(freq.sum()))
 
 
 	fig,axs = plt.subplots(1,3,sharey=True,figsize=(10,8))
 
-	ax1=axs[0]
-	ax2=axs[1]
-	ax3=axs[2]
+	ax1 = axs[0]
+	ax2 = axs[1]
+	ax3 = axs[2]
 
 	hist_wp = np.squeeze(hist_array[:,:,0])
 	hist_wptta = np.squeeze(hist_array[:,:,1])
@@ -87,45 +116,79 @@ def plot(year=None,target=None,pngsuffix=False,
 	x = bins
 	y = wprof_df.hgt
 
-	p = ax1.pcolormesh(x,y,hist_wp,cmap='viridis')
+	if contourf:
+		X,Y = np.meshgrid(x,y)
+		nancol = np.zeros((40,1))+np.nan
+		hist_wp = np.hstack((hist_wp,nancol))
+		hist_wptta = np.hstack((hist_wptta,nancol))
+		hist_wpnotta = np.hstack((hist_wpnotta,nancol))
+
+		# max0=np.nanmax(hist_wp)
+		# maxt=np.nanmax(hist_wptta)
+		# maxn=np.nanmax(hist_wpnotta)
+		# vmax = int(max(max0,maxt,maxn))
+
+		vmax=20
+		nlevels = 10
+		delta = int(vmax/nlevels)
+		v = np.arange(2,vmax+delta,delta)
+
+		cmap = cm.get_cmap('plasma')
+
+		ax1.contourf(X,Y,hist_wp,v,cmap=cmap)
+		p = ax2.contourf(X,Y,hist_wptta,v,cmap=cmap,extend='max')
+		p.cmap.set_over(cmap(1.0))
+		ax3.contourf(X,Y,hist_wpnotta,v,cmap=cmap)
+		cbar = add_colorbar(ax3,p,size='4%')
+	else:
+		p = ax1.pcolormesh(x,y,hist_wp,cmap='viridis')
+		ax2.pcolormesh(x,y,hist_wptta,cmap='viridis')
+		ax3.pcolormesh(x,y,hist_wpnotta,cmap='viridis')
+		amin = np.amin(hist_wpnotta)
+		amax = np.amax(hist_wpnotta)
+		cbar = add_colorbar(ax3,p,size='4%',ticks=[amin,amax])
+		cbar.ax.set_yticklabels(['low','high'])
+
+
+	' --- setup ax1 --- '
 	amin = np.amin(hist_wp)
 	amax = np.amax(hist_wp)
 	ax1.set_xticks(hist_xticks)
 	ax1.set_xlim(hist_xlim)
-	ax1.text(0.5,0.95,'All profiles',fontsize=15,
+	ax1.set_ylim([0,4000])
+	txt = 'All profiles (n={})'.format(wp_hours)
+	ax1.text(0.5,0.95,txt,fontsize=15,
 			transform=ax1.transAxes,va='bottom',ha='center')
 	ax1.set_ylabel('Altitude [m] MSL')
 
-	p = ax2.pcolormesh(x,y,hist_wptta,cmap='viridis')
+	' --- setup ax2 --- '
 	amin = np.amin(hist_wptta)
 	amax = np.amax(hist_wptta)
 	ax2.set_xticks(hist_xticks)
 	ax2.set_xlim(hist_xlim)
+	ax2.set_ylim([0,4000])
 	ax2.set_xlabel(name[target])
-	ax2.text(0.5,0.95,'TTA',fontsize=15,
+	txt = 'TTA (n={})'.format(tta_hours)
+	ax2.text(0.5,0.95,txt,fontsize=15,
 			transform=ax2.transAxes,va='bottom',ha='center')
 
-	p = ax3.pcolormesh(x,y,hist_wpnotta,cmap='viridis')
-	amin = np.amin(hist_wpnotta)
-	amax = np.amax(hist_wpnotta)
-	cbar = add_colorbar(ax3,p,size='4%',ticks=[amin,amax])
-	cbar.ax.set_yticklabels(['low','high'])
+	' --- setup ax3 --- '
 	ax3.set_xticks(hist_xticks)
 	ax3.set_xlim(hist_xlim)
-	ax3.set_xlim(hist_xlim)
-	ax3.set_xlim(hist_xlim)
-	ax3.text(0.5,0.95,'NO-TTA',fontsize=15,
+	ax3.set_ylim([0,4000])
+	txt = 'NO-TTA (n={})'.format(notta_hours)
+	ax3.text(0.5,0.95,txt,fontsize=15,
 			transform=ax3.transAxes,va='bottom',ha='center')
 
-	wdsurf=125
-	wdwpro=170
-	rainbb=0.25
-	nhours=5
 
-	title1 = 'Normalized frequencies of BBY wind profiles year {} \n'
+	title1 = 'Normalized frequencies of BBY wind profiles {} \n'
 	title2 = '(TTA wdir_surf:{}, wdir_wp:{}, rain_bby:{}, nhours:{}'
 	title = title1+title2
-	plt.suptitle(title.format(year, wdsurf, wdwpro, rainbb, nhours),
+	if len(year) == 1:
+		yy = 'year {}'.format(year[0])
+	else:
+		yy = 'year {} to {}'.format(year[0],year[-1])
+	plt.suptitle(title.format(yy, wdsurf, wdwpro, rainbb, nhours),
 				fontsize=15)
 	plt.subplots_adjust(top=0.9,left=0.1,right=0.95,bottom=0.1,
 						wspace=0.1)
@@ -136,5 +199,3 @@ def plot(year=None,target=None,pngsuffix=False,
 	    plt.close()
 	else:
 	    plt.show(block=False)
-
-

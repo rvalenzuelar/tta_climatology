@@ -292,7 +292,7 @@ class tta_analysis:
 		total_rainfall_czd = df.rczd.sum() - df[exclude].rczd.sum()
 
 		hrs_exclude = exclude.sum()
-		hrs_include = df.consecutive.size - hrs_exclude
+		hrs_include = df.index.size - hrs_exclude
 
 		tta_hours = df.consecutive.sum()
 		notta_hours = hrs_include - tta_hours
