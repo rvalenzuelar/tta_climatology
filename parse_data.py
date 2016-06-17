@@ -7,7 +7,7 @@
     import parse_data as parse
     bby = parse_data.surface('bby', 1998)
     czd = parse_data.surface('czd', 1998)
-    wprof = parse_data.windprof(1998)    
+    wprof = parse_data.windprof(1998)
 
 '''
 
@@ -54,7 +54,7 @@ class windprof:
         wd = mat['bby915lapwind']['wdir'][0]
         hgt = mat['bby915lapwind']['htmsl'][0]
 
-        # determine common reference time 
+        # determine common reference time
         # through all seasons
         wp_st = timestamp[0].year
         wp_en = timestamp[-1].year
@@ -65,7 +65,7 @@ class windprof:
                                    end =date1.format(wp_en),
                                    freq='1H')
         df_ref = pd.DataFrame(data={'index':range(len(dates_ref))},
-                              index=dates_ref)        
+                              index=dates_ref)
 
         idx_ref = df_ref.loc[timestamp].values
 
@@ -142,18 +142,18 @@ class windprof:
         txt = 'Year: {:4s}, ngates_min:{:4d}, ngates_max:{:4d},' + \
             ' first_gate:{:4d}, last_gate:{:4d}'
 
-        print txt.format(y, int(ngates.min()), int(ngates.max()),
-                         int(firstg.max()), int(lastg.min()))
+        print(txt.format(y, int(ngates.min()), int(ngates.max()),
+                         int(firstg.max()), int(lastg.min())))
 
     def check_time_gaps(self):
 
         gidx, ghrs, gdys = time_gaps(self.time)
-        print 'Gaps index'
-        print gidx
-        print 'Gaps hours'
-        print ghrs
-        print 'Gaps days'
-        print gdys
+        print('Gaps index')
+        print(gidx)
+        print('Gaps hours')
+        print(ghrs)
+        print('Gaps days')
+        print(gdys)
 
 
 class surface:
@@ -205,7 +205,7 @@ class surface:
             # precip is hourly accumulated
             rainczd = mat['avg_czc_sprof_rtype_precip60'][0]
             begd = mat['avg_czc_sprof_begdayt60'][0]
-            
+
             # convert to python datetime
             idates = [datenum_to_datetime(d) for d in begd]
 
@@ -242,7 +242,7 @@ class surface:
             else:
                 print('No time gaps found for hourly time serie')
         else:
-            print 'Data needs to be hourly'
+            print('Data needs to be hourly')
 
 
 '''
@@ -252,7 +252,7 @@ class surface:
 
 def fill_surface_gaps(idata,idates):
 
-    
+
     st = idates[0]
     en = idates[-1]
 
@@ -264,7 +264,7 @@ def fill_surface_gaps(idata,idates):
 
     # creates df filled with NaNs
     df_ref = pd.DataFrame(index=dates_ref,
-                          columns=columns)        
+                          columns=columns)
 
     for k,v in idata.iteritems():
         df_ref.loc[idates,k]=v
