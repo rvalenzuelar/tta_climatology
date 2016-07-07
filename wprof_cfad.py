@@ -34,24 +34,34 @@ class cfad:
                      rainbb=None, raincz=None, nhours=None):
               
 
-        out = process(year=year,wdsurf=wdsurf,
+        out = processv2(year=year,wdsurf=wdsurf,
                        wdwpro=wdwpro,rainbb=rainbb,
                        raincz=raincz, nhours=nhours)
       
         self.spd_hist = out[0]
         self.dir_hist = out[1]
-        self.spd_cfad = out[2]
-        self.dir_cfad = out[3]
-        self.bins_spd = out[4]
-        self.bins_dir = out[5]
-        self.hgts = out[6]
-        self.wp_hours  = out[7]
-        self.tta_hours = out[8]
-        self.notta_hours  = out[9]
-        self.spd_average  = out[10]
-        self.dir_average  = out[11]
-        self.spd_median  = out[12]
-        self.dir_median  = out[13]
+        self.u_hist   = out[2]
+        self.v_hist   = out[3]
+        self.spd_cfad = out[4]
+        self.dir_cfad = out[5]
+        self.u_cfad   = out[6]
+        self.v_cfad   = out[7]
+        self.bins_spd = out[8]
+        self.bins_dir = out[9]
+        self.bins_u   = out[10]
+        self.bins_v   = out[11]
+        self.hgts      = out[12]
+        self.wp_hours  = out[13]
+        self.tta_hours = out[14]
+        self.notta_hours  = out[15]
+        self.spd_average  = out[16]
+        self.dir_average  = out[17]
+        self.u_average  = out[18]
+        self.v_average  = out[19]
+        self.spd_median  = out[20]
+        self.dir_median  = out[21]
+        self.u_median  = out[22]
+        self.v_median  = out[23]
         self.wdsurf = wdsurf
         self.wdwpro = wdwpro
         self.rainbb = rainbb
@@ -61,11 +71,15 @@ class cfad:
     
     
     
-    def plot(self,target,pngsuffix=False, pdfsuffix=False,contourf=True,
-             add_median=False,add_average=False):
+    def plot(self,target,axes=None,pngsuffix=False, pdfsuffix=False,
+             contourf=True, add_median=False,add_average=False,
+             add_title=True, add_cbar=True,cbar_label=None,show=True,
+             subax_label=True):
         
         name={'wdir':'Wind Direction',
-              'wspd':'Wind Speed'}
+              'wspd':'Wind Speed',
+              'u':'u-wind',
+              'v':'v-wind'}
     
         if target == 'wdir':
             cfad = self.dir_cfad
@@ -81,12 +95,30 @@ class cfad:
             bins = self.bins_spd
             hist_xticks = np.arange(0,40,5)
             hist_xlim = [0,35]    
+        elif target == 'u':
+            cfad = self.u_cfad
+            median = self.u_median
+            average = self.u_average
+            bins = self.bins_u
+            hist_xticks = np.arange(-14,22,8)
+            hist_xlim = [-14,20] 
+        elif target == 'v':
+            cfad = self.v_cfad
+            median = self.v_median
+            average = self.v_average
+            bins = self.bins_v
+            hist_xticks = np.arange(-8,24,4)
+            hist_xlim = [-8,20] 
     
-        fig,axs = plt.subplots(1,3,sharey=True,figsize=(10,8))
-    
-        ax1 = axs[0]
-        ax2 = axs[1]
-        ax3 = axs[2]
+        if axes is None:
+            fig,axs = plt.subplots(1,3,sharey=True,figsize=(10,8))
+            ax1 = axs[0]
+            ax2 = axs[1]
+            ax3 = axs[2]
+        else:
+            ax1 = axes[0]
+            ax2 = axes[1]
+            ax3 = axes[2]
     
         hist_wp = np.squeeze(cfad[:,:,0])
         hist_wptta = np.squeeze(cfad[:,:,1])
@@ -102,19 +134,22 @@ class cfad:
             hist_wptta = np.hstack((hist_wptta,nancol))
             hist_wpnotta = np.hstack((hist_wpnotta,nancol))
     
-            vmax=20
-            nlevels = 10
+            vmax=13
+            nlevels = 5
             delta = int(vmax/nlevels)
             v = np.arange(2,vmax+delta,delta)
     
             cmap = cm.get_cmap('plasma')
     
             ax1.contourf(X,Y,hist_wp,v,cmap=cmap)
-            p = ax2.contourf(X,Y,hist_wptta,v,cmap=cmap,extend='max')
-            p.cmap.set_over(cmap(1.0))
+            p = ax2.contourf(X,Y,hist_wptta,v,cmap=cmap)
             ax3.contourf(X,Y,hist_wpnotta,v,cmap=cmap)
-            cbar = add_colorbar(ax3,p,size='4%')
-
+            
+            ax1.vlines(0,0,4000,linestyle='--',color='w')
+            ax2.vlines(0,0,4000,linestyle='--',color='w')
+            ax3.vlines(0,0,4000,linestyle='--',color='w')
+                        
+            
             lw=3
             if add_median:
                 ax1.plot(median[:,0],self.hgts,color='w',lw=lw)
@@ -129,56 +164,57 @@ class cfad:
             p = ax1.pcolormesh(x,y,hist_wp,cmap='viridis')
             ax2.pcolormesh(x,y,hist_wptta,cmap='viridis')
             ax3.pcolormesh(x,y,hist_wpnotta,cmap='viridis')
-            amin = np.amin(hist_wpnotta)
-            amax = np.amax(hist_wpnotta)
-            cbar = add_colorbar(ax3,p,size='4%',ticks=[amin,amax])
-            cbar.ax.set_yticklabels(['low','high'])
+
+        ''' add color bar '''            
+        if add_cbar is True:   
+            cbar = add_colorbar(ax3,p,size='4%',loc='right',
+                                label=cbar_label)
+            cbar.ax.set_yticklabels(['low']+['']*nlevels+['high'])
     
     
         ' --- setup ax1 --- '
-        amin = np.amin(hist_wp)
-        amax = np.amax(hist_wp)
         ax1.set_xticks(hist_xticks)
         ax1.set_xlim(hist_xlim)
         ax1.set_ylim([0,4000])
-        txt = 'All profiles (n={})'.format(self.wp_hours)
-        ax1.text(0.5,0.95,txt,fontsize=15,
-                transform=ax1.transAxes,va='bottom',ha='center')
         ax1.set_ylabel('Altitude [m] MSL')
     
         ' --- setup ax2 --- '
-        amin = np.amin(hist_wptta)
-        amax = np.amax(hist_wptta)
         ax2.set_xticks(hist_xticks)
         ax2.set_xlim(hist_xlim)
         ax2.set_ylim([0,4000])
         ax2.set_xlabel(name[target])
-        txt = 'TTA (n={})'.format(self.tta_hours)
-        ax2.text(0.5,0.95,txt,fontsize=15,
-                transform=ax2.transAxes,va='bottom',ha='center')
+
     
         ' --- setup ax3 --- '
         ax3.set_xticks(hist_xticks)
         ax3.set_xlim(hist_xlim)
         ax3.set_ylim([0,4000])
-        txt = 'NO-TTA (n={})'.format(self.notta_hours)
-        ax3.text(0.5,0.95,txt,fontsize=15,
-                transform=ax3.transAxes,va='bottom',ha='center')
-    
-    
-        title = 'Normalized frequencies of BBY wind profiles {} \n'
-        title += 'TTA wdir_surf:{}, wdir_wp:{}, '
-        title += 'rain_bby:{}, rain_czd:{}, nhours:{}'
+
+
+        ''' add subaxis label '''
+        if subax_label is True:
+            txt = 'All profiles (n={})'.format(self.wp_hours)
+            ax1.text(0.5,0.95,txt,fontsize=15,
+                    transform=ax1.transAxes,va='bottom',ha='center')            
+            txt = 'TTA (n={})'.format(self.tta_hours)
+            ax2.text(0.5,0.95,txt,fontsize=15,
+                    transform=ax2.transAxes,va='bottom',ha='center')
+            txt = 'NO-TTA (n={})'.format(self.notta_hours)
+            ax3.text(0.5,0.95,txt,fontsize=15,
+                    transform=ax3.transAxes,va='bottom',ha='center')
         
-        if len(self.year) == 1:
-            yy = 'year {}'.format(self.year[0])
-        else:
-            yy = 'year {} to {}'.format(self.year[0],self.year[-1])
-        plt.suptitle(title.format(yy, self.wdsurf, 
-                    self.wdwpro, self.rainbb, self.raincz, self.nhours),
-                    fontsize=15)
-    
-        plt.subplots_adjust(top=0.9,left=0.1,right=0.95,bottom=0.1, wspace=0.1)
+        ''' add title '''
+        if add_title is True:
+            title = 'Normalized frequencies of BBY wind profiles {} \n'
+            title += 'TTA wdir_surf:{}, wdir_wp:{}, '
+            title += 'rain_bby:{}, rain_czd:{}, nhours:{}'
+            if len(self.year) == 1:
+                yy = 'year {}'.format(self.year[0])
+            else:
+                yy = 'year {} to {}'.format(self.year[0],self.year[-1])
+            plt.suptitle(title.format(yy, self.wdsurf, 
+                        self.wdwpro, self.rainbb, self.raincz, self.nhours),
+                        fontsize=15)
          
         if pngsuffix:
             out_name = 'wprof_{}_cfad{}.png'
@@ -188,8 +224,182 @@ class cfad:
             out_name = 'wprof_{}_cfad{}.pdf'
             plt.savefig(out_name.format(target,pdfsuffix))
             plt.close()        
-        else:
+        
+        if show is True:
             plt.show()
+
+        return ax1,ax2,ax3
+
+def processv2(year=[],wdsurf=None,
+               wdwpro=None,rainbb=None,
+               raincz=None, nhours=None):
+        
+        ''' v2: target loop moved into year loop '''
+        
+        
+        binss={'wdir': np.arange(0,370,10),
+               'wspd': np.arange(0,36,1),
+               'u': np.arange(-15,21,1),
+               'v': np.arange(-8,21,1),
+               }
+               
+        target = ['wdir','wspd']
+        arrays = {}
+        wsp = np.empty((40,1))
+        wsp_tta = np.empty((40,1))
+        wsp_notta = np.empty((40,1))
+        wdr = np.empty((40,1))
+        wdr_tta = np.empty((40,1))
+        wdr_notta = np.empty((40,1))
+        
+        for y in year:
+            print('Processing year {}'.format(y))
+            
+            ' tta analysis '
+            tta = tta_analysis(y)
+            tta.start_df(wdir_surf=wdsurf,
+                           wdir_wprof=wdwpro,
+                           rain_bby=rainbb,
+                           rain_czd=raincz,
+                           nhours=nhours)
+    
+            ' retrieve dates '
+            include_dates = tta.include_dates
+            tta_dates = tta.tta_dates
+            notta_dates = tta.notta_dates
+    
+            ' read wprof '
+            wprof_df = parse_data.windprof(y)
+            
+            for n,t in enumerate(target):
+                
+                wprof = wprof_df.dframe[t]        
+        
+                ' wprof partition '
+                wprof = wprof.loc[include_dates]    # all included
+                wprof_tta = wprof.loc[tta_dates]    # only tta
+                wprof_notta = wprof.loc[notta_dates]# only notta
+                
+                s1 = np.squeeze(pandas2stack(wprof))
+                s2 = np.squeeze(pandas2stack(wprof_tta))
+                s3 = np.squeeze(pandas2stack(wprof_notta))
+        
+                if t == 'wdir':
+                    wdr = np.hstack((wdr,s1))
+                    wdr_tta = np.hstack((wdr_tta,s2))
+                    wdr_notta = np.hstack((wdr_notta, s3))                    
+                else:
+                    wsp = np.hstack((wsp,s1))
+                    wsp_tta = np.hstack((wsp_tta,s2))
+                    wsp_notta = np.hstack((wsp_notta, s3))
+
+        arrays['wdir']=[wdr,wdr_tta,wdr_notta]
+        arrays['wspd']=[wsp,wsp_tta,wsp_notta]
+                
+        uw = -wsp*np.sin(np.radians(wdr))
+        uw_tta = -wsp_tta*np.sin(np.radians(wdr_tta))
+        uw_notta = -wsp_notta*np.sin(np.radians(wdr_notta))
+
+        vw = -wsp*np.cos(np.radians(wdr))
+        vw_tta = -wsp_tta*np.cos(np.radians(wdr_tta))
+        vw_notta = -wsp_notta*np.cos(np.radians(wdr_notta))        
+
+        arrays['u']=[uw,uw_tta,uw_notta]
+        arrays['v']=[vw,vw_tta,vw_notta]
+                
+        _,wp_hours = wsp.shape
+        _,tta_hours = wsp_tta.shape
+        _,notta_hours = wsp_notta.shape    
+        
+        ' initialize arrays '
+        hist_array_spd = np.empty((40,len(binss['wspd'])-1,3))
+        hist_array_dir = np.empty((40,len(binss['wdir'])-1,3))
+        cfad_array_spd = np.empty((40,len(binss['wspd'])-1,3))
+        cfad_array_dir = np.empty((40,len(binss['wdir'])-1,3))        
+        average_spd = np.empty((40,3))
+        average_dir = np.empty((40,3))
+        median_spd = np.empty((40,3))
+        median_dir = np.empty((40,3))
+        
+        ' loop for variable (wdir,wspd) '
+        for k,v in arrays.iteritems():        
+        
+            hist_array = np.empty((40,len(binss[k])-1,3))
+            cfad_array = np.empty((40,len(binss[k])-1,3))
+            average = np.empty((40,3))
+            median = np.empty((40,3))
+            
+            ' extract value'
+            wp = v[0]
+            wp_tta = v[1]
+            wp_notta = v[2]
+        
+            ' makes CFAD '
+            for hgt in range(wp.shape[0]):
+                
+                row1 = wp[hgt,:]
+                row2 = wp_tta[hgt,:]
+                row3 = wp_notta[hgt,:]
+        
+                for n,r in enumerate([row1,row2,row3]):
+        
+                    ' following CFAD Yuter et al (1995) '
+                    freq,bins=np.histogram(r[~np.isnan(r)],
+                                            bins=binss[k])
+                    hist_array[hgt,:,n] = freq
+                    cfad_array[hgt,:,n] = 100.*(freq/float(freq.sum()))
+        
+                    bin_middle = (bins[1:]+bins[:-1])/2.
+                    average[hgt,n] = np.sum(freq*bin_middle)/freq.sum()
+                    median[hgt,n] = np.percentile(r[~np.isnan(r)],50)
+            
+            if k == 'wspd':
+                hist_array_spd = hist_array
+                cfad_array_spd = cfad_array
+                average_spd = average
+                median_spd = median
+            elif k == 'wdir':                
+                hist_array_dir = hist_array
+                cfad_array_dir = cfad_array
+                average_dir = average
+                median_dir = median
+            elif k == 'u':
+                hist_array_u = hist_array
+                cfad_array_u = cfad_array
+                average_u = average
+                median_u = median                
+            elif k == 'v':
+                hist_array_v = hist_array
+                cfad_array_v = cfad_array
+                average_v = average
+                median_v = median
+    
+        return [hist_array_spd,
+                hist_array_dir,
+                hist_array_u,
+                hist_array_v,
+                cfad_array_spd,
+                cfad_array_dir,
+                cfad_array_u,
+                cfad_array_v,
+                binss['wspd'],
+                binss['wdir'],
+                binss['u'],
+                binss['v'],
+                wprof_df.hgt,
+                wp_hours,
+                tta_hours,
+                notta_hours,
+                average_spd,
+                average_dir,
+                average_u,
+                average_v,
+                median_spd,
+                median_dir,
+                median_u,
+                median_v,
+                ]
+
 
 
 def process(year=[],wdsurf=None,

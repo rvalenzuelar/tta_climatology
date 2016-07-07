@@ -153,9 +153,9 @@ class windprof:
         print('Gaps hours')
         print(ghrs)
         print('Gaps days')
-        print(gdys)
+        print(gdys)  
 
-
+            
 class surface:
 
     def __init__(self, location=None, year=None, hourly=True,
@@ -515,3 +515,32 @@ def time_gaps(datetime_array):
         return gaps_idx, gaps_hours, gaps_days
     else:
         return None, None, None
+
+
+'''
+    Other functions
+***************************************************
+'''
+
+def oroforcing(matfile=None,dates=None,fill_gaps=True):
+    
+    mat = sio.loadmat(matfile)
+    
+    bulk = mat['avg_czc_sprof_bulkupslopeflux_850to1150'][0]
+    upslp = mat['avg_czc_sprof_upslope850to1150'][0]
+    iwv = mat['avg_czc_sprof_iwv60min'][0]
+    begd = mat['avg_czc_sprof_begdayt60'][0]
+    
+    # convert to python datetime
+    idates = [datenum_to_datetime(d) for d in begd]
+
+    data={'bulk':bulk,'upslp':upslp,'iwv':iwv}
+    if fill_gaps:
+        # Fills gaps with NaN values
+        dframe = fill_surface_gaps(data,idates)
+    else:
+        dframe = pd.DataFrame(data=data, index=idates)
+
+    dframe = quality_control(dframe)
+
+    return dframe
