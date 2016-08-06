@@ -36,6 +36,10 @@ class tta_analysis:
     def start(self, wdir_surf=None, wdir_wprof=None, 
               rain_bby=None,rain_czd=None,nhours=None):
 
+        ''' this is an old verion
+            prefer start_df that uses pandas dataframe
+        '''
+
         bby = parse_data.surface('bby', self.year)
         czd = parse_data.surface('czd', self.year)
         wprof = parse_data.windprof(self.year)
@@ -175,7 +179,8 @@ class tta_analysis:
               rain_bby=None,rain_czd=None,nhours=None):
 
         '''
-            this version uses pandas dataframe
+            this version uses pandas dataframe, 
+            it should be more accurate and simpler
         '''
 
         import pandas as pd
@@ -293,14 +298,18 @@ class tta_analysis:
         rbbyIsNan = np.isnan(ar_rbby)
         rczdIsNan = np.isnan(ar_rczd)
         
-        zeros = np.zeros((1,len(ar_rbby)))
-#        rbbyIsZero = np.squeeze(np.equal(ar_rbby,zeros).T)
-        rczdIsZero = np.squeeze(np.equal(ar_rczd,zeros).T)
         
-#        exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan
-        
-        exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan \
-                | rczdIsZero
+        if rain_czd is None:
+            exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan        
+        elif rain_czd >= 0.25:
+            ''' this boolean excludes dates when there is no
+                precip at CZD
+            '''       
+            zeros = np.zeros((1,len(ar_rbby)))
+            rczdIsZero = np.squeeze(np.equal(ar_rczd,zeros).T)                  
+            exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan \
+                    | rczdIsZero
+
 
         tot_rbby = np.round(df.rbby.sum(),0).astype(int)
         tot_rczd = np.round(df.rczd.sum(),0).astype(int)
@@ -311,46 +320,46 @@ class tta_analysis:
         inc_rbby = tot_rbby - exc_rbby
         inc_rczd = tot_rczd - exc_rczd
 
-        tot_hrs = np.round(df.index.size,0).astype(int)
+        tot_hrs   = np.round(df.index.size,0).astype(int)
         exc_hours = np.round(exclude.sum(),0).astype(int)
         inc_hours = tot_hrs - exc_hours
 
-        tta_rbby = np.round(df[df.consecutive].rbby.sum(),0).astype(int)
-        tta_rczd = np.round(df[df.consecutive].rczd.sum(),0).astype(int)
+        tta_rbby   = np.round(df[df.consecutive].rbby.sum(),0).astype(int)
+        tta_rczd   = np.round(df[df.consecutive].rczd.sum(),0).astype(int)
         notta_rbby = inc_rbby - tta_rbby
         notta_rczd = inc_rczd - tta_rczd
 
         exclude_dates = df[exclude].index
         include_dates = df[~exclude].index
-        tta_dates = df[~exclude & df.consecutive].index
-        notta_dates = df[~exclude & ~df.consecutive].index
+        tta_dates     = df[~exclude & df.consecutive].index
+        notta_dates   = df[~exclude & ~df.consecutive].index
 
-        tta_hours = tta_dates.size
+        tta_hours   = tta_dates.size
         notta_hours = notta_dates.size
 
-        self.time_beg = time_beg
-        self.time_end = time_end
-        self.count_hrs_include = inc_hours
-        self.count_hrs_exclude = exc_hours
+        self.time_beg           = time_beg
+        self.time_end           = time_end
+        self.count_hrs_include  = inc_hours
+        self.count_hrs_exclude  = exc_hours
         self.total_rainfall_bby = inc_rbby
         self.total_rainfall_czd = inc_rczd
-        self.tta_rainfall_bby = tta_rbby
-        self.tta_rainfall_czd = tta_rczd
+        self.tta_rainfall_bby   = tta_rbby
+        self.tta_rainfall_czd   = tta_rczd
         self.notta_rainfall_bby = notta_rbby
         self.notta_rainfall_czd = notta_rczd
-        self.tta_hours = tta_hours
-        self.notta_hours = notta_hours
-        self.wprof_hgt = wprof.hgt
-        self.exclude_dates = exclude_dates
-        self.include_dates = include_dates
-        self.tta_dates = tta_dates
-        self.notta_dates = notta_dates
-        self.df = df
+        self.tta_hours          = tta_hours
+        self.notta_hours        = notta_hours
+        self.wprof_hgt          = wprof.hgt
+        self.exclude_dates      = exclude_dates
+        self.include_dates      = include_dates
+        self.tta_dates          = tta_dates
+        self.notta_dates        = notta_dates
+        self.df                 = df
 
         # print('TTA analysis finished')
 
 
-    def print_stats(self,header=False,return_results=False):
+    def print_stats(self,header=False,return_results=False,skip_print=False):
 
         if header:
             hdr='YR TOT TBB NBB TOT TCZ NCZ TTA NTT TTA NTT BBY(%) CZD(%)'.split()
@@ -394,10 +403,10 @@ class tta_analysis:
         col4 = hrs_col.format(tta_hours, notta_hours)
         col5 = prc_col.format(rain_perc_bby, rain_perc_czd)
 
-        print(col1+col2+col3+col4+col5)
+        if skip_print is False:
+            print(col1+col2+col3+col4+col5)
 
         if return_results is True:
-
             return np.array([bby_total, bby_tta, bby_notta,
                              czd_total, czd_tta, czd_notta,
                              tta_ratio, notta_ratio,

@@ -5,7 +5,7 @@ Created on Tue Jul  5 10:27:13 2016
 @author: raul
 """
 import matplotlib.pyplot as plt
-import wprof_cfad as cfad
+from wprof_cfad import cfad
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 from matplotlib.gridspec import GridSpecFromSubplotSpec as gssp
@@ -19,13 +19,20 @@ rcParams['axes.labelsize'] = 15
 try:
     out
 except NameError:
-    out=cfad(year=[1998]+range(2001,2013),
-             wdsurf=125,wdwpro=170,
-             rainbb=None,raincz=0.25,
-             nhours=2)
-    
+    out = cfad(year=[1998]+range(2001,2013),
+               wdsurf=125,
+               wdwpro=170,
+               rainbb=None,
+               raincz=0.25,
+               nhours=2)
+        
 ''' creates plot with seaborn style '''
 with sns.axes_style("white"):
+    sns.set_style('ticks',
+              {'xtick.direction': u'in',
+               'ytick.direction': u'in'}
+              )    
+    
     scale=1.2
     plt.figure(figsize=(8.5*scale,11*scale))
     
@@ -73,9 +80,9 @@ for ax in axes:
     ax.text(0.05,0.9,ax.get_gid(),size=18,weight='bold',
             transform=ax.transAxes)
 
-#plt.show()
+plt.show()
 
-fname='/home/raul/Desktop/cfad_windprof.png'
-plt.savefig(fname, dpi=150, format='png',papertype='letter',
-            bbox_inches='tight')
+#fname='/home/raul/Desktop/cfad_windprof.png'
+#plt.savefig(fname, dpi=150, format='png',papertype='letter',
+#            bbox_inches='tight')
 

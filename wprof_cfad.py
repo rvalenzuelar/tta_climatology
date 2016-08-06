@@ -35,8 +35,8 @@ class cfad:
               
 
         out = processv2(year=year,wdsurf=wdsurf,
-                       wdwpro=wdwpro,rainbb=rainbb,
-                       raincz=raincz, nhours=nhours)
+                        wdwpro=wdwpro,rainbb=rainbb,
+                        raincz=raincz, nhours=nhours)
       
         self.spd_hist = out[0]
         self.dir_hist = out[1]
@@ -145,9 +145,11 @@ class cfad:
             p = ax2.contourf(X,Y,hist_wptta,v,cmap=cmap)
             ax3.contourf(X,Y,hist_wpnotta,v,cmap=cmap)
             
-            ax1.vlines(0,0,4000,linestyle='--',color='w')
-            ax2.vlines(0,0,4000,linestyle='--',color='w')
-            ax3.vlines(0,0,4000,linestyle='--',color='w')
+            lcolor = (0.6,0.6,0.6)
+            lw = 3
+            ax1.vlines(0,0,4000,linestyle='--',color=lcolor,lw=lw)
+            ax2.vlines(0,0,4000,linestyle='--',color=lcolor,lw=lw)
+            ax3.vlines(0,0,4000,linestyle='--',color=lcolor,lw=lw)
                         
             
             lw=3
@@ -257,11 +259,11 @@ def processv2(year=[],wdsurf=None,
             
             ' tta analysis '
             tta = tta_analysis(y)
-            tta.start_df(wdir_surf=wdsurf,
-                           wdir_wprof=wdwpro,
-                           rain_bby=rainbb,
-                           rain_czd=raincz,
-                           nhours=nhours)
+            tta.start_df(wdir_surf  = wdsurf,
+                         wdir_wprof = wdwpro,
+                         rain_bby   = rainbb,
+                         rain_czd   = raincz,
+                         nhours     = nhours)
     
             ' retrieve dates '
             include_dates = tta.include_dates

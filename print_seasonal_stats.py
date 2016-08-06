@@ -40,15 +40,15 @@ def params(wdir_surf=None,wdir_wprof=None,
     hrs_col = '{:5.0f} {:5.0f} '
     prc_col = '{:5.0f} {:5.0f}'
     
-    bby_total = results[:,0].sum()
-    bby_tta = results[:,1].sum()
-    bby_notta = results[:,2].sum()
-    czd_total = results[:,3].sum()
-    czd_tta = results[:,4].sum()
-    czd_notta = results[:,5].sum()
-    tta_ratio = czd_tta/bby_tta
+    bby_total   = results[:,0].sum()
+    bby_tta     = results[:,1].sum()
+    bby_notta   = results[:,2].sum()
+    czd_total   = results[:,3].sum()
+    czd_tta     = results[:,4].sum()
+    czd_notta   = results[:,5].sum()
+    tta_ratio   = czd_tta/bby_tta
     notta_ratio = czd_notta/bby_notta
-    tta_hours = results[:,8].sum()
+    tta_hours   = results[:,8].sum()
     notta_hours = results[:,9].sum()
     rain_perc_bby = np.round(100.*(bby_tta/bby_total),0).astype(int)
     rain_perc_czd = np.round(100.*(czd_tta/czd_total),0).astype(int)
