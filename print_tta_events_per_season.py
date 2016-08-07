@@ -34,12 +34,12 @@ params = (
 n_ttas = {
           'nhours1':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
                      'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
-          'nhours2':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
-                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
-          'nhours4':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
-                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
-          'nhours8':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
-                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
+#          'nhours2':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
+#                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
+#          'nhours4':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
+#                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
+#          'nhours8':{'w_events':[],'w_hours':[],'w_czd':[],'w_bby':[],
+#                     'n_events':[],'n_hours':[],'n_czd':[],'n_bby':[]},
 
           }
 
@@ -57,29 +57,36 @@ for p in params:
         tta.start_df(**p)
         s = pd.Series(tta.tta_dates)
         if s.size == 0:
-            n_events += 0
-            n_hours += 0
-            r_czd += 0
-            r_bby += 0
+            ev = 0
+            ho = 0
+            cz = 0
+            bb = 0
         else:
             sdiff = s-s.shift()
-            n_events += np.sum( sdiff>h ) + 1
-            n_hours += tta.tta_hours
-            r_czd += tta.tta_rainfall_czd
-            r_bby += tta.tta_rainfall_bby
-        template = 'year:{},n_ttas:{},n_hours:{}'
-        print template.format(y,n_events,n_hours)
+            ev = np.sum( sdiff>h ) + 1
+            ho = tta.tta_hours
+            cz = tta.tta_rainfall_czd
+            bb = tta.tta_rainfall_bby
+        av_time = ho/float(ev)
+        template = 'year:{:4d}, n_ttas:{:3d}, n_hours:{:4d}, ave_time:{:2.1f}, r_czd:{:3d}, r_bby:{:3d},'
+        print template.format(y,ev,ho,av_time,cz,bb)        
+        n_events += ev
+        n_hours += ho
+        r_czd += cz
+        r_bby += bb
+
+
     nh = str(p['nhours'])
     if p['rain_czd'] is None:
-        n_ttas['nhours'+nh]['n_events'] = n_events
-        n_ttas['nhours'+nh]['n_hours'] = n_hours
-        n_ttas['nhours'+nh]['n_czd'] = r_czd
-        n_ttas['nhours'+nh]['n_bby'] = r_bby
+        prefix = 'n_'
     else:
-        n_ttas['nhours'+nh]['w_events'] = n_events
-        n_ttas['nhours'+nh]['w_hours'] = n_hours
-        n_ttas['nhours'+nh]['w_czd'] = r_czd
-        n_ttas['nhours'+nh]['w_bby'] = r_bby
+        prefix = 'w_'
+        
+    n_ttas['nhours'+nh][prefix + 'events'] = n_events
+    n_ttas['nhours'+nh][prefix + 'hours']  = n_hours
+    n_ttas['nhours'+nh][prefix + 'czd']    = r_czd
+    n_ttas['nhours'+nh][prefix + 'bby']    = r_bby
+
 
 print n_ttas
 

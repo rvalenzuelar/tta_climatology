@@ -193,10 +193,10 @@ class tta_analysis:
         beg_czd, end_czd = czd.check_beg_end()
         beg_wpr, end_wpr = wprof.check_beg_end()
 
-        ''' the latest of the beg '''
+        ''' trim the head and tail of dataset depending
+            on the latest time of the beginning and 
+            earliest of the ending '''
         time_beg = max(beg_bby, beg_czd, beg_wpr)
-
-        ''' the earliest of the end '''
         time_end = min(end_bby, end_czd, end_wpr)
 
         ''' rainfall before all obs start '''
@@ -280,7 +280,7 @@ class tta_analysis:
                     tta_bool = np.append(tta_bool, [False])
                 else:
                     tta_bool = np.append(tta_bool, [False] * (bufsum + 1))
-                # reset buffer
+                ' reset buffer '
                 bool_buffer = np.array([False] * nhours)
                 count = 0
 
@@ -341,8 +341,12 @@ class tta_analysis:
         self.time_end           = time_end
         self.count_hrs_include  = inc_hours
         self.count_hrs_exclude  = exc_hours
-        self.total_rainfall_bby = inc_rbby
-        self.total_rainfall_czd = inc_rczd
+        self.tot_rainfall_bby   = tot_rbby
+        self.tot_rainfall_czd   = tot_rczd
+        self.inc_rainfall_bby   = inc_rbby
+        self.inc_rainfall_czd   = inc_rczd
+        self.exc_rainfall_bby   = exc_rbby
+        self.exc_rainfall_czd   = exc_rczd        
         self.tta_rainfall_bby   = tta_rbby
         self.tta_rainfall_czd   = tta_rczd
         self.notta_rainfall_bby = notta_rbby
@@ -373,11 +377,11 @@ class tta_analysis:
             print(fmt.format(*hdr))
 
 
-        bby_total = self.total_rainfall_bby
+        bby_inc = self.inc_rainfall_bby
         bby_tta =  self.tta_rainfall_bby
         bby_notta =  self.notta_rainfall_bby
 
-        czd_total = self.total_rainfall_czd
+        czd_inc = self.inc_rainfall_czd
         czd_tta =  self.tta_rainfall_czd
         czd_notta =  self.notta_rainfall_czd        
 
@@ -387,8 +391,8 @@ class tta_analysis:
         tta_hours = self.tta_hours
         notta_hours = self.notta_hours
 
-        rain_perc_bby = 100*(bby_tta/float(bby_total))
-        rain_perc_czd = 100*(czd_tta/float(czd_total))
+        rain_perc_bby = 100*(bby_tta/float(bby_inc))
+        rain_perc_czd = 100*(czd_tta/float(czd_inc))
 
 
         bby_col = '{:5d} {:5.0f} {:5.0f} {:5.0f} '
@@ -397,8 +401,8 @@ class tta_analysis:
         hrs_col = '{:5.0f} {:5.0f} '
         prc_col = '{:5.0f} {:5.0f}'
 
-        col1 = bby_col.format(self.year, bby_total, bby_tta,bby_notta)
-        col2 = czd_col.format(czd_total, czd_tta, czd_notta)
+        col1 = bby_col.format(self.year, bby_inc, bby_tta,bby_notta)
+        col2 = czd_col.format(czd_inc, czd_tta, czd_notta)
         col3 = rto_col.format(tta_ratio, notta_ratio)
         col4 = hrs_col.format(tta_hours, notta_hours)
         col5 = prc_col.format(rain_perc_bby, rain_perc_czd)
@@ -407,8 +411,8 @@ class tta_analysis:
             print(col1+col2+col3+col4+col5)
 
         if return_results is True:
-            return np.array([bby_total, bby_tta, bby_notta,
-                             czd_total, czd_tta, czd_notta,
+            return np.array([bby_inc, bby_tta, bby_notta,
+                             czd_inc, czd_tta, czd_notta,
                              tta_ratio, notta_ratio,
                              tta_hours, notta_hours,
                              rain_perc_bby, rain_perc_czd])
