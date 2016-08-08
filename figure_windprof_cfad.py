@@ -66,7 +66,7 @@ pos=[0.665151515152, 0.539534883721, w, h]
 ax2.set_position(pos, which=u'both')
 
 out.plot('u',axes=[ax0,ax1,ax2],add_median=True,add_title=False,
-         cbar_label='[frequency]',show=False)
+         cbar_label='[Normalized frequency]',show=False)
 
 out.plot('v',axes=[ax3,ax4,ax5],add_median=True,add_title=False,
          add_cbar=False,show=False,subax_label=False)
