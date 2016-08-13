@@ -10,12 +10,24 @@ from tta_analysis import tta_analysis
 
 years = [1998]+range(2001,2013)
 
-params = [dict(wdir_surf=125,wdir_wprof=170,rain_bby=None,rain_czd=0.25,nhours=2),
-		  dict(wdir_surf=150,wdir_wprof=170,rain_bby=None,rain_czd=0.25,nhours=2),
-		  dict(wdir_surf=125,wdir_wprof=136,rain_bby=None,rain_czd=0.25,nhours=2),
-		  dict(wdir_surf=125,wdir_wprof=170,rain_bby=None,rain_czd=0.25,nhours=1),
-		  dict(wdir_surf=125,wdir_wprof=170,rain_bby=None,rain_czd=0.25,nhours=4),
-		  dict(wdir_surf=125,wdir_wprof=170,rain_bby=None,rain_czd=0.25,nhours=8)]
+params = [
+          # 33% wsrf and %50 wprof
+          dict(wdir_surf=130,wdir_wprof=170,
+               rain_bby=None,rain_czd=0.25,nhours=1),
+          dict(wdir_surf=130,wdir_wprof=170,
+               rain_bby=None,rain_czd=0.25,nhours=2),
+          # 50% wsrf     
+          dict(wdir_surf=154,wdir_wprof=170,
+               rain_bby=None,rain_czd=0.25,nhours=2),
+          # 33% wprof
+          dict(wdir_surf=130,wdir_wprof=146,
+               rain_bby=None,rain_czd=0.25,nhours=2),               
+          dict(wdir_surf=130,wdir_wprof=170,
+               rain_bby=None,rain_czd=0.25,nhours=4),
+          dict(wdir_surf=130,wdir_wprof=170,
+               rain_bby=None,rain_czd=0.25,nhours=8),               
+
+          ]
 
 first = True
 for p in params:
