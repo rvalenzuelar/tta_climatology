@@ -122,8 +122,8 @@ axes = WindroseAxes.from_ax(subplots=(2,len(wd_tuple)/2),
 
 for ax,wd,ws in zip(axes,wd_tuple,ws_tuple):        
     ax.contourf(wd, ws,
-                bins=range(0,24,3),
-                nsector=48,
+                bins=range(0,24,3),  # speed bins
+                nsector=36,
                 cmap=cm.plasma,
                 normed=True)
 
@@ -177,11 +177,11 @@ for ax in axes:
     ax.set_yticks(newtcks)
     ax.set_yticklabels(newlabs)
     
-plt.show()
+#plt.show()
 
-#fname='/home/raul/Desktop/all_season_windrose.png'
-#plt.savefig(fname, dpi=300, format='png',papertype='letter',
-#            bbox_inches='tight')
+fname='/home/raul/Desktop/fig_all_season_windrose.png'
+plt.savefig(fname, dpi=300, format='png',papertype='letter',
+            bbox_inches='tight')
 
 
 ''' percentile analysis '''
