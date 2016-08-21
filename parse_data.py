@@ -389,6 +389,7 @@ def average_wind(wdir, wspd):
                 return av_wdir, av_wspd
         else:
             return None, None
+            
     elif array_dim == 2:
         ''' if 2D array '''
         hn, tn = wdir.shape
@@ -438,6 +439,7 @@ def average_wind(wdir, wspd):
                 av_wdstd_array[n] = None
                 av_wsstd_array[n] = None
         return av_wdir_array, av_wspd_array, av_wdstd_array, av_wsstd_array, wdnans, wsnans
+        
     else:
         print('Arrays need to be 1D or 2D')
 
