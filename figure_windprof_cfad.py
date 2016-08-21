@@ -5,26 +5,38 @@ Created on Tue Jul  5 10:27:13 2016
 @author: raul
 """
 import matplotlib.pyplot as plt
-from wprof_cfad import cfad
 import matplotlib.gridspec as gridspec
 import seaborn as sns
+from wprof_cfad import cfad
 from matplotlib.gridspec import GridSpecFromSubplotSpec as gssp
-
+from rv_utilities import add_floating_colorbar
 
 from matplotlib import rcParams
 rcParams['xtick.labelsize'] = 15
 rcParams['ytick.labelsize'] = 15
 rcParams['axes.labelsize'] = 15
+rcParams['axes.labelpad'] = 0.1
 
 try:
-    out
+    outnr
 except NameError:
-    out = cfad(year=[1998]+range(2001,2013),
-               wdsurf=125,
+    outnr = cfad(year=[1998]+range(2001,2013),
+               wdsurf=130,
+               wdwpro=170,
+               rainbb=None,
+               raincz=None,
+               nhours=2)  
+
+try:
+    outwr
+except NameError:    
+    outwr = cfad(year=[1998]+range(2001,2013),
+               wdsurf=130,
                wdwpro=170,
                rainbb=None,
                raincz=0.25,
                nhours=2)
+      
         
 ''' creates plot with seaborn style '''
 with sns.axes_style("white"):
@@ -33,56 +45,104 @@ with sns.axes_style("white"):
                'ytick.direction': u'in'}
               )    
     
-    scale=1.2
-    plt.figure(figsize=(8.5*scale,11*scale))
+    scale=1.3
+    fig = plt.figure(figsize=(8.5*scale,11*scale))
     
-    gs0 = gridspec.GridSpec(2, 1,
-                            hspace=0.15)
-    
+
+    gsA = gridspec.GridSpec(2, 1,
+                            hspace=0.2)
+
+    gsAA = gssp(2, 1,
+                subplot_spec=gsA[0],
+                hspace=0.25)
+
+    gsAB = gssp(2, 1,
+                subplot_spec=gsA[1],
+                hspace=0.25)
+ 
     gs00 = gssp(1, 3,
-                subplot_spec=gs0[0],
+                subplot_spec=gsAA[0],
                 wspace=0.15
                 )
     
     gs01 = gssp(1, 3,
-                subplot_spec=gs0[1],
+                subplot_spec=gsAA[1],
                 wspace=0.15
                 )
 
-    ax0 = plt.subplot(gs00[0],gid='(a)')
-    ax1 = plt.subplot(gs00[1],gid='(b)')
-    ax2 = plt.subplot(gs00[2],gid='(c)')
-    ax3 = plt.subplot(gs01[0],gid='(d)')
-    ax4 = plt.subplot(gs01[1],gid='(e)')
-    ax5 = plt.subplot(gs01[2],gid='(f)')
+    gs02 = gssp(1, 3,
+                subplot_spec=gsAB[0],
+                wspace=0.15
+                )
+    
+    gs03 = gssp(1, 3,
+                subplot_spec=gsAB[1],
+                wspace=0.15
+                )   
 
-axes = [ax0,ax1,ax2,ax3,ax4,ax5]
+    
+    ax00 = plt.subplot(gs00[0],gid='(a)')
+    ax01 = plt.subplot(gs00[1],gid='(b)')
+    ax02 = plt.subplot(gs00[2],gid='(c)')
+    ax03 = plt.subplot(gs01[0],gid='(d)')
+    ax04 = plt.subplot(gs01[1],gid='(e)')
+    ax05 = plt.subplot(gs01[2],gid='(f)')
+
+    ax06 = plt.subplot(gs02[0],gid='(g)')
+    ax07 = plt.subplot(gs02[1],gid='(h)')
+    ax08 = plt.subplot(gs02[2],gid='(i)')
+    ax09 = plt.subplot(gs03[0],gid='(j)')
+    ax10 = plt.subplot(gs03[1],gid='(k)')
+    ax11 = plt.subplot(gs03[2],gid='(l)')
 
 
-''' adjsut axis with colorbar '''
-w = 0.25
-h = 0.360465116279
-pos=[0.665151515152, 0.539534883721, w, h]
-ax2.set_position(pos, which=u'both')
+axes = [ax00,ax01,ax02,ax03,ax04,ax05,
+        ax06,ax07,ax08,ax09,ax10,ax11]
 
-out.plot('u',axes=[ax0,ax1,ax2],add_median=True,add_title=False,
-         cbar_label='[Normalized frequency]',show=False)
 
-out.plot('v',axes=[ax3,ax4,ax5],add_median=True,add_title=False,
-         add_cbar=False,show=False,subax_label=False)
 
-ax1.set_yticklabels('')
-ax2.set_yticklabels('')
-ax4.set_yticklabels('')
-ax5.set_yticklabels('')
+plot=outnr.plot('u',axes=[ax00,ax01,ax02],add_median=True,add_title=False,
+           add_cbar=False,show=False)
+
+outnr.plot('v',axes=[ax03,ax04,ax05],add_median=True,add_title=False,
+           add_cbar=False,show=False,subax_label=False)
+
+outwr.plot('u',axes=[ax06,ax07,ax08],add_median=True,add_title=False,
+           add_cbar=False, subax_label=True, show=False)
+
+outwr.plot('v',axes=[ax09,ax10,ax11],add_median=True,add_title=False,
+           add_cbar=False,show=False,subax_label=False)
+
+
+add_floating_colorbar(fig=fig,im=plot['im'],
+                      loc='bottom',
+                      position=[0.25,0.08,0.5,0.3],
+                      label='Normalized frequency [%]')
+
+target = (ax02,ax05,ax08,ax11)
+text = ('All profiles','','Rain at CZD','')
+for ax,tx in zip(target,text):
+    ax.text(1.05,0.0,tx,ha='center',va='center',
+            fontsize=15,weight='bold',rotation=-90,
+            transform=ax.transAxes)
+
+ax01.set_yticklabels('')
+ax02.set_yticklabels('')
+ax04.set_yticklabels('')
+ax05.set_yticklabels('')
+ax07.set_yticklabels('')
+ax08.set_yticklabels('')
+ax10.set_yticklabels('')
+ax11.set_yticklabels('')
+
 
 for ax in axes:
     ax.text(0.05,0.9,ax.get_gid(),size=18,weight='bold',
             transform=ax.transAxes)
 
-plt.show()
-
-#fname='/home/raul/Desktop/cfad_windprof.png'
-#plt.savefig(fname, dpi=150, format='png',papertype='letter',
-#            bbox_inches='tight')
+#plt.show()
+#
+fname='/home/raul/Desktop/cfad_windprof.png'
+plt.savefig(fname, dpi=150, format='png',papertype='letter',
+            bbox_inches='tight')
 

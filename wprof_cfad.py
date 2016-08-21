@@ -100,15 +100,15 @@ class cfad:
             median = self.u_median
             average = self.u_average
             bins = self.bins_u
-            hist_xticks = np.arange(-14,22,8)
+            hist_xticks = np.arange(-14,22,4)
             hist_xlim = [-14,20] 
         elif target == 'v':
             cfad = self.v_cfad
             median = self.v_median
             average = self.v_average
             bins = self.bins_v
-            hist_xticks = np.arange(-8,24,4)
-            hist_xlim = [-8,20] 
+            hist_xticks = np.arange(-14,24,4)
+            hist_xlim = [-14,20] 
     
         if axes is None:
             fig,axs = plt.subplots(1,3,sharey=True,figsize=(10,8))
@@ -134,8 +134,8 @@ class cfad:
             hist_wptta = np.hstack((hist_wptta,nancol))
             hist_wpnotta = np.hstack((hist_wpnotta,nancol))
     
-            vmax=13
-            nlevels = 5
+            vmax=15
+            nlevels = 6
             delta = int(vmax/nlevels)
             v = np.arange(2,vmax+delta,delta)
     
@@ -169,9 +169,8 @@ class cfad:
 
         ''' add color bar '''            
         if add_cbar is True:   
-            cbar = add_colorbar(ax3,p,size='4%',loc='right',
-                                label=cbar_label)
-            cbar.ax.set_yticklabels(['low']+['']*nlevels+['high'])
+            add_colorbar(ax3,p,size='4%',loc='right',
+                         label=cbar_label)
     
     
         ' --- setup ax1 --- '
@@ -194,16 +193,17 @@ class cfad:
 
 
         ''' add subaxis label '''
+        vpos=1.05
         if subax_label is True:
             txt = 'All profiles (n={})'.format(self.wp_hours)
-            ax1.text(0.5,0.95,txt,fontsize=15,
-                    transform=ax1.transAxes,va='bottom',ha='center')            
+            ax1.text(0.5,vpos,txt,fontsize=15,weight='bold',
+                    transform=ax1.transAxes,va='center',ha='center')            
             txt = 'TTA (n={})'.format(self.tta_hours)
-            ax2.text(0.5,0.95,txt,fontsize=15,
-                    transform=ax2.transAxes,va='bottom',ha='center')
+            ax2.text(0.5,vpos,txt,fontsize=15,weight='bold',
+                    transform=ax2.transAxes,va='center',ha='center')
             txt = 'NO-TTA (n={})'.format(self.notta_hours)
-            ax3.text(0.5,0.95,txt,fontsize=15,
-                    transform=ax3.transAxes,va='bottom',ha='center')
+            ax3.text(0.5,vpos,txt,fontsize=15, weight='bold',
+                    transform=ax3.transAxes,va='center',ha='center')
         
         ''' add title '''
         if add_title is True:
@@ -230,7 +230,7 @@ class cfad:
         if show is True:
             plt.show()
 
-        return ax1,ax2,ax3
+        return {'axes':[ax1,ax2,ax3],'im':p}
 
 def processv2(year=[],wdsurf=None,
                wdwpro=None,rainbb=None,
@@ -242,7 +242,7 @@ def processv2(year=[],wdsurf=None,
         binss={'wdir': np.arange(0,370,10),
                'wspd': np.arange(0,36,1),
                'u': np.arange(-15,21,1),
-               'v': np.arange(-8,21,1),
+               'v': np.arange(-14,21,1),
                }
                
         target = ['wdir','wspd']
@@ -267,8 +267,8 @@ def processv2(year=[],wdsurf=None,
     
             ' retrieve dates '
             include_dates = tta.include_dates
-            tta_dates = tta.tta_dates
-            notta_dates = tta.notta_dates
+            tta_dates     = tta.tta_dates
+            notta_dates   = tta.notta_dates
     
             ' read wprof '
             wprof_df = parse_data.windprof(y)
@@ -308,10 +308,14 @@ def processv2(year=[],wdsurf=None,
 
         arrays['u']=[uw,uw_tta,uw_notta]
         arrays['v']=[vw,vw_tta,vw_notta]
-                
+
+        ''' total hours, first rows are empty '''                
         _,wp_hours = wsp.shape
         _,tta_hours = wsp_tta.shape
         _,notta_hours = wsp_notta.shape    
+        wp_hours -= 1
+        tta_hours-= 1
+        notta_hours -= 1
         
         ' initialize arrays '
         hist_array_spd = np.empty((40,len(binss['wspd'])-1,3))

@@ -27,7 +27,8 @@ freq_160_all_array = np.zeros((1,36))
 freq_160_rain_czd_array = np.zeros((1,36))
 freq_160_rain_bby_array = np.zeros((1,36))
 
-years = [1998]+range(2001,2013)
+#years = [1998]+range(2001,2013)
+years = [1998]
 
 for y in years:
 
@@ -169,9 +170,9 @@ ax[0].set_ylabel('Winter season [year]')
 
 plt.subplots_adjust(hspace=0.2,
                     wspace=0.1)
-#plt.show()
+plt.show()
 #fname='/home/raul/Desktop/wdir_seasonal_histogram.png'
-fname='/Users/raulv/Dropbox/AuthoredPapers/Long-term statistics/figures_v02/wdir_seasonal_histogram.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+#fname='/Users/raulv/Dropbox/AuthoredPapers/Long-term statistics/figures_v02/wdir_seasonal_histogram.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
     

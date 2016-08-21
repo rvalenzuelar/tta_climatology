@@ -199,36 +199,19 @@ class tta_analysis:
         time_beg = max(beg_bby, beg_czd, beg_wpr)
         time_end = min(end_bby, end_czd, end_wpr)
 
-        ''' rainfall before all obs start '''
-#        rbby_before = np.nansum(bby.dframe.loc[:time_beg].precip)
-#        rczd_before = np.nansum(czd.dframe.loc[:time_beg].precip)
-
-        ''' rainfall after all obs end '''
-#        rbby_after = np.nansum(bby.dframe.loc[time_end:].precip)
-#        rczd_after = np.nansum(czd.dframe.loc[time_end:].precip)
-
-        ''' number of windprofiles before (after)
-            all obs start (end) '''
-#        nwprof_before = len(wprof.dframe.loc[:time_beg].wdir)
-#        nwprof_after = len(wprof.dframe.loc[time_end:].wdir)
-
+        ''' initializations '''
         onehr = timedelta(hours=1)
-        time = time_beg
         bool_buffer = np.array([False] * nhours)
         tta_bool = np.array([])
         count = 0
-#        rainfall_czd = np.array([])
-#        rainfall_bby = np.array([])
-#        wpr_wd_inc = []
-#        wpr_ws_inc = []
-#        count_while = 0
-#        count_exclude = 0
-
-        rng = pd.date_range(start=time_beg,end=time_end,freq='1H')
-
-        cols = ['wdsrf','wdwpr','rbby','rczd','tta','consecutive']
-        df = pd.DataFrame(index=rng,columns=cols)
-
+        rng = pd.date_range(start=time_beg,
+                            end=time_end,
+                            freq='1H')
+        cols = ('wssrf','wswpr','wdsrf','wdwpr','rbby','rczd','tta','consecutive')
+        df = pd.DataFrame(index=rng,columns=cols)       
+        time = time_beg
+        
+        ''' loop evaluates each time '''
         while (time <= time_end):
 
             surf_wd = bby.dframe.loc[time].wdir
@@ -243,7 +226,8 @@ class tta_analysis:
             df.loc[time].wdwpr = wpr_wd0
             df.loc[time].rbby = pbby
             df.loc[time].rczd = pczd
-
+            df.loc[time].wssrf = bby.dframe.loc[time].wspd
+            df.loc[time].wswpr = wprof.dframe.loc[time].wspd[0]
 
             ''' check conditions '''
             cond1 = (surf_wd <= wdir_surf)
@@ -303,8 +287,7 @@ class tta_analysis:
             exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan        
         elif rain_czd >= 0.25:
             ''' this boolean excludes dates when there is no
-                precip at CZD
-            '''       
+                precip at CZD '''       
             zeros = np.zeros((1,len(ar_rbby)))
             rczdIsZero = np.squeeze(np.equal(ar_rczd,zeros).T)                  
             exclude = wdsrfIsNan | wdwprIsNan | rbbyIsNan | rczdIsNan \
