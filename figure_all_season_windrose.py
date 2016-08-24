@@ -21,6 +21,16 @@ rcParams['axes.labelsize'] = 15
 rcParams['ytick.color'] = (0.8,0.8,0.8)
 rcParams['figure.facecolor']='w'
 
+
+''' get percentile '''
+def get_wdir_perc(axes,perc):
+    info=axes._info
+    table=info['table']
+    wdir=info['dir']
+    tsum=table.sum(axis=0)
+    tcsum=tsum.cumsum()
+    return wdir[np.where(tcsum<=perc)[0][-1]]
+
 try:
     wdsrf_all
 except NameError:           
@@ -157,17 +167,25 @@ for i, lab in zip([0,1,2,3],panel_labels):
 ''' add azimuthal lines '''
 lw = 2
 zorder = 10000
-th = 170    
-theta=np.array([-th+90,-th+90])*np.pi/180.
-axes[1].plot(theta,[0,8], color='r', lw=lw, zorder=zorder)
-axes[1].text(0.58,-0.12,'170\n(50%)',color='r',weight='bold',
+
+''' percentile values '''
+# add 5deg to get mid of bin
+med_wdir = get_wdir_perc(axes[1],50) + 5
+per_wdir = get_wdir_perc(axes[3],33) + 5
+
+above_text = '{}\n(50%)'.format(int(med_wdir))
+surf_text = '{}\n(33%)'.format(int(per_wdir))
+
+theta=np.array([-med_wdir+90,-med_wdir+90])*np.pi/180.
+axes[1].plot(theta,[0,10], color='r', lw=lw, zorder=zorder)
+axes[1].text(0.58,-0.12,above_text,color='r',weight='bold',
              transform=axes[1].transAxes)
-th = 130
-theta=np.array([-th+90,-th+90])*np.pi/180.
-axes[3].plot(theta,[0,8], color='r', lw=lw, zorder=zorder)
-axes[3].text(0.87,0.05,'130\n(33%)',color='r',weight='bold',
+theta=np.array([-per_wdir+90,-per_wdir+90])*np.pi/180.
+axes[3].plot(theta,[0,10], color='r', lw=lw, zorder=zorder)
+axes[3].text(0.87,0.05,surf_text,color='r',weight='bold',
              transform=axes[3].transAxes)
 
+''' adjust frequency axis '''
 for ax in axes:
     ax.set_radii_angle(angle=45)
     ytks = ax.get_yticks()
@@ -177,22 +195,10 @@ for ax in axes:
     ax.set_yticks(newtcks)
     ax.set_yticklabels(newlabs)
     
-#plt.show()
+plt.show()
 
-fname='/home/raul/Desktop/fig_all_season_windrose.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
-
-
-''' percentile analysis '''
-def get_wdir_perc(axes,perc):
-    info=axes._info
-    table=info['table']
-    wdir=info['dir']
-    tsum=table.sum(axis=0)
-    tcsum=tsum.cumsum()
-    return wdir[np.where(tcsum<=perc)[0][-1]]
-    
-get_wdir_perc(axes[1],50)
-get_wdir_perc(axes[3],33)
-    
+#fname='/home/raul/Desktop/fig_all_season_windrose.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
+   
+  
