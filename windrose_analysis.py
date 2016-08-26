@@ -32,9 +32,11 @@ def get_wdir_perc(axes,perc):
     tcsum=tsum.cumsum()
     return wdir[np.where(tcsum<=perc)[0][-1]]
 
-ws = {0:[],2:[],4:[],6:[],8:[],10:[]}
-wd = {0:[],2:[],4:[],6:[],8:[],10:[]}
-target_hgts = (0,2,4,6,8,10)
+
+target_hgts = (0,1,2,3,4,5)
+
+ws = {th:list() for th in target_hgts}
+wd = {th:list() for th in target_hgts}
 
 #years = [2003]
 years = [1998]+range(2001,2013)
@@ -96,8 +98,8 @@ for h,ax in zip(target_hgts,axes):
 axes[4].legend(loc=(0.2,-0.4),
                ncol=4)
 
-#plt.show()
+plt.show()
 
-fname='/home/raul/Desktop/all_season_windrose_perhgt.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+#fname='/home/raul/Desktop/all_season_windrose_perhgt.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')

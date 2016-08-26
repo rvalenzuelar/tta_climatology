@@ -168,11 +168,13 @@ v = np.arange(4,34,4)
 im = ax.contourf(X,Y,H_rain_czd,v,
                  cmap=cm.get_cmap('plasma'))
 
+''' add colorbar '''
 add_floating_colorbar(fig=fig,im=im,
                       position=[0.25,-0.05,0.5,0.8],
                       loc='bottom',
                       label='Normalized frequency [%]')
 
+''' add lines '''
 cmap = discrete_cmap(7, base_cmap='Set1')
 lim_surf = 130
 lim_160m = 170
@@ -187,13 +189,13 @@ ax.text(lim_160m,0,str(lim_160m),
         fontsize=fsize,color=color,
         weight='bold')
 
-
+''' ranges '''
 ax.set_xticks(range(0,360,60))
 ax.set_yticks(range(0,360,60))
 ax.set_xlim([0,360])
 ax.set_ylim([0,360])
 
-''' some labels '''
+''' labels '''
 va = 'bottom'
 ha = 'center'
 ax.text(180,360,'Rain at CZD',va=va,ha=ha,fontsize=15)
@@ -201,11 +203,11 @@ ax.set_ylabel('wdir surface')
 ax.set_xlabel('wdir 160-m')
 
 
-#plt.show()
+plt.show()
 
-template = '/home/raul/Desktop/fig_hist2d_{}-{}.png'
-fname=template.format(str(lim_surf).zfill(3),str(lim_160m))
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+#template = '/home/raul/Desktop/fig_hist2d_{}-{}.png'
+#fname=template.format(str(lim_surf).zfill(3),str(lim_160m))
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
 
     
