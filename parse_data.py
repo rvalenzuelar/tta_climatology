@@ -163,38 +163,21 @@ class surface:
 
 
         if location == 'bby':
-
+            
+            ''' converted 2-min mat files into 60-min hdf5 files
+                using mat_to_hdf5.py for faster reading
+            '''
+            
             y = str(year)[-2:]
             f = surfacepath_bby.format(y)
-            sfc = sio.loadmat(f)['Sfcmet_bby']
-            # cols=sfc.dtype.names
-            date, tempc, rh, pmb, wspd, wdir, precip = \
-                [], [], [], [], [], [], []
-            for n in range(sfc.size):
-                dt = datenum_to_datetime(sfc['dayt'][0][n][0][0])
-                # converts to Timestamp
-                date.append(pd.to_datetime(dt))
-
-                # tempc.append(sfc['tamb'][0][n][0][0])
-                # rh.append(sfc['rh'][0][n][0][0])
-                # pmb.append(sfc['pmb'][0][n][0][0])
-                wspd.append(sfc['wspd'][0][n][0][0])
-                wdir.append(sfc['wdir'][0][n][0][0])
-                precip.append(sfc['precip'][0][n][0][0])
-
-            d = {'wspd': wspd, 'wdir': wdir, 'precip': precip}
-            dframe = pd.DataFrame(data=d, index=date)
-            if year == 2001:
-                '2001 has weird values beginning the mat file'
-                dframe = dframe.ix[67:]
-            dframe = quality_control(dframe)
-
             if hourly:
-                self.dframe = get_statistical(dframe, minutes=60)
-                self.hourly = True
+                df = pd.read_hdf(f+'.h5')
+                self.dframe = df
             else:
-                self.dframe = dframe
-                self.hourly = False
+                print('*** Need to create new h5 files with \
+                       requested time resolution *** ')
+                self.dframe = None
+
 
         elif location == 'czd':
 

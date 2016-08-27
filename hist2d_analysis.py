@@ -135,8 +135,8 @@ add_floating_colorbar(fig=fig,im=im,
                       
 plt.subplots_adjust(hspace=0.05,wspace=0.05)                      
 
-#plt.show()
-
-fname='/home/raul/Desktop/hist2d_surf_160-896.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+plt.show()
+#
+#fname='/home/raul/Desktop/hist2d_surf_160-896.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
