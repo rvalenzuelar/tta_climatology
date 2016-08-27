@@ -9,14 +9,13 @@ import parse_data
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
-from rv_utilities import add_floating_colorbar
+import seaborn as sns
+from rv_utilities import add_floating_colorbar,discrete_cmap
 
-# if seaborn-style plot shows up need 
-# to use:
-# %matplotlib inline
+
 import matplotlib as mpl
-inline_rc = dict(mpl.rcParams)
-mpl.rcParams.update(inline_rc)
+#inline_rc = dict(mpl.rcParams)
+#mpl.rcParams.update(inline_rc)
 
 mpl.rcParams['xtick.labelsize'] = 15
 mpl.rcParams['ytick.labelsize'] = 15
@@ -24,9 +23,11 @@ mpl.rcParams['axes.labelsize'] = 15
 
 
 
-#target_hgts = (0,1,2,3,4,5,6,7,8)
-target_hgts = (9,10,11,12,13,14,15,16,17)
+target_hgts = (0,1,2,3,4,5,6,7,8)
+#target_hgts = (9,10,11,12,13,14,15,16,17)
 
+#target_hgts = (0,1,2,3,4,5,6,7,8,9)
+#target_hgts = (0,9,10,11,12,13,14,15,16,17)
 
 #years = [2003]
 years = [1998]+range(2001,2013)
@@ -61,13 +62,21 @@ except NameError:
                 ws[h].append(s[h])
                 wd[h].append(d[h])
 
-scale = 1.5
+sns.set_style("whitegrid")
+scale = 1.1
 fig,axes = plt.subplots(3,3,figsize=(11*scale,11*scale),
                         sharex=True,sharey=True)
 axes=axes.flatten()
+cmap = discrete_cmap(7, base_cmap='Set1')
+color = cmap(1)
+fsize = 15
 lw = 2
-normed=True
+normed = True
+lim_surf = 130
+lim_160m = 170
 x = np.array(wdsrf)
+#x = np.array(wd[0])
+first = True
 for h,ax in zip(target_hgts,axes):
     
     y = np.array(wd[h])
@@ -82,15 +91,34 @@ for h,ax in zip(target_hgts,axes):
     ''' make grid '''
     X,Y = np.meshgrid(xed[:-1],yed[:-1])    
     
+    ''' contourf '''
     v = np.arange(4,34,4)
-    im = ax.contourf(X,Y,H,
-                     v,
+    im = ax.contourf(X,Y,H,v,
                      cmap=cm.get_cmap('plasma'))
+    ''' 1:1 line '''
+    ax.plot([0,360],[0,360],'--',color=(0.5,0.5,0.5))
+    
+    ''' hlines and vlines '''    
+    ax.hlines(lim_surf,0,360,color=color)
+    ax.vlines(lim_160m,0,360,color=color)
 
+    if first:    
+        ax.text(0,lim_surf,str(lim_surf),
+                fontsize=fsize,color=color,
+                weight='bold')
+        ax.text(lim_160m,0,str(lim_160m),
+                fontsize=fsize,color=color,
+                weight='bold') 
+        first = False
+        
+    ''' altitude text '''
     ax.text(60,300,'{:2.0f}m'.format(hgt[h]),fontsize=15,
             weight='bold')
 
+
+
 axes[3].set_ylabel('wdir-surface')
+#axes[3].set_ylabel('wdir-160-m')
 #axes[4].text(310,-60,'wdir-above-ground',fontsize=15)
 axes[7].set_xlabel('wdir-above-ground')
 
@@ -106,8 +134,9 @@ add_floating_colorbar(fig=fig,im=im,
                       label='Normalized frequency [%]')
                       
 plt.subplots_adjust(hspace=0.05,wspace=0.05)                      
-plt.show()
 
-#fname='/home/raul/Desktop/all_season_windrose_perhgt.png'
-#plt.savefig(fname, dpi=300, format='png',papertype='letter',
-#            bbox_inches='tight')
+#plt.show()
+
+fname='/home/raul/Desktop/hist2d_surf_160-896.png'
+plt.savefig(fname, dpi=300, format='png',papertype='letter',
+            bbox_inches='tight')

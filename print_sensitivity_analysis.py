@@ -26,7 +26,6 @@ params = [
                rain_bby=None,rain_czd=0.25,nhours=4),
           dict(wdir_surf=130,wdir_wprof=170,
                rain_bby=None,rain_czd=0.25,nhours=8),               
-
           ]
 
 first = True
