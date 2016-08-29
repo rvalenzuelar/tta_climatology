@@ -356,7 +356,9 @@ class tta_analysis:
         self.include_dates      = include_dates
         self.tta_dates          = tta_dates
         self.notta_dates        = notta_dates
-        self.df                 = df
+        self.df                 = df.loc[include_dates]
+        self.df_exclude         = df.loc[exclude_dates]
+
 
         # print('TTA analysis finished')
 

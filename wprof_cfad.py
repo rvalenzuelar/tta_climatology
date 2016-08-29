@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 from rv_utilities import pandas2stack, add_colorbar
-from tta_analysis import tta_analysis
+from tta_analysis2 import tta_analysis
 
 class cfad:
 
@@ -74,7 +74,7 @@ class cfad:
     def plot(self,target,axes=None,pngsuffix=False, pdfsuffix=False,
              contourf=True, add_median=False,add_average=False,
              add_title=True, add_cbar=True,cbar_label=None,show=True,
-             subax_label=True):
+             subax_label=True,top_altitude=4000):
         
         name={'wdir':'Wind Direction',
               'wspd':'Wind Speed',
@@ -176,20 +176,20 @@ class cfad:
         ' --- setup ax1 --- '
         ax1.set_xticks(hist_xticks)
         ax1.set_xlim(hist_xlim)
-        ax1.set_ylim([0,4000])
+        ax1.set_ylim([0,top_altitude])
         ax1.set_ylabel('Altitude [m] MSL')
     
         ' --- setup ax2 --- '
         ax2.set_xticks(hist_xticks)
         ax2.set_xlim(hist_xlim)
-        ax2.set_ylim([0,4000])
+        ax2.set_ylim([0,top_altitude])
         ax2.set_xlabel(name[target])
 
     
         ' --- setup ax3 --- '
         ax3.set_xticks(hist_xticks)
         ax3.set_xlim(hist_xlim)
-        ax3.set_ylim([0,4000])
+        ax3.set_ylim([0,top_altitude])
 
 
         ''' add subaxis label '''

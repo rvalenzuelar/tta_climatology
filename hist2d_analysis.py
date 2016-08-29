@@ -23,7 +23,7 @@ mpl.rcParams['axes.labelsize'] = 15
 
 
 
-target_hgts = (0,1,2,3,4,5,6,7,8)
+target_hgts = tuple(range(16))
 #target_hgts = (9,10,11,12,13,14,15,16,17)
 
 #target_hgts = (0,1,2,3,4,5,6,7,8,9)
@@ -39,7 +39,9 @@ except NameError:
     wd = {th:list() for th in target_hgts}
     wdsrf = list()    
     for year in years:
+        
         print(year)
+        
         wpr = parse_data.windprof(year=year)
         wspd = wpr.dframe.wspd
         wdir = wpr.dframe.wdir
@@ -64,7 +66,7 @@ except NameError:
 
 sns.set_style("whitegrid")
 scale = 1.1
-fig,axes = plt.subplots(3,3,figsize=(11*scale,11*scale),
+fig,axes = plt.subplots(4,4,figsize=(11*scale,11*scale),
                         sharex=True,sharey=True)
 axes=axes.flatten()
 cmap = discrete_cmap(7, base_cmap='Set1')
@@ -94,33 +96,35 @@ for h,ax in zip(target_hgts,axes):
     ''' contourf '''
     v = np.arange(4,34,4)
     im = ax.contourf(X,Y,H,v,
-                     cmap=cm.get_cmap('plasma'))
+                     cmap=cm.get_cmap('viridis'))
     ''' 1:1 line '''
     ax.plot([0,360],[0,360],'--',color=(0.5,0.5,0.5))
     
     ''' hlines and vlines '''    
-    ax.hlines(lim_surf,0,360,color=color)
-    ax.vlines(lim_160m,0,360,color=color)
-
-    if first:    
-        ax.text(0,lim_surf,str(lim_surf),
-                fontsize=fsize,color=color,
-                weight='bold')
-        ax.text(lim_160m,0,str(lim_160m),
-                fontsize=fsize,color=color,
-                weight='bold') 
-        first = False
+#    ax.hlines(lim_surf,0,360,color=color)
+#    ax.vlines(lim_160m,0,360,color=color)
+#
+#    if first:    
+#        ax.text(0,lim_surf,str(lim_surf),
+#                fontsize=fsize,color=color,
+#                weight='bold')
+#        ax.text(lim_160m,0,str(lim_160m),
+#                fontsize=fsize,color=color,
+#                weight='bold') 
+#        first = False
         
     ''' altitude text '''
     ax.text(60,300,'{:2.0f}m'.format(hgt[h]),fontsize=15,
             weight='bold')
 
 
-
-axes[3].set_ylabel('wdir-surface')
+axes[0].text(5,30,'1:1',fontsize=15,rotation=45,
+            color=(0.5,0.5,0.5),va='bottom')
+axes[8].text(-90,370,'wdir-surface',fontsize=15,
+             ha='right',rotation=90)
 #axes[3].set_ylabel('wdir-160-m')
 #axes[4].text(310,-60,'wdir-above-ground',fontsize=15)
-axes[7].set_xlabel('wdir-above-ground')
+axes[13].text(180,-90,'wdir-above-ground',fontsize=15,)
 
 ''' ranges '''
 ax.set_xticks(range(0,360,60))
@@ -135,8 +139,11 @@ add_floating_colorbar(fig=fig,im=im,
                       
 plt.subplots_adjust(hspace=0.05,wspace=0.05)                      
 
-plt.show()
-#
-#fname='/home/raul/Desktop/hist2d_surf_160-896.png'
-#plt.savefig(fname, dpi=300, format='png',papertype='letter',
-#            bbox_inches='tight')
+axes[-1].remove()
+
+#plt.show()
+
+#fname='/home/raul/Desktop/hist2d_surf_160-1541.png'
+fname='/Users/raulv/Desktop/hist2d_surf_160-1541.png'
+plt.savefig(fname, dpi=300, format='png',papertype='letter',
+            bbox_inches='tight')

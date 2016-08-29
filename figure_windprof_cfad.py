@@ -21,21 +21,21 @@ try:
     outnr
 except NameError:
     outnr = cfad(year=[1998]+range(2001,2013),
-               wdsurf=130,
-               wdwpro=170,
-               rainbb=None,
-               raincz=None,
-               nhours=2)  
+                   wdsurf=130,
+                   wdwpro=None,
+                   rainbb=None,
+                   raincz=None,
+                   nhours=2)  
 
 try:
     outwr
 except NameError:    
     outwr = cfad(year=[1998]+range(2001,2013),
-               wdsurf=130,
-               wdwpro=170,
-               rainbb=None,
-               raincz=0.25,
-               nhours=2)
+                   wdsurf=130,
+                   wdwpro=None,
+                   rainbb=None,
+                   raincz=0.25,
+                   nhours=2)
       
         
 ''' creates plot with seaborn style '''
@@ -101,17 +101,25 @@ axes = [ax00,ax01,ax02,ax03,ax04,ax05,
 
 
 
-plot=outnr.plot('u',axes=[ax00,ax01,ax02],add_median=True,add_title=False,
-           add_cbar=False,show=False)
+plot=outnr.plot('u',axes=[ax00,ax01,ax02],
+                add_median=True,add_title=False,
+                add_cbar=False,show=False,
+                top_altitude=2000)
 
-outnr.plot('v',axes=[ax03,ax04,ax05],add_median=True,add_title=False,
-           add_cbar=False,show=False,subax_label=False)
+outnr.plot('v',axes=[ax03,ax04,ax05],
+               add_median=True,add_title=False,
+               add_cbar=False,show=False,subax_label=False,
+                top_altitude=2000)
 
-outwr.plot('u',axes=[ax06,ax07,ax08],add_median=True,add_title=False,
-           add_cbar=False, subax_label=True, show=False)
+outwr.plot('u',axes=[ax06,ax07,ax08],
+               add_median=True,add_title=False,
+               add_cbar=False, subax_label=True, show=False,
+                top_altitude=2000)
 
-outwr.plot('v',axes=[ax09,ax10,ax11],add_median=True,add_title=False,
-           add_cbar=False,show=False,subax_label=False)
+outwr.plot('v',axes=[ax09,ax10,ax11],
+               add_median=True,add_title=False,
+               add_cbar=False,show=False,subax_label=False,
+                top_altitude=2000)
 
 
 add_floating_colorbar(fig=fig,im=plot['im'],
@@ -141,8 +149,9 @@ for ax in axes:
             transform=ax.transAxes)
 
 #plt.show()
-#
-fname='/home/raul/Desktop/cfad_windprof.png'
+
+#fname='/home/raul/Desktop/cfad_windprof_wdsurf_0-2000.png'
+fname='/Users/raulv/Desktop/cfad_windprof_wdsurf130_1h_0-2000.png'
 plt.savefig(fname, dpi=150, format='png',papertype='letter',
             bbox_inches='tight')
 

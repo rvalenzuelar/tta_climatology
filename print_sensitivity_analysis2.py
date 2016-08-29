@@ -19,6 +19,7 @@ params = [
 #          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=1),
 #          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=1),
 #          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=1),
+#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=1),
 
 #          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=2),          
 #          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=2),
@@ -28,6 +29,7 @@ params = [
 #          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=2),
 #          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=2),
 #          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=2),
+#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=2),
 
 #          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=4),                 
 #          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=4),
@@ -37,15 +39,17 @@ params = [
 #          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=4),
 #          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=4),
 #          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=4),
+#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=4),
 
           dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=8), 
-#          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=8),
-#          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=8),
-#          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=8),         
-#          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=8),
-#          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=8),
+          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=8),
+          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=8),
+          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=8),         
+          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=8),
+          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=8),
           dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=8),
           dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=8),
+          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=8),
          ]
 
 try:
@@ -94,8 +98,8 @@ for nparam,result in results.iteritems():
 
     
     col =  '{:7.2f} {:7d} {:7d} {:>7} '
-    col += '{:7.1f} {:7.1f} {:7.1f} {:7.0f} '
-    col += '{:7.1f} {:7.1f} {:7.1f} {:7.0f}'
+    col += '{:7.2f} {:7.2f} {:7.2f} {:7.0f} '
+    col += '{:7.2f} {:7.2f} {:7.2f} {:7.0f}'
 
     p = params[nparam]
 
