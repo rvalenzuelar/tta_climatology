@@ -29,8 +29,8 @@ target_hgts = tuple(range(16))
 #target_hgts = (0,1,2,3,4,5,6,7,8,9)
 #target_hgts = (0,9,10,11,12,13,14,15,16,17)
 
-#years = [2003]
-years = [1998]+range(2001,2013)
+years = [1998]
+#years = [1998]+range(2001,2013)
 
 try:
     wdsrf
@@ -141,9 +141,9 @@ plt.subplots_adjust(hspace=0.05,wspace=0.05)
 
 axes[-1].remove()
 
-#plt.show()
+plt.show()
 
-#fname='/home/raul/Desktop/hist2d_surf_160-1541.png'
-fname='/Users/raulv/Desktop/hist2d_surf_160-1541.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+##fname='/home/raul/Desktop/hist2d_surf_160-1541.png'
+#fname='/Users/raulv/Desktop/hist2d_surf_160-1541.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')

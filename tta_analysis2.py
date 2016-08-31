@@ -177,6 +177,7 @@ class tta_analysis:
 
     def start_df(self, wdir_surf  = None,
                        wdir_wprof = None,
+                       wprof_gate = 0,
                        rain_bby   = None,
                        rain_czd   = None,
                        nhours     = None):
@@ -219,7 +220,7 @@ class tta_analysis:
         while (time <= time_end):
 
             surf_wd = bby.dframe.loc[time].wdir
-            wpr_wd0 = wprof.dframe.loc[time].wdir[0]  # first gate
+            wpr_wd0 = wprof.dframe.loc[time].wdir[wprof_gate] 
             pbby = bby.dframe.loc[time].precip
             pczd = czd.dframe.loc[time].precip
 
@@ -233,29 +234,42 @@ class tta_analysis:
             df.loc[time].wssrf = bby.dframe.loc[time].wspd
             df.loc[time].wswpr = wprof.dframe.loc[time].wspd[0]
 
-            ''' check conditions '''
-            cond1 = (surf_wd <= wdir_surf)
-            if wdir_wprof and rain_bby and rain_czd:
-                cond2 = (wpr_wd0 <= wdir_wprof)            
-                cond3 = (pbby >= rain_bby)
-                cond4 = (pczd >= rain_czd)
-                tta_condition = cond1 and cond2 and cond3 and cond4
-            elif wdir_wprof and rain_czd:
-                cond2 = (wpr_wd0 <= wdir_wprof)
+            ''' check conditions '''               
+            
+            if wdir_surf:
+                if isinstance(wdir_surf,int):
+                    cond1 = (surf_wd <= wdir_surf)
+                elif isinstance(wdir_surf,str):
+                    cond1 = parse_operator(surf_wd,wdir_surf)
+
+            if wdir_wprof:
+                if isinstance(wdir_wprof,int):
+                    cond2 = (wpr_wd0 <= wdir_wprof) 
+                elif isinstance(wdir_wprof,str):
+                    cond2 = parse_operator(wpr_wd0,wdir_wprof)
+
+            if rain_czd:
                 cond3 = (pczd >= rain_czd)
+
+            if rain_bby:            
+                cond4 = (pbby >= rain_bby)
+              
+            
+            if wdir_surf and wdir_wprof and rain_bby and rain_czd:
+                tta_condition = cond1 and cond2 and cond3 and cond4
+            elif wdir_surf and wdir_wprof and rain_czd:
                 tta_condition = cond1 and cond2 and cond3
+            elif wdir_surf and wdir_wprof and rain_bby:
+                tta_condition = cond1 and cond2 and cond4
+            elif wdir_surf and rain_czd:
+                tta_condition = cond1 and cond3
+            elif wdir_wprof and rain_czd:
+                tta_condition = cond2 and cond3                
+            elif wdir_surf and rain_bby:
+                tta_condition = cond1 and cond4
             elif wdir_wprof and rain_bby:
-                cond2 = (wpr_wd0 <= wdir_wprof)
-                cond3 = (pbby >= rain_bby)
-                tta_condition = cond1 and cond2 and cond3
-            elif rain_czd:
-                cond2 = (pczd >= rain_czd)                
-                tta_condition = cond1 and cond2                
-            elif rain_bby:
-                cond2 = (pbby >= rain_bby)
-                tta_condition = cond1 and cond2                
-            elif wdir_wprof:
-                cond2 = (wpr_wd0 <= wdir_wprof)
+                tta_condition = cond2 and cond4                
+            elif wdir_surf and wdir_wprof:
                 tta_condition = cond1 and cond2
             else:
                 tta_condition = cond1 
@@ -309,11 +323,11 @@ class tta_analysis:
                     | rczdIsZero
 
 
-        tot_rbby = np.round(df.rbby.sum(),0).astype(int)
-        tot_rczd = np.round(df.rczd.sum(),0).astype(int)
+        tot_rbby = np.round(df.rbby.sum(),3)
+        tot_rczd = np.round(df.rczd.sum(),3)
 
-        exc_rbby = np.round(df[exclude].rbby.sum(),0).astype(int)
-        exc_rczd = np.round(df[exclude].rczd.sum(),0).astype(int)
+        exc_rbby = np.round(df[exclude].rbby.sum(),3)
+        exc_rczd = np.round(df[exclude].rczd.sum(),3)
 
         inc_rbby = tot_rbby - exc_rbby
         inc_rczd = tot_rczd - exc_rczd
@@ -322,8 +336,8 @@ class tta_analysis:
         exc_hours = np.round(exclude.sum(),0).astype(int)
         inc_hours = tot_hrs - exc_hours
 
-        tta_rbby   = np.round(df[df.consecutive].rbby.sum(),0).astype(int)
-        tta_rczd   = np.round(df[df.consecutive].rczd.sum(),0).astype(int)
+        tta_rbby   = np.round(df[df.consecutive].rbby.sum(),3)
+        tta_rczd   = np.round(df[df.consecutive].rczd.sum(),3)
         notta_rbby = inc_rbby - tta_rbby
         notta_rczd = inc_rczd - tta_rczd
 
@@ -356,9 +370,7 @@ class tta_analysis:
         self.include_dates      = include_dates
         self.tta_dates          = tta_dates
         self.notta_dates        = notta_dates
-        self.df                 = df.loc[include_dates]
-        self.df_exclude         = df.loc[exclude_dates]
-
+        self.df                 = df
 
         # print('TTA analysis finished')
 
@@ -417,3 +429,51 @@ class tta_analysis:
                              tta_hours, notta_hours,
                              rain_perc_bby, rain_perc_czd])
         
+def parse_operator(target, query):
+
+    import operator as op
+
+    split = query.split(',')
+
+    '''one tail query '''
+    if len(split) == 1:
+
+        part = split[0].partition('=')  
+        if part[-1].isdigit():
+            if part[0] == '>':
+                resp = op.ge(target,int(part[-1]))
+            else:
+                resp = op.le(target,int(part[-1]))    
+        else:
+            if part[0][0] == '>':
+                resp = op.gt(target,int(part[0][1:]))
+            else:
+                resp = op.lt(target,int(part[0][1:]))  
+
+    elif len(split) == 2:
+        
+        top = split[0][0]  
+        va1 = int(split[0][1:])        
+        bot = split[1][-1]
+        va2 = int(split[1][:-1])
+
+        if top == '[' and bot == ']':
+            resp = op.ge(target,va1) & op.le(target,va2)
+            
+        elif top == '[' and bot == '[':
+            resp = op.ge(target,va1) & op.lt(target,va2)
+            
+        elif top == ']' and bot == ']':
+            resp = op.gt(target,va1) & op.le(target,va2)
+            
+        elif top == ']' and bot == '[':
+            resp = op.gt(target,va1) & op.lt(target,va2)
+        
+    return resp
+        
+        
+        
+        
+        
+    
+    

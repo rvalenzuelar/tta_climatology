@@ -283,16 +283,22 @@ def processv2(year=[],wdsurf=None,
                 wprof_notta = wprof.loc[notta_dates]# only notta
                 
                 s1 = np.squeeze(pandas2stack(wprof))
-                s2 = np.squeeze(pandas2stack(wprof_tta))
+                if wprof_tta.size > 0:
+                    s2 = np.squeeze(pandas2stack(wprof_tta))
+                    ttaok = True
+                else:
+                    ttaok =False
                 s3 = np.squeeze(pandas2stack(wprof_notta))
         
                 if t == 'wdir':
                     wdr = np.hstack((wdr,s1))
-                    wdr_tta = np.hstack((wdr_tta,s2))
+                    if ttaok is True:
+                        wdr_tta = np.hstack((wdr_tta,s2))
                     wdr_notta = np.hstack((wdr_notta, s3))                    
                 else:
                     wsp = np.hstack((wsp,s1))
-                    wsp_tta = np.hstack((wsp_tta,s2))
+                    if ttaok is True:
+                        wsp_tta = np.hstack((wsp_tta,s2))
                     wsp_notta = np.hstack((wsp_notta, s3))
 
         arrays['wdir']=[wdr,wdr_tta,wdr_notta]

@@ -36,8 +36,8 @@ def get_wdir_perc(axes,perc):
 target_hgts = tuple(range(-1,15))
 #target_hgts = (0,2,4,6,8,10)
 
-#years = [2003]
-years = [1998]+range(2001,2013)
+years = [1998]
+#years = [1998]+range(2001,2013)
 
 try:
     wdsrf
@@ -119,9 +119,9 @@ axes[13].text(1.0,-0.15,'wind speed [$m\,s^{-1}$]',
               fontsize=15,ha='center',
               transform=axes[13].transAxes)
 
-#plt.show()
+plt.show()
 
-#fname='/home/raul/Desktop/all_season_windrose_perhgt_160-620.png'
-fname='/Users/raulv/Desktop/all_season_windrose_perhgt_srf-1500.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+##fname='/home/raul/Desktop/all_season_windrose_perhgt_160-620.png'
+#fname='/Users/raulv/Desktop/all_season_windrose_perhgt_srf-1500.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')

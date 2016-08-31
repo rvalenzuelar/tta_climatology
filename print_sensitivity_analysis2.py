@@ -10,47 +10,46 @@ from tta_analysis2 import tta_analysis
 
 years = [1998]+range(2001,2013)
 
-params = [
-#          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=1),
-#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=1),
+#params = [{ 'wdir_surf':  a,
+#            'wdir_wprof': None,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(100,190,10)]
+                
+#params = [{ 'wdir_surf':  '[{},{}['.format(a,a+10),
+#            'wdir_wprof': None,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(85,275,10)]
 
-#          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=2),          
-#          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=2),         
-#          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=2),
-#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=2),
+#params = [{ 'wdir_surf':  None,
+#            'wdir_wprof': '[{},{}['.format(a,a+10),
+#            'wprof_gate': 0,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(85,275,10)]
 
-#          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=4),                 
-#          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=4),         
-#          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=4),
-#          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=4),
+#params = [{ 'wdir_surf':  None,
+#            'wdir_wprof': '[{},{}['.format(a,a+10),
+#            'wprof_gate': 1,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(85,275,10)]
+           
+#params = [{ 'wdir_surf':  None,
+#            'wdir_wprof': '[{},{}['.format(a,a+10),
+#            'wprof_gate': 4,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(85,275,10)]                   
 
-          dict(wdir_surf=100,wdir_wprof=None,rain_czd=0.25,nhours=8), 
-          dict(wdir_surf=110,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=120,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=130,wdir_wprof=None,rain_czd=0.25,nhours=8),         
-          dict(wdir_surf=140,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=150,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=160,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=170,wdir_wprof=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=180,wdir_wprof=None,rain_czd=0.25,nhours=8),
-         ]
+params = [{ 'wdir_surf':  None,
+            'wdir_wprof': '[{},{}['.format(a,a+10),
+            'wprof_gate': 10,
+            'rain_czd':   0.25,
+            'nhours':     1
+           } for a in range(85,275,10)]
+ 
 
 try:
     results
@@ -76,20 +75,29 @@ except NameError:
         
 
 first = True
+ratio = list()
+rr_czd = list()
+rr_bby = list()
+try:
+    ngate = params[0]['wprof_gate']
+except KeyError:
+    ngate = ''
+    
 for nparam,result in results.iteritems():
 
     tta_hours = result[:,8].sum()
-    bby_tta = result[:,1].sum()/tta_hours
-    czd_tta = result[:,4].sum()/tta_hours
+    bby_tta = np.nansum(result[:,1])/tta_hours
+    czd_tta = np.nansum(result[:,4])/tta_hours
     tta_ratio = czd_tta/bby_tta
     
     notta_hours = result[:,9].sum()
-    bby_notta = result[:,2].sum()/notta_hours
-    czd_notta = result[:,5].sum()/notta_hours
+    bby_notta = np.nansum(result[:,2])/notta_hours
+    czd_notta = np.nansum(result[:,5])/notta_hours
     notta_ratio = czd_notta/bby_notta
     
     if first:
-        cols = ['mnrain','mnhours','Wd_Surf','Wd_160m',
+        cols = ['mnrain','mnhours','Wd_Surf  ',
+                'Wd_wprof{}'.format(ngate),
                 'TTczd','TTbby','ratio','hours',
                 'NTczd','NTbby','ratio','hours']
         header = '{:>7} '*len(cols)
@@ -97,7 +105,7 @@ for nparam,result in results.iteritems():
         first = False
 
     
-    col =  '{:7.2f} {:7d} {:7d} {:>7} '
+    col =  '{:7.2f} {:7d} {:9} {:>7} '
     col += '{:7.2f} {:7.2f} {:7.2f} {:7.0f} '
     col += '{:7.2f} {:7.2f} {:7.2f} {:7.0f}'
 
@@ -110,7 +118,9 @@ for nparam,result in results.iteritems():
                      czd_tta,bby_tta,tta_ratio,tta_hours,
                      czd_notta,bby_notta,notta_ratio,notta_hours))
 
-
+    ratio.append(tta_ratio)
+    rr_czd.append(czd_tta)
+    rr_bby.append(bby_tta)
 
 
 

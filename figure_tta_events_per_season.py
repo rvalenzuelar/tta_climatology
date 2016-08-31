@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from tta_analysis import tta_analysis
+from tta_analysis2 import tta_analysis
 from datetime import timedelta
 from rv_utilities import discrete_cmap
 from matplotlib import rcParams
@@ -23,7 +23,7 @@ sns.set_style("whitegrid")
 years = tuple([1998]+range(2001,2013))
 
 params = (
-          dict(wdir_surf=130,wdir_wprof=170,
+          dict(wdir_surf=130,wdir_wprof=None,
                rain_bby=None,rain_czd=0.25,nhours=1),
 #          dict(wdir_surf=125,wdir_wprof=170,
 #               rain_bby=None,rain_czd=0.25,nhours=2),
@@ -31,7 +31,7 @@ params = (
 #               rain_bby=None,rain_czd=0.25,nhours=4),
 #          dict(wdir_surf=125,wdir_wprof=170,
 #               rain_bby=None,rain_czd=0.25,nhours=8),
-          dict(wdir_surf=130,wdir_wprof=170,
+          dict(wdir_surf=130,wdir_wprof=None,
                rain_bby=None,rain_czd=None,nhours=1),
 #          dict(wdir_surf=125,wdir_wprof=170,
 #               rain_bby=None,rain_czd=None,nhours=2),
@@ -158,12 +158,17 @@ for ax,y,t,xlab,ylab,p,pos in grp:
     ax.set_ylabel(ylab)
     ax.set_xlim([1997.8,2013])
     ax.legend(loc=[0.1,0.8],fontsize=15)
-ax.legend_.remove()
-plt.show()
 
-#fname='/home/raul/Desktop/fig_events_per_season.png'
-#plt.savefig(fname, dpi=150, format='png',papertype='letter',
-#            bbox_inches='tight')
+
+
+ax.legend_.remove()
+
+
+#plt.show()
+
+fname='/home/raul/Desktop/fig_events_per_season_130-None-1.png'
+plt.savefig(fname, dpi=150, format='png',papertype='letter',
+            bbox_inches='tight')
 
 
 
