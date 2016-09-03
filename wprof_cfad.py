@@ -74,7 +74,8 @@ class cfad:
     def plot(self,target,axes=None,pngsuffix=False, pdfsuffix=False,
              contourf=True, add_median=False,add_average=False,
              add_title=True, add_cbar=True,cbar_label=None,show=True,
-             subax_label=True,top_altitude=4000):
+             subax_label=True,top_altitude=4000,
+             orientation=None):
         
         name={'wdir':'Wind Direction',
               'wspd':'Wind Speed',
@@ -193,18 +194,34 @@ class cfad:
 
 
         ''' add subaxis label '''
-        vpos=1.05
-        if subax_label is True:
-            txt = 'All profiles (n={})'.format(self.wp_hours)
-            ax1.text(0.5,vpos,txt,fontsize=15,weight='bold',
-                    transform=ax1.transAxes,va='center',ha='center')            
-            txt = 'TTA (n={})'.format(self.tta_hours)
-            ax2.text(0.5,vpos,txt,fontsize=15,weight='bold',
-                    transform=ax2.transAxes,va='center',ha='center')
-            txt = 'NO-TTA (n={})'.format(self.notta_hours)
-            ax3.text(0.5,vpos,txt,fontsize=15, weight='bold',
-                    transform=ax3.transAxes,va='center',ha='center')
-        
+        if orientation == 'horizontal':
+            vpos=1.05
+            if subax_label is True:
+                txt = 'All profiles (n={})'.format(self.wp_hours)
+                ax1.text(0.5,vpos,txt,fontsize=15,weight='bold',
+                        transform=ax1.transAxes,va='center',ha='center')            
+                txt = 'TTA (n={})'.format(self.tta_hours)
+                ax2.text(0.5,vpos,txt,fontsize=15,weight='bold',
+                        transform=ax2.transAxes,va='center',ha='center')
+                txt = 'NO-TTA (n={})'.format(self.notta_hours)
+                ax3.text(0.5,vpos,txt,fontsize=15, weight='bold',
+                        transform=ax3.transAxes,va='center',ha='center')
+        elif orientation == 'vertical':
+            hpos=1.05
+            if subax_label is True:
+                txt = 'All profiles (n={})'.format(self.wp_hours)
+                ax1.text(hpos,0.5,txt,fontsize=15,weight='bold',
+                        transform=ax1.transAxes,va='center',
+                        ha='center',rotation=-90)            
+                txt = 'TTA (n={})'.format(self.tta_hours)
+                ax2.text(hpos,0.5,txt,fontsize=15,weight='bold',
+                        transform=ax2.transAxes,va='center',
+                        ha='center',rotation=-90)
+                txt = 'NO-TTA (n={})'.format(self.notta_hours)
+                ax3.text(hpos,0.5,txt,fontsize=15, weight='bold',
+                        transform=ax3.transAxes,va='center',
+                        ha='center',rotation=-90)
+            
         ''' add title '''
         if add_title is True:
             title = 'Normalized frequencies of BBY wind profiles {} \n'
@@ -293,11 +310,15 @@ def processv2(year=[],wdsurf=None,
                 if t == 'wdir':
                     wdr = np.hstack((wdr,s1))
                     if ttaok is True:
+                        if s2.ndim == 1:
+                            s2=np.expand_dims(s2,axis=1)
                         wdr_tta = np.hstack((wdr_tta,s2))
                     wdr_notta = np.hstack((wdr_notta, s3))                    
                 else:
                     wsp = np.hstack((wsp,s1))
                     if ttaok is True:
+                        if s2.ndim == 1:
+                            s2=np.expand_dims(s2,axis=1)                        
                         wsp_tta = np.hstack((wsp_tta,s2))
                     wsp_notta = np.hstack((wsp_notta, s3))
 

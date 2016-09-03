@@ -16,11 +16,11 @@ years = [1998]+range(2001,2013)
 #            'nhours':     1
 #           } for a in range(100,190,10)]
                 
-#params = [{ 'wdir_surf':  '[{},{}['.format(a,a+10),
-#            'wdir_wprof': None,
-#            'rain_czd':   0.25,
-#            'nhours':     1
-#           } for a in range(85,275,10)]
+params = [{ 'wdir_surf':  '[{},{}['.format(a,a+10),
+            'wdir_wprof': None,
+            'rain_czd':   0.25,
+            'nhours':     1
+           } for a in range(85,275,10)]
 
 #params = [{ 'wdir_surf':  None,
 #            'wdir_wprof': '[{},{}['.format(a,a+10),
@@ -43,12 +43,12 @@ years = [1998]+range(2001,2013)
 #            'nhours':     1
 #           } for a in range(85,275,10)]                   
 
-params = [{ 'wdir_surf':  None,
-            'wdir_wprof': '[{},{}['.format(a,a+10),
-            'wprof_gate': 10,
-            'rain_czd':   0.25,
-            'nhours':     1
-           } for a in range(85,275,10)]
+#params = [{ 'wdir_surf':  None,
+#            'wdir_wprof': '[{},{}['.format(a,a+10),
+#            'wprof_gate': 10,
+#            'rain_czd':   0.25,
+#            'nhours':     1
+#           } for a in range(85,275,10)]
  
 
 try:

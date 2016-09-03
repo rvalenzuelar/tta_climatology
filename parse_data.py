@@ -172,6 +172,16 @@ class surface:
             f = surfacepath_bby.format(y)
             if hourly:
                 df = pd.read_hdf(f+'.h5')
+
+                ''' disable warning since we are using
+                    df.XXX.loc[conditions]=value '''
+                pd.options.mode.chained_assignment = None  # default='warn'
+                
+                ''' replace None for NaNs '''
+                df.precip.loc[df.precip.isnull()]=np.nan                
+                df.wdir.loc[df.wdir.isnull()]=np.nan                
+                df.wspd.loc[df.wspd.isnull()]=np.nan                
+                
                 self.dframe = df
             else:
                 print('*** Need to create new h5 files with \

@@ -19,11 +19,11 @@ rcParams['axes.labelsize'] = 15
 rcParams['axes.labelpad'] = 0.1
 
 params = dict(
-              wdsurf = '[120,150]',
+              wdsurf = '[85,95]',
               wdwpro = None,
               rainbb = None,
               raincz = 0.25,
-              nhours = 2
+              nhours = 1
               )
 
 try:
@@ -104,14 +104,14 @@ for ax in axes:
     ax.text(0.05,0.9,ax.get_gid(),size=18,weight='bold',
             transform=ax.transAxes)
 
-#plt.show()
+plt.show()
 
-sr = '120-150'
-wp = params['wdwpro']
-nh = params['nhours']
-name = 'cfad_wprof_rczd_{}-{}-{}.png'.format(sr,wp,nh)
-fname='/home/raul/Desktop/'+name
-#fname='/Users/raulv/Desktop/'+name
-plt.savefig(fname, dpi=150, format='png',papertype='letter',
-            bbox_inches='tight')
+#sr = '120-150'
+#wp = params['wdwpro']
+#nh = params['nhours']
+#name = 'cfad_wprof_rczd_{}-{}-{}.png'.format(sr,wp,nh)
+#fname='/home/raul/Desktop/'+name
+##fname='/Users/raulv/Desktop/'+name
+#plt.savefig(fname, dpi=150, format='png',papertype='letter',
+#            bbox_inches='tight')
 

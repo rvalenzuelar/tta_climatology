@@ -45,10 +45,11 @@ for year in years:
     y = y[~isnan]
 
     ''' filter '''
-##    fltr = (x>0) & (y>0)
+#    fltr = (x>0) & (y>0)
 #    fltr =  (y>0)
-#    x = x[fltr]    
-#    y = y[fltr]    
+    fltr = (x==0) & (y==0)
+    x = x[~fltr]    
+    y = y[~fltr]    
     
     
     xlist.extend(x)
@@ -63,23 +64,30 @@ H,xed,yed = np.histogram2d(xlist,ylist,
                                           gauge_res),
                            normed=False)
 
-Hm = np.ma.masked_where(H<=2,H)
+#Hm = np.ma.masked_where(H<=2,H)
 
 fig,ax = plt.subplots(figsize=(10,8))
 
-im = ax.pcolormesh(xed,yed,Hm,
+im = ax.pcolormesh(xed,yed,H,
                norm=LogNorm(),
                cmap='inferno',
-               vmax = 5e4
+               vmax = 1e3
                )
-cmap = discrete_cmap(7, base_cmap='Set1')
-color = cmap(1)
-ax.plot([-gauge_res/2.,6],[2,-gauge_res/2.],
+
+''' 1:3 line '''
+cmap = discrete_cmap(7, base_cmap='Set3')
+color = cmap(0)
+ax.plot([-gauge_res/2.,12],[4,-gauge_res/2.],
         color=color,lw=3,zorder=1000)
+ax.text(6,2,'1:3',rotation=-22,color=color,
+        weight='bold',fontsize=18)
+
 ax.set_xlabel('rain czd $[mm\,h^{-1}]$')
 ax.set_ylabel('rain bby $[mm\,h^{-1}]$')
-ax.set_xlim([-gauge_res/2.,10+gauge_res])
-ax.set_ylim([-gauge_res/2.,10+gauge_res])
+
+axlim = 15 
+ax.set_xlim([-gauge_res/2.,axlim+gauge_res])
+ax.set_ylim([-gauge_res/2.,axlim+gauge_res])
 plt.colorbar(im,label='count')
 plt.grid()
 

@@ -41,6 +41,10 @@ params = (
 #               rain_bby=None,rain_czd=None,nhours=8)
          )
 
+
+template  = 'year:{:4d}, n_ttas:{:3d}, n_hours:{:4d}, ' 
+template += 'ave_time:{:2.1f}, r_czd:{:4.1f}, r_bby:{:4.1f},'
+
 ' defines jump between ttas '          
 h = timedelta(hours=1)
 
@@ -75,7 +79,6 @@ except NameError:
                 cz = tta.tta_rainfall_czd
                 bb = tta.tta_rainfall_bby
             av_time = ho/float(ev)
-            template = 'year:{:4d}, n_ttas:{:3d}, n_hours:{:4d}, ave_time:{:2.1f}, r_czd:{:3d}, r_bby:{:3d},'
             print template.format(y,ev,ho,av_time,cz,bb)        
             n_events.append(ev)
             n_hours.append(ho)
@@ -164,11 +167,11 @@ for ax,y,t,xlab,ylab,p,pos in grp:
 ax.legend_.remove()
 
 
-#plt.show()
+plt.show()
 
-fname='/home/raul/Desktop/fig_events_per_season_130-None-1.png'
-plt.savefig(fname, dpi=150, format='png',papertype='letter',
-            bbox_inches='tight')
+#fname='/home/raul/Desktop/fig_events_per_season_130-None-1.png'
+#plt.savefig(fname, dpi=150, format='png',papertype='letter',
+#            bbox_inches='tight')
 
 
 
