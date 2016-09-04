@@ -462,7 +462,7 @@ class tta_analysis:
             v = -ws*np.cos(np.radians(wd))
             u_mean = u.mean()
             v_mean = v.mean()
-            ws_mean = np.sqrt(u_mean**2+v_mean**2)
+#            ws_mean = np.sqrt(u_mean**2+v_mean**2)
             wd_mean = 270 - np.arctan2(v_mean,u_mean)*180./np.pi
             if wd_mean > 360:
                 wd_mean -= 360
@@ -483,7 +483,7 @@ class tta_analysis:
             ''' check conditions '''               
             if wdir_thres:
                 if isinstance(wdir_thres,int):
-                    cond1 = (wd_mean <= wdir_thres)
+                    cond1 = (wd_mean < wdir_thres)
                 elif isinstance(wdir_thres,str):
                     cond1 = parse_operator(wd_mean,wdir_thres)
 

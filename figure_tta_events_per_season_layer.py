@@ -28,10 +28,10 @@ sns.set_style("whitegrid")
 years = tuple([1998]+range(2001,2013))
 
 params = (
-          dict(wdir_thres=140,wdir_layer=[0,500],
+          dict(wdir_thres=150,wdir_layer=[0,500],
                rain_czd=0.25,nhours=1),
 
-          dict(wdir_thres=140,wdir_layer=[0,500],
+          dict(wdir_thres=150,wdir_layer=[0,500],
                rain_czd=None,nhours=1),
          )
 
@@ -140,11 +140,14 @@ for ax,y,t,xlab,ylab,p,pos in grp:
     std_n = std+'{:2.0f}'.format(stdd_n)
     std_w = std+'{:2.0f}'.format(stdd_w)
     
+    trans = ax.transAxes    
+    
     ax.bar(x,y[0],width,color=c[0],label='All obs')
     ax.bar(x + width,y[1],width,color=c[1],label='Rain at CZD')
     ax.plot([1997,2014],[mean_n]*2,color=c[0])
     ax.plot([1997,2014],[mean_w]*2,color=c[1])
-    ax.text(1998,pos,p,weight='bold',fontsize=15, va='bottom')
+    ax.text(0.03,0.9,p,weight='bold',fontsize=15, va='bottom',
+            transform=trans)
     ax.text(1999,mean_n,avr_n,color=c[0],fontsize=15, va='bottom')
     ax.text(1999,mean_n,std_n,color=c[0],fontsize=15, va='bottom')
     ax.text(1999,mean_w,avr_w,color=c[1],fontsize=15, va='bottom')
@@ -158,15 +161,16 @@ for ax,y,t,xlab,ylab,p,pos in grp:
     ax.set_xlim([1997.8,2013])
     ax.legend(loc=[0.08,0.7],fontsize=15)
 
-tx  = 'Mean surf-500m hourly winds '
-tx += '$\leq$ 140$^\circ$'
+tx  = 'Layer-mean Surf-500m hourly winds '
+tx += '$<$ {}$^\circ$'.format(params[0]['wdir_thres'])
 plt.suptitle(tx,fontsize=18,weight='bold',y=0.95)
 
 ax.legend_.remove()
 
 #plt.show()
 
-fname='/home/raul/Desktop/fig_events_per_season_0-500m.png'
+#fname='/home/raul/Desktop/fig_events_per_season_wd150_surf-500m.png'
+fname='/Users/raulv/Desktop/fig_events_per_season_wd150_surf-500m.png'
 plt.savefig(fname, dpi=150, format='png',papertype='letter',
             bbox_inches='tight')
 

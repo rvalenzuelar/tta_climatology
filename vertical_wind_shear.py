@@ -5,12 +5,12 @@ Created on Fri Sep  2 16:14:22 2016
 @author: raul
 """
 import parse_data
-import matplotlib.cm as cm
+#import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from rv_windrose import WindroseAxes
+#from rv_windrose import WindroseAxes
 from rv_utilities import pandas2stack, discrete_cmap
 
 sns.set_style('whitegrid')
@@ -189,8 +189,8 @@ else:
     tx += '$\geq $ 0.25  mm'
 plt.suptitle(tx, fontsize=15,weight='bold',y=0.95)
 
-#plt.show()
+plt.show()
 
-fname='/home/raul/Desktop/wind-comp_profile_rczd.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+#fname='/home/raul/Desktop/wind-comp_profile_rczd.png'
+#plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
