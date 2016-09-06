@@ -47,7 +47,8 @@ WS = pd.DataFrame()
 
 
 #max_hgt_gate = 15  # 1450 [m]
-max_hgt_gate = 31  # 2000 [m]
+#max_hgt_gate = 21  # 2000 [m]
+max_hgt_gate = 40  # 3750 [m] max top
 
 try:
     ws
@@ -184,13 +185,18 @@ for wf,wd,color in zip(wind_flow_mean,flow_dir,colors):
 
     
     dx=x[1:]-x[:-1]
+
+#    dx=xnew[1:]-xnew[:-1]
+#    dz=ynew[1:]-ynew[:-1] 
+
     dxdz = dx/dz
+    
     axes[1].plot(dxdz,ydz,label=str(wd),
             color=color,lw=lw)   
     
-    axes[0].set_ylim([0,int(hgt[max_hgt_gate])+100])        
+    axes[0].set_ylim([0,int(hgt[max_hgt_gate-1])+100])        
     
-axes[0].set_xlim([-10,10])
+axes[0].set_xlim([-12,14])
 
 tx = '13-season wind profile per direction component'
 plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
