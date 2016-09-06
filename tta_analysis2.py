@@ -602,7 +602,10 @@ class tta_analysis:
         # print('TTA analysis finished')
 
 
-    def print_stats(self,header=False,return_results=False,skip_print=False):
+    def print_stats(self,header=False,
+                         return_results=False,
+                         skip_print=False,
+                         bootstrap=False):
 
         if header:
             hdr='YR TOT TBB NBB TOT TCZ NCZ TTA NTT TTA NTT BBY(%) CZD(%)'.split()
@@ -658,6 +661,67 @@ class tta_analysis:
                              tta_ratio, notta_ratio,
                              tta_hours, notta_hours,
                              rain_perc_bby, rain_perc_czd])
+
+    def bootstrap_rainrate(self, data, num_samples, alpha):
+        
+        import numpy.random as npr    
+        
+        '''
+            Returns bootstrap estimate of 100.0*(1-alpha) CI for statistic.
+            (source:http://people.duke.edu/~ccc14/pcfb/analysis.html)
+        '''
+        
+        ''' number of data points '''
+        n = len(data)
+        
+        ''' num_samples arrays with random indices of data
+            allowing repeated indices (sampling with replacement)
+        '''
+        idx = npr.randint(0, n, (num_samples, n))
+        
+        ''' get the samples of random indices '''
+        samples = data[idx]
+        
+        ''' get the statistic along axis 1 and sort it'''
+        stat = np.sort(statistic(samples, 1))
+    
+        ''' confidence interval '''    
+        bot_CI = stat[int((alpha/2.0)*num_samples)] 
+        top_CI = stat[int((1-alpha/2.0)*num_samples)]
+        
+        return (bot_CI,top_CI)
+
+
+
+def bootstrap(data, num_samples, statistic, alpha):
+    
+    import numpy.random as npr    
+    
+    '''
+        Returns bootstrap estimate of 100.0*(1-alpha) CI for statistic.
+        (source:http://people.duke.edu/~ccc14/pcfb/analysis.html)
+    '''
+    
+    ''' number of data points '''
+    n = len(data)
+    
+    ''' num_samples arrays with random indices of data
+        allowing repeated indices (sampling with replacement)
+    '''
+    idx = npr.randint(0, n, (num_samples, n))
+    
+    ''' get the samples of random indices '''
+    samples = data[idx]
+    
+    ''' get the statistic along axis 1 and sort it'''
+    stat = np.sort(statistic(samples, 1))
+
+    ''' confidence interval '''    
+    bot_CI = stat[int((alpha/2.0)*num_samples)] 
+    top_CI = stat[int((1-alpha/2.0)*num_samples)]
+    
+    return (bot_CI,top_CI)
+
         
 def parse_operator(target, query):
 

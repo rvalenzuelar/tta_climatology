@@ -6,16 +6,20 @@ Created on Thu Sep  1 17:25:52 2016
 """
 
 import numpy as np
+import pandas as pd
 from tta_analysis2 import tta_analysis
 
-years = [1998]+range(2001,2013)
+years = [1998]
+#years = [1998]+range(2001,2013)
 
-''' creates one param per wd sector '''               
-params_wsec = [{ 'wdir_thres':  '[{},{}['.format(a,a+10),
-                'wdir_layer': [0,500],
-                'rain_czd':   0.25,
-                'nhours':     1
-              } for a in range(85,275,10)]
+#''' creates one param per wd sector '''               
+#params_wsec = [{ 'wdir_thres':  '[{},{}['.format(a,a+10),
+#                'wdir_layer': [0,500],
+#                'rain_czd':   0.25,
+#                'nhours':     1
+#              } for a in range(85,275,10)]
+#
+#params = params_wsec
 
 ''' creates one param per nhour '''
 params_nh = [{ 'wdir_thres': 150,
@@ -36,7 +40,8 @@ params = params_nh + params_wth
 try:
     results
 except NameError:
-    results = {nparam:list() for nparam in range(len(params))}
+#    results = {nparam:list() for nparam in range(len(params))}
+    results = {nparam:pd.DataFrame() for nparam in range(len(params))}
     first = True
     for y in years:
         print y
@@ -44,8 +49,9 @@ except NameError:
         if first:    
             for n,p in enumerate(params):
                 tta.start_df_layer(**p)
-                results[n] = tta.print_stats(return_results=True,
-                                             skip_print=True)
+#                results[n] = tta.print_stats(return_results=True,
+#                                             skip_print=True)
+                results[n] = results[n].append(tta.df[tta.df.tta])
             first = False
         else:
             for n,p in enumerate(params):
@@ -68,6 +74,7 @@ for nparam,result in results.iteritems():
     tta_hours = result[:,8].sum()
     bby_tta = np.nansum(result[:,1])/tta_hours
     czd_tta = np.nansum(result[:,4])/tta_hours
+    bby_CI = bootstrap_rainrate()
     tta_ratio = czd_tta/bby_tta
     
     notta_hours = result[:,9].sum()
