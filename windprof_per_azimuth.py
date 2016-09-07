@@ -39,20 +39,19 @@ def cos(arg):
 years = [1998]+range(2001,2013)
 
 
-#WD = [pd.DataFrame(),pd.DataFrame()]
-#WS = [pd.DataFrame(),pd.DataFrame()]
-
-WD = pd.DataFrame()
-WS = pd.DataFrame()
-
-
 #max_hgt_gate = 15  # 1450 [m]
 #max_hgt_gate = 21  # 2000 [m]
 max_hgt_gate = 40  # 3750 [m] max top
 
 try:
-    ws
+    WS
 except NameError:
+
+    #WD = [pd.DataFrame(),pd.DataFrame()]
+    #WS = [pd.DataFrame(),pd.DataFrame()]
+    
+    WD = pd.DataFrame()
+    WS = pd.DataFrame()
     
     for year in years:
 
@@ -142,6 +141,7 @@ except NameError:
     V_df = -1*WS.multiply(WD_cos)
     
     flow_dir = range(90,190,10)
+#    flow_dir = range(180,280,10) 
     wind_flow_mean = list()
     for fdir in flow_dir:
         wind_flow = U_df*sin(fdir)+V_df*cos(fdir)
@@ -184,19 +184,19 @@ for wf,wd,color in zip(wind_flow_mean,flow_dir,colors):
                               alpha=0.5)
 
     
-    dx=x[1:]-x[:-1]
-
-#    dx=xnew[1:]-xnew[:-1]
-#    dz=ynew[1:]-ynew[:-1] 
-
+    dx = x[1:]-x[:-1]
     dxdz = dx/dz
+#    axes[1].plot(dxdz,ydz,label=str(wd),color=color,lw=lw)   
+
+    from scipy.interpolate import spline
+    ynew = np.linspace(ydz.min(),int(ydz.max()),100)
+    dxdz_smooth = spline(dxdz,ydz,ynew)
+    axes[1].plot(dxdz_smooth,ynew,label=str(wd),color=color,lw=lw)   
     
-    axes[1].plot(dxdz,ydz,label=str(wd),
-            color=color,lw=lw)   
-    
-    axes[0].set_ylim([0,int(hgt[max_hgt_gate-1])+100])        
+    axes[0].set_ylim([0,int(hgt[max_hgt_gate-1])+200])        
     
 axes[0].set_xlim([-12,14])
+#axes[0].set_xlim([-20,5])
 
 tx = '13-season wind profile per direction component'
 plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
