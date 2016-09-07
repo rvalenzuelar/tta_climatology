@@ -47,11 +47,11 @@ try:
     WS
 except NameError:
 
-    #WD = [pd.DataFrame(),pd.DataFrame()]
-    #WS = [pd.DataFrame(),pd.DataFrame()]
+    WD = [pd.DataFrame(),pd.DataFrame()]
+    WS = [pd.DataFrame(),pd.DataFrame()]
     
-    WD = pd.DataFrame()
-    WS = pd.DataFrame()
+#    WD = pd.DataFrame()
+#    WS = pd.DataFrame()
     
     for year in years:
 
@@ -81,8 +81,8 @@ except NameError:
         rain_dates = rain_czd.loc[rain_czd.values].index
 
         ''' init dataframes for year '''        
-#        wd = pd.DataFrame()          
-#        ws = pd.DataFrame()          
+        wd = pd.DataFrame()          
+        ws = pd.DataFrame()          
         wd_rain = pd.DataFrame(index=rain_dates)          
         ws_rain = pd.DataFrame(index=rain_dates)  
         
@@ -90,8 +90,8 @@ except NameError:
         bby_ws = bby.wspd
         
         ''' creates surface column '''
-#        wd['surf'] = bby_wd
-#        ws['surf'] = bby_ws            
+        wd['surf'] = bby_wd
+        ws['surf'] = bby_ws            
         wd_rain['surf'] = bby_wd.loc[rain_dates]
         ws_rain['surf'] = bby_ws.loc[rain_dates]
 
@@ -105,49 +105,62 @@ except NameError:
         ''' creates columns for each level '''
         for h in hgt[:max_hgt_gate]:
             col = '{:2.0f}'.format(h)
+            
             ''' weird pandas bug doesnt allow 
                 2001 as column name '''
-            if col =='2001': col='2000'
-#            wd[col]=np.zeros(wd.index.size)        
-#            ws[col]=np.zeros(ws.index.size)
+            if col =='2001': 
+                col='2000'
+            
+            wd[col]=np.zeros(wd.index.size)        
+            ws[col]=np.zeros(ws.index.size)
             wd_rain[col]=np.zeros(rain_dates.size)        
             ws_rain[col]=np.zeros(rain_dates.size)  
         
-#        for n, [s,d] in enumerate(zip(wspd,wdir)):
-#            d = np.array(d)
-#            s = np.array(s)
-#            wd.iloc[n,1:] = d
-#            ws.iloc[n,1:] = s
+        for n, [s,d] in enumerate(zip(wspd,wdir)):
+            d = np.array(d)
+            s = np.array(s)
+            wd.iloc[n,1:] = d
+            ws.iloc[n,1:] = s
 
         for n, [sr,dr] in enumerate(zip(wspd_rain, wdir_rain)):
             wd_rain.iloc[n,1:] = np.array(dr[:max_hgt_gate])
             ws_rain.iloc[n,1:] = np.array(sr[:max_hgt_gate])
 
-#        WD[0] = WD[0].append(wd)
-#        WS[0] = WS[0].append(ws)
-#        WD[1] = WD[1].append(wd_rain)
-#        WS[1] = WS[1].append(ws_rain)
+        WD[0] = WD[0].append(wd)
+        WS[0] = WS[0].append(ws)
+        WD[1] = WD[1].append(wd_rain)
+        WS[1] = WS[1].append(ws_rain)
 
-        WD = WD.append(wd_rain)
-        WS = WS.append(ws_rain)
-        
-        
+#        WD = WD.append(wd_rain)
+#        WS = WS.append(ws_rain)
 
-    ''' component analysis '''
-    WD_sin = WD.applymap(lambda x: sin(x))
-    WD_cos = WD.applymap(lambda x: cos(x))
+#        WD = WD.append(wd)
+#        WS = WS.append(ws)        
+
+
+''' component analysis '''
+wind_flow_mean = [list(),list()]        
+#flow_dir = range(90,190,10)
+#flow_dir = range(180,280,10) 
+flow_dir = [90,140,180]
+
+for n in range(2):
     
-    U_df = -1*WS.multiply(WD_sin)
-    V_df = -1*WS.multiply(WD_cos)
+    WD_sin = WD[n].applymap(lambda x: sin(x))
+    WD_cos = WD[n].applymap(lambda x: cos(x))
     
-    flow_dir = range(90,190,10)
-#    flow_dir = range(180,280,10) 
-    wind_flow_mean = list()
+    U_df = -1*WS[n].multiply(WD_sin)
+    V_df = -1*WS[n].multiply(WD_cos)
+    
     for fdir in flow_dir:
-        wind_flow = U_df*sin(fdir)+V_df*cos(fdir)
-        wind_flow_mean.append(wind_flow.mean())
+        if fdir >= 180:
+            wind_flow = -(U_df*sin(fdir)+V_df*cos(fdir))
+        else:
+            wind_flow = U_df*sin(fdir)+V_df*cos(fdir)            
+        wind_flow_mean[n].append(wind_flow.mean())
+
     
-cmap = discrete_cmap(len(flow_dir), base_cmap='Set1')
+cmap = discrete_cmap(len(flow_dir), base_cmap='Set2')
 colors = [cmap(n) for n in range(len(flow_dir))]
 
 dz = np.array([160]+[92]*(max_hgt_gate-1))
@@ -158,7 +171,7 @@ ydz = y[:-1]+(y[1:]-y[:-1])/2.
 
 fig,axes = plt.subplots(2,1,figsize=(8,12),sharey=True)
 lw=3
-for wf,wd,color in zip(wind_flow_mean,flow_dir,colors):
+for wf,wd,color in zip(wind_flow_mean[0],flow_dir,colors):
     x = wf.values
     
     f = interp1d(y,x)
@@ -174,32 +187,37 @@ for wf,wd,color in zip(wind_flow_mean,flow_dir,colors):
                 weight='bold')
 
     ''' fill jet '''
-    cond1 = np.where(xnew<=xnew[0])[0]
-    cond2 = np.where(xnew>xnew[0])[0]
-    if cond1.size>0 and cond2.size>0:        
-        jet = xnew[cond1]    
-        axes[0].fill_betweenx(ynew,xnew,x2=jet.max(),
-                              where=xnew<jet.max(),
-                              color=color,
-                              alpha=0.5)
+#    cond1 = np.where(xnew<=xnew[0])[0]
+#    cond2 = np.where(xnew>xnew[0])[0]
+#    if cond1.size>0 and cond2.size>0:        
+#        jet = xnew[cond1]    
+#        axes[0].fill_betweenx(ynew,xnew,x2=jet.max(),
+#                              where=xnew<jet.max(),
+#                              color=color,
+#                              alpha=0.5)
 
     
     dx = x[1:]-x[:-1]
     dxdz = dx/dz
-#    axes[1].plot(dxdz,ydz,label=str(wd),color=color,lw=lw)   
+    
+    axes[1].plot(dxdz,ydz,label=str(wd),color=color,lw=lw)   
 
-    from scipy.interpolate import spline
-    ynew = np.linspace(ydz.min(),int(ydz.max()),100)
-    dxdz_smooth = spline(dxdz,ydz,ynew)
-    axes[1].plot(dxdz_smooth,ynew,label=str(wd),color=color,lw=lw)   
+#    from scipy.interpolate import spline
+#    ynew = np.linspace(ydz.min(),int(ydz.max()),100)
+#    dxdz_smooth = spline(dxdz,ydz,ynew)
+#    axes[1].plot(dxdz_smooth,ynew,label=str(wd),color=color,lw=lw)   
     
     axes[0].set_ylim([0,int(hgt[max_hgt_gate-1])+200])        
     
 axes[0].set_xlim([-12,14])
 #axes[0].set_xlim([-20,5])
 
+axes[0].grid()
+axes[1].grid()
+
 tx = '13-season wind profile per direction component'
 plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
+
 plt.show()
 
 
