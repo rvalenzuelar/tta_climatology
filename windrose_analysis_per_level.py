@@ -10,6 +10,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from rv_windrose import WindroseAxes
+from matplotlib import rcParams
 
 # if seaborn-style plot shows up need 
 # to use:
@@ -17,11 +18,11 @@ from rv_windrose import WindroseAxes
 # %matplotlib inline
 
 
-mpl.rcParams['xtick.labelsize'] = 15
-mpl.rcParams['ytick.labelsize'] = 15
-mpl.rcParams['axes.labelsize'] = 15
-mpl.rcParams['ytick.color'] = (0.8,0.8,0.8)
-mpl.rcParams['mathtext.default'] = 'sf'
+rcParams['xtick.labelsize'] = 15
+rcParams['ytick.labelsize'] = 15
+rcParams['axes.labelsize'] = 15
+rcParams['ytick.color'] = (0.8,0.8,0.8)
+rcParams['mathtext.default'] = 'sf'
 
 ''' get percentile '''
 def get_wdir_perc(axes,perc):
@@ -57,6 +58,8 @@ except NameError:
     wd = {th:list() for th in target_hgts}
     wdsrf = list()
     
+    select_rain = 'all'    
+    
     for year in years:
           
         wpr  = parse_data.windprof(year=year)
@@ -65,22 +68,32 @@ except NameError:
         hgt  = wpr.hgt
         
         czd = parse_data.surface('czd', year=year)
-        rain_czd = czd.dframe.precip > 0
-#        rain_dates = rain_czd.loc[rain_czd.values].index
-        rain_dates = None
-    
-        bby = parse_data.surface('bby', year=year)
+        bby = parse_data.surface('bby', year=year)        
+
+        if select_rain == 'all':
+            select = None
+        elif select_rain == 'czd':
+            rain_czd = czd.dframe.precip > 0
+            select = rain_czd[rain_czd].index
+        elif select_rain == 'bby':
+            rain_bby = bby.dframe.precip > 0
+            select = rain_bby[rain_bby].index
+        elif select_rain == 'norain':
+            norain_czd = czd.dframe.precip == 0 
+            norain_bby = bby.dframe.precip == 0 
+            norain = norain_czd & norain_bby
+            select = norain[norain].index
         
-        if rain_dates is None:
+        if select is None:
             wd[-1].extend(bby.dframe.wdir.values.astype(float))
             ws[-1].extend(bby.dframe.wspd.values.astype(float))                
             wspd_rain = wspd
             wdir_rain = wdir            
         else:
-            wd[-1].extend(bby.dframe.wdir.loc[rain_dates].values.astype(float))
-            ws[-1].extend(bby.dframe.wspd.loc[rain_dates].values.astype(float))               
-            wspd_rain = wspd.loc[rain_dates]
-            wdir_rain = wdir.loc[rain_dates]
+            wd[-1].extend(bby.dframe.wdir.loc[select].values.astype(float))
+            ws[-1].extend(bby.dframe.wspd.loc[select].values.astype(float))               
+            wspd_rain = wspd.loc[select]
+            wdir_rain = wdir.loc[select]
         
         for h in target_hgts[1:]:
             for s,d in zip(wspd_rain, wdir_rain):
@@ -122,19 +135,9 @@ for h,ax in zip(target_hgts,axes):
     else:
         ax.set_xticklabels('')
 
-    ''' add stat line '''
-    max_ylim = 15
-    stat_wdir = get_wdir_mode(ax)
-    theta = np.array([-stat_wdir+90,-stat_wdir+90])*np.pi/180.
-    ax.plot(theta,[0,max_ylim], color='r',
-            lw=lw, zorder=zorder)
-#    stat_wdir = get_wdir_perc(ax,50)
-#    theta = np.array([-stat_wdir+90,-stat_wdir+90])*np.pi/180.
-#    ax.plot(theta,[0,10], color='k', linestyle='--',
-#            lw=lw, zorder=zorder)    
-
 
     ''' adjust frequency axis '''
+    max_ylim = 15    
     ax.set_ylim([0,max_ylim])
     ax.set_radii_angle(angle=45)
     ytks = ax.get_yticks()
@@ -153,6 +156,17 @@ for h,ax in zip(target_hgts,axes):
         ax.set_yticks(newtcks)
         ax.set_yticklabels('')            
         
+    ''' add stat line '''
+
+#    stat_wdir = get_wdir_mode(ax)
+#    theta = np.array([-stat_wdir+90,-stat_wdir+90])*np.pi/180.
+#    ax.plot(theta,[0,max_ylim], color='r',
+#            lw=lw, zorder=zorder)
+#    stat_wdir = get_wdir_perc(ax,50)
+#    theta = np.array([-stat_wdir+90,-stat_wdir+90])*np.pi/180.
+#    ax.plot(theta,[0,10], color='k', linestyle='--',
+#            lw=lw, zorder=zorder)    
+
     
 ''' add legend '''
 axes[12].legend(loc=(0.4,-0.5), ncol=4)
@@ -160,14 +174,22 @@ axes[13].text(1.0,-0.18,'wind speed [$m\,s^{-1}$]',
               fontsize=15,ha='center',
               transform=axes[13].transAxes)
 
-tx  = 'Wind roses at BBY for all hours'
+if select_rain == 'czd':
+    select_rain+='-rain'
+elif select_rain == 'bby':
+    select_rain+='-rain'
+elif select_rain == 'all':
+    select_rain = 'winter-season'
+    
+tx  = 'Wind roses at BBY for {} hours'.format(select_rain)
 #tx  = 'Wind roses at BBY for hours with rain CZD '
 #tx += '$\geq$ 0.25 mm'
 plt.suptitle(tx,fontsize=15, weight='bold',y=0.95)
 
 #plt.show()
 
-fname='/home/raul/Desktop/windrose_perhgt_0-1449m_all.png'
+fname=('/home/raul/Desktop/'
+       'windrose_perhgt_0-1449m_{}.png'.format(select_rain))
 #fname='/Users/raulv/Desktop/windrose_perhgt_srf-1500.png'
 plt.savefig(fname, dpi=300, format='png',papertype='letter',
             bbox_inches='tight')

@@ -13,19 +13,16 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from rv_windrose import WindroseAxes
 from rv_utilities import discrete_cmap
-
+from matplotlib import rcParams
 
 # if seaborn-style plot shows up need 
 # to use:
 # %matplotlib inline
-import matplotlib as mpl
-inline_rc = dict(mpl.rcParams)
-mpl.rcParams.update(inline_rc)
 
-mpl.rcParams['xtick.labelsize'] = 15
-mpl.rcParams['ytick.labelsize'] = 15
-mpl.rcParams['axes.labelsize'] = 15
-mpl.rcParams['mathtext.default'] = 'sf'
+rcParams['xtick.labelsize'] = 15
+rcParams['ytick.labelsize'] = 15
+rcParams['axes.labelsize'] = 15
+rcParams['mathtext.default'] = 'sf'
 
 
 def sin(arg):
@@ -139,7 +136,7 @@ except NameError:
 
 
 ''' component analysis '''
-wind_flow_mean = [list(),list()]        
+wind_flow_mean = [dict(),dict()]        
 #flow_dir = range(90,190,10)
 #flow_dir = range(180,280,10) 
 flow_dir = [90,140,180]
@@ -157,7 +154,7 @@ for n in range(2):
             wind_flow = -(U_df*sin(fdir)+V_df*cos(fdir))
         else:
             wind_flow = U_df*sin(fdir)+V_df*cos(fdir)            
-        wind_flow_mean[n].append(wind_flow.mean())
+        wind_flow_mean[n][fdir] = wind_flow.mean()
 
     
 cmap = discrete_cmap(len(flow_dir), base_cmap='Set2')
@@ -169,22 +166,32 @@ y = np.array([0])
 y = np.append(y,hgt[:max_hgt_gate])
 ydz = y[:-1]+(y[1:]-y[:-1])/2.
 
-fig,axes = plt.subplots(2,1,figsize=(8,12),sharey=True)
-lw=3
-for wf,wd,color in zip(wind_flow_mean[0],flow_dir,colors):
-    x = wf.values
-    
-    f = interp1d(y,x)
-    ynew = np.linspace(0,int(y.max()),100)
-    xnew = f(ynew)    
-    
-    axes[0].plot(xnew,ynew,label=str(wd),
-            color=color,lw=lw)
 
-    axes[0].text(x[-1], hgt[max_hgt_gate-1]+30, str(wd),
-                fontsize=14,
-                ha='center',
-                weight='bold')
+fig,axes = plt.subplots(2,2,figsize=(8,12),sharey=True)
+lw=3
+for row in range(2):
+    for col,comp in zip(range(2),[90,180]):
+        x = wind_flow_mean[row][comp].values
+        
+        f = interp1d(y,x)
+        ynew = np.linspace(0,int(y.max()),100)
+        xnew = f(ynew)    
+        
+        axes[row,col].plot(xnew,ynew,label=str(comp),
+                            color=cmap(col),lw=lw)  
+
+        if col == 0:
+            axes[row,col].set_xlim([-2,14])
+        else:
+            axes[row,col].set_xlim([-1,11])
+
+        if row == 0:
+            axes[row,col].set_xticklabels('')
+            
+            
+        axes[row,col].grid()
+
+        axes[row,col].set_ylim([0,1500])        
 
     ''' fill jet '''
 #    cond1 = np.where(xnew<=xnew[0])[0]
@@ -196,27 +203,38 @@ for wf,wd,color in zip(wind_flow_mean[0],flow_dir,colors):
 #                              color=color,
 #                              alpha=0.5)
 
-    
-    dx = x[1:]-x[:-1]
-    dxdz = dx/dz
-    
-    axes[1].plot(dxdz,ydz,label=str(wd),color=color,lw=lw)   
+    ''' wind shear '''
+#    dx = x[1:]-x[:-1]
+#    dxdz = dx/dz
+#    
+#    axes[1].plot(dxdz,ydz,label=str(wd),color=color,lw=lw)   
 
 #    from scipy.interpolate import spline
 #    ynew = np.linspace(ydz.min(),int(ydz.max()),100)
 #    dxdz_smooth = spline(dxdz,ydz,ynew)
 #    axes[1].plot(dxdz_smooth,ynew,label=str(wd),color=color,lw=lw)   
     
-    axes[0].set_ylim([0,int(hgt[max_hgt_gate-1])+200])        
-    
-axes[0].set_xlim([-12,14])
-#axes[0].set_xlim([-20,5])
 
-axes[0].grid()
-axes[1].grid()
+''' axis annotation '''
+locx = [6,6,12,12]
+locy = [1510,1510,800,800]
+anot = ['U','V','All','czd-rain']
+rot = [0,0,-90,-90]
+for row,col,n in zip([0,0,0,1],[0,1,1,1],range(4)):
+    axes[row,col].text(locx[n],
+                       locy[n],
+                       anot[n],
+                       fontsize=14,
+                       ha='center',
+                       weight='bold',
+                       rotation=rot[n])
 
-tx = '13-season wind profile per direction component'
-plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
+
+
+#tx = '13-season wind profile per direction component'
+#plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
+
+plt.subplots_adjust(hspace=0.05)
 
 plt.show()
 
