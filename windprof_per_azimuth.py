@@ -49,7 +49,7 @@ except NameError:
     
 #    WD = pd.DataFrame()
 #    WS = pd.DataFrame()
-    
+
     for year in years:
         print(year)
         wpr = parse_data.windprof(year=year)
