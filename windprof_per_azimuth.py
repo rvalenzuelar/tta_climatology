@@ -130,7 +130,6 @@ except NameError:
 #        WD = WD.append(wd)
 #        WS = WS.append(ws)        
 
-
 ''' component analysis '''
 wind_flow_mean = [dict(),dict()]        
 #flow_dir = range(90,190,10)
@@ -224,8 +223,6 @@ for row,col,n in zip([0,0,0,1],[0,1,1,1],range(4)):
                        ha='center',
                        weight='bold',
                        rotation=rot[n])
-
-
 
 #tx = '13-season wind profile per direction component'
 #plt.suptitle(tx,fontsize=15,weight='bold',y=0.95)
