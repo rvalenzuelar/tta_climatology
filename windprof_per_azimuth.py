@@ -51,13 +51,13 @@ except NameError:
 #    WS = pd.DataFrame()
     
     for year in years:
-
+        print(year)
         wpr = parse_data.windprof(year=year)
         bby = parse_data.surface('bby', year=year)
         czd = parse_data.surface('czd', year=year)
         
         hgt = wpr.hgt        
-        
+
         ''' reduce to common time period '''
         first_bby = bby.dframe.index[0]
         first_czd = czd.dframe.index[0]
