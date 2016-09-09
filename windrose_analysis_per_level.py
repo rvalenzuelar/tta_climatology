@@ -21,7 +21,7 @@ from matplotlib import rcParams
 rcParams['xtick.labelsize'] = 15
 rcParams['ytick.labelsize'] = 15
 rcParams['axes.labelsize'] = 15
-rcParams['ytick.color'] = (0.8,0.8,0.8)
+rcParams['ytick.color'] = (0.8, 0.8, 0.8)
 rcParams['mathtext.default'] = 'sf'
 
 ''' get percentile '''
@@ -32,7 +32,7 @@ def get_wdir_perc(axes,perc):
     tsum=table.sum(axis=0)
     tcsum=tsum.cumsum()
     # add 5deg to get mid of bin
-    stat = wdir[np.where(tcsum<=perc)[0][-1]]+5
+    stat = wdir[np.where(tcsum <= perc)[0][-1]]+5
     return stat
 
 def get_wdir_mode(axes):
@@ -41,7 +41,7 @@ def get_wdir_mode(axes):
     wdir=info['dir']
     tsum=table.sum(axis=0)
     # add 5deg to get mid of bin
-    stat = wdir[np.where(tsum==tsum.max())[0][0]]+5
+    stat = wdir[np.where(tsum.max() == tsum)[0][0]] + 5
     return stat
 
 
@@ -101,27 +101,28 @@ except NameError:
                 wd[h].append(d[h])
 
 scale = 1.3
-axes = WindroseAxes.from_ax(subplots=(4,4),
-                            space=(0.05,0.1),
-                            figsize=(8*scale,9*scale))
+axes = WindroseAxes.from_ax(subplots=(4, 4),
+                            space=(0.05, 0.1),
+                            figsize=(8*scale, 9*scale))
 lw = 2
 zorder = 10000
-hgt = np.append(hgt,[43])
+hgt = np.append(hgt, (43,))
 first = True
 for h,ax in zip(target_hgts,axes):
     
     ax.contourf(wd[h], ws[h],
-                bins    = range(0,24,3),  # speed bins
-                nsector = 36,
-                cmap    = cm.viridis,
-                normed  = True)
+                bins=range(0,24,3),  # speed bins
+                nsector=36,
+                cmap=cm.viridis,
+                normed=True)
 
     if h == -1:
         txt='Surface'
     else:
         txt='{:2.0f}m'.format(hgt[h])
-    ax.text(0.5,1.05,txt,
-            weight='bold',fontsize=15,
+    ax.text(0.5, 1.05, txt,
+            weight='bold',
+            fontsize=15,
             ha='center',
             transform=ax.transAxes)
 
@@ -129,9 +130,10 @@ for h,ax in zip(target_hgts,axes):
         xtcklab = ax.get_xticklabels()
         ax.set_xticklabels(xtcklab,
                            fontsize=10,
-                           position=(0,-0.2),
+                           position=(0, -0.2),
                            weight='bold',
-                           color=(0.5,0.5,0.5,0.8))
+                           color=(0.5, 0.5, 0.5, 0.8))
+
     else:
         ax.set_xticklabels('')
 

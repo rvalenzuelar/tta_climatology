@@ -101,7 +101,7 @@ except NameError:
             
             ''' weird pandas bug doesnt allow 
                 2001 as column name '''
-            if col =='2001': 
+            if col == '2001':
                 col='2000'
             
             wd[col]=np.zeros(wd.index.size)        
@@ -131,10 +131,10 @@ except NameError:
 #        WS = WS.append(ws)        
 
 ''' component analysis '''
-wind_flow_mean = [dict(),dict()]        
+wind_flow_mean = [dict(), dict()]
 #flow_dir = range(90,190,10)
 #flow_dir = range(180,280,10) 
-flow_dir = [90,140,180]
+flow_dir = [90, 140, 180]
 
 for n in range(2):
     
@@ -158,12 +158,12 @@ colors = [cmap(n) for n in range(len(flow_dir))]
 dz = np.array([160]+[92]*(max_hgt_gate-1))
 
 y = np.array([0])
-y = np.append(y,hgt[:max_hgt_gate])
+y = np.append(y, hgt[:max_hgt_gate])
 ydz = y[:-1]+(y[1:]-y[:-1])/2.
 
 
-fig,axes = plt.subplots(2,2,figsize=(8,12),sharey=True)
-lw=3
+fig, axes = plt.subplots(2, 2, figsize=(8, 12), sharey=True)
+lw = 3
 for row in range(2):
     for col,comp in zip(range(2),[90,180]):
         x = wind_flow_mean[row][comp].values
