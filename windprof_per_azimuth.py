@@ -31,10 +31,8 @@ def sin(arg):
 def cos(arg):
     return np.cos(np.radians(arg))
 
-
 #years = [1998]
 years = [1998]+range(2001,2013)
-
 
 #max_hgt_gate = 15  # 1450 [m]
 #max_hgt_gate = 21  # 2000 [m]
