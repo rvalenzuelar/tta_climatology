@@ -90,12 +90,10 @@ except NameError:
         wd_rain['surf'] = bby_wd.loc[rain_dates]
         ws_rain['surf'] = bby_ws.loc[rain_dates]
 
-
         wspd = wpr.wspd
         wdir = wpr.wdir
         wspd_rain = wspd.loc[rain_dates]
         wdir_rain = wdir.loc[rain_dates]
-        
 
         ''' creates columns for each level '''
         for h in hgt[:max_hgt_gate]:
