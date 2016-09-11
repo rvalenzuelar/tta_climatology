@@ -111,6 +111,7 @@ except NameError:
 
 ''' component analysis '''
 wind_flow_mean = [dict(), dict()]
+wind_flow_std = [dict(), dict()]
 nans_per_level = [np.array([]).astype(int),
                   np.array([]).astype(int)]
 
@@ -133,6 +134,8 @@ for n in range(2):
     ' mean value per level '
     wind_flow_mean[n][180] = np.nanmean(stack_180,axis=0)
     wind_flow_mean[n][90] = np.nanmean(stack_90,axis=0)
+    wind_flow_std[n][180] = np.nanstd(stack_180,axis=0)
+    wind_flow_std[n][90] = np.nanstd(stack_90,axis=0)
 
     nans_per_level[n] = np.append(nans_per_level[n],
                                   np.isnan(stack_180).sum(axis=0))
@@ -150,12 +153,17 @@ ydz = y[:-1]+(y[1:]-y[:-1])/2.
 " percentage of obs for each category "
 wind_flow_mean[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
 wind_flow_mean[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
+wind_flow_std[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
+wind_flow_std[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
 
+out = 'mean'
 
-# fig, axes = plt.subplots(2, 2, figsize=(8,8), sharey=True)
-fig = plt.figure()
+if out == 'mean':
+    fig = plt.figure(figsize=(9,8))
+else:
+    fig = plt.figure(figsize=(7,8))
 gs = gridspec.GridSpec(2, 3,
-                       width_ratios=[2,2,1],
+                       width_ratios=[2, 2, 1],
                        )
 
 axes = list()
@@ -169,23 +177,36 @@ axes = np.array(axes)
 axes = axes.reshape((2,3))
 
 lw = 3
-out = 'shear'
 
 for row in range(2):
     for col,comp,cl in zip(range(3), [90, 180, 0], colors):
 
         ax = axes[row,col]
         x = wind_flow_mean[row][comp]
+        std = wind_flow_std[row][comp]
 
         if out == 'mean':
             if col <2:
 
-                f = interp1d(y, x)
-                ynew = np.linspace(0, int(y.max()), 100)
-                xnew = f(ynew)
-                # ax.plot(xnew, ynew, color=cl, lw=lw)
+                ' plot mean '
+                # f = interp1d(y, x)
+                # ynew = np.linspace(0, int(y.max()), 100)
+                # xnew = f(ynew)
                 ax.plot(x, y, color=cl, lw=lw)
-                ax.set_xlim([-2, 14])
+                'plot std_dev'
+                # f = interp1d(y, std)
+                # ynew = np.linspace(0, int(y.max()), 100)
+                # xnew = f(ynew)
+                # ax.plot(x+std, y, color=cl, lw=lw, linestyle='--')
+                # ax.plot(x-std, y, color=cl, lw=lw, linestyle='--')
+
+                ax.fill_betweenx(y,x-std,
+                                 x2=x+std,
+                                 where=x-std<x+std,
+                                 color=cl,
+                                 alpha=0.2)
+
+                ax.set_xlim([-10, 20])
                 if row == 1 and (col == 0 or col == 1):
                     ax.set_xlabel('$[m\,s^{-1}]$')
                 anotU,anotV = ['U','V']
@@ -263,12 +284,13 @@ for row, col, n in zip([0, 0, 0, 1], [0, 1, 2, 2], range(4)):
             transform=ax.transAxes)
 
 if out == 'mean':
-    tx = '13-season mean wind profile'
-    gs.update(hspace=0.1, wspace=0.15)
+    tx = '13-season mean and std_dev wind component profile'
+    plt.subplots_adjust(hspace=0.1, wspace=0.15,
+                        left=0.1, right=0.95)
 else:
     tx = '13-season mean vertical wind-shear profile'
-    gs.update(hspace=0.1, wspace=0.15, right=1.2)
-plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
+    plt.subplots_adjust(hspace=0.1, wspace=0.15, right=1.2)
+plt.suptitle(tx,fontsize=15,weight='bold',y=0.98)
 
 # fig.set_size_inches(5,10)
 # fig.canvas.draw()
@@ -276,8 +298,8 @@ plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 # plt.show()
 
 
-# # #fname='/home/raul/Desktop/fig_windrose_layer_0-500.png'
-# fname = ('/Users/raulvalenzuela/Documents/'
-#          'windprof_components_{}.png'.format(out))
-# plt.savefig(fname, dpi=300, format='png',papertype='letter',
-#            bbox_inches='tight')
+# #fname='/home/raul/Desktop/fig_windrose_layer_0-500.png'
+fname = ('/Users/raulvalenzuela/Documents/'
+         'windprof_components_{}.png'.format(out))
+plt.savefig(fname, dpi=300, format='png',papertype='letter',
+           bbox_inches='tight')
