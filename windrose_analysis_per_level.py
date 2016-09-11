@@ -137,8 +137,7 @@ for h,ax in zip(target_hgts,axes):
     else:
         ax.set_xticklabels('')
 
-
-    ''' adjust frequency axis '''
+    " adjust frequency axis "
     max_ylim = 15    
     ax.set_ylim([0,max_ylim])
     ax.set_radii_angle(angle=45)
