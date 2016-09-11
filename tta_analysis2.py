@@ -31,6 +31,11 @@ from datetime import timedelta
 class tta_analysis:
 
     def __init__(self, year=None):
+        # type: (object) -> object
+        """
+
+        :rtype: object
+        """
         self.year = year
 
     def start(self, wdir_surf=None, wdir_wprof=None, 
