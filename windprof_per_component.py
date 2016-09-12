@@ -12,9 +12,8 @@ import parse_data
 import matplotlib.gridspec as gridspec
 
 from matplotlib import rcParams
-from scipy.interpolate import interp1d
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-from rv_utilities import discrete_cmap,pandas2stack
+from rv_utilities import discrete_cmap
 
 # if seaborn-style plot shows up need
 # to use:
@@ -89,7 +88,7 @@ except NameError:
 
         ' include only hours when surf and the entire' \
         ' profile is non-missing (profile is allowed to have' \
-        ' at least one non-missin)'
+        ' at least one non-missing)'
         nan_df = pd.concat([precip_nans, prof_nans], axis=1)
         any_nan = nan_df.apply(lambda x: x.any(), axis=1, reduce=True)
         include = ~any_nan
@@ -118,7 +117,6 @@ nans_per_level = [np.array([]).astype(int),
 ' for each all/rainy category '
 for n in range(2):
 
-    print n
     WD_sin = WD[n].apply(lambda x: sin(x))
     WD_cos = WD[n].apply(lambda x: cos(x))
 
@@ -156,7 +154,7 @@ wind_flow_mean[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
 wind_flow_std[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
 wind_flow_std[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
 
-out = 'mean'
+out = 'shear'
 
 if out == 'mean':
     fig = plt.figure(figsize=(9,8))
@@ -186,20 +184,10 @@ for row in range(2):
         std = wind_flow_std[row][comp]
 
         if out == 'mean':
-            if col <2:
-
+            if col < 2:
                 ' plot mean '
-                # f = interp1d(y, x)
-                # ynew = np.linspace(0, int(y.max()), 100)
-                # xnew = f(ynew)
                 ax.plot(x, y, color=cl, lw=lw)
-                'plot std_dev'
-                # f = interp1d(y, std)
-                # ynew = np.linspace(0, int(y.max()), 100)
-                # xnew = f(ynew)
-                # ax.plot(x+std, y, color=cl, lw=lw, linestyle='--')
-                # ax.plot(x-std, y, color=cl, lw=lw, linestyle='--')
-
+                ' plot std_dev'
                 ax.fill_betweenx(y,x-std,
                                  x2=x+std,
                                  where=x-std<x+std,
@@ -216,6 +204,8 @@ for row in range(2):
                 ax.set_xlim([0, 100])
                 labels=['0','','40','','80','']
                 ax.set_xticklabels(labels)
+            anrows = [0, 0, 0, 1]
+            ancols = [0, 1, 2, 2]
         elif out == 'shear':
             dx = x[1:]-x[:-1]
             dxdz = dx/dz
@@ -228,6 +218,8 @@ for row in range(2):
             if row == 1 and (col == 0 or col == 1):
                 ax.set_xlabel('$[x1e^{-3}s^{-1}]$')
             anotU, anotV = ['dU/dZ', 'dV/dZ']
+            anrows = [0, 0, 0, 1]
+            ancols = [0, 1, 1, 1]
 
         if row == 0:
             ax.set_xticklabels('')
@@ -252,16 +244,6 @@ for row in range(2):
             if (row == 0 or row == 1) and col == 2:
                 ax.remove()
 
-    ''' fill jet '''
-#    cond1 = np.where(xnew<=xnew[0])[0]
-#    cond2 = np.where(xnew>xnew[0])[0]
-#    if cond1.size>0 and cond2.size>0:
-#        jet = xnew[cond1]
-#        axes[0].fill_betweenx(ynew,xnew,x2=jet.max(),
-#                              where=xnew<jet.max(),
-#                              color=color,
-#                              alpha=0.5)
-
 
 ''' axis annotation '''
 locx = [0.5, 0.5, 1.1, 1.1]
@@ -271,7 +253,7 @@ anot = [anotU,
         'All (n={:d})'.format(WD[0].index.size),
         'czd-rain (n={:d})'.format(WD[1].index.size)]
 rot = [0, 0, -90, -90]
-for row, col, n in zip([0, 0, 0, 1], [0, 1, 2, 2], range(4)):
+for row, col, n in zip(anrows,ancols, range(4)):
     ax = axes[row, col]
     ax.text(locx[n],
             locy[n],
@@ -287,15 +269,10 @@ if out == 'mean':
     tx = '13-season mean and std_dev wind component profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         left=0.1, right=0.95)
-else:
+elif out == 'shear':
     tx = '13-season mean vertical wind-shear profile'
-    plt.subplots_adjust(hspace=0.1, wspace=0.15, right=1.2)
+    plt.subplots_adjust(hspace=0.1, wspace=0.15, right=1.15)
 plt.suptitle(tx,fontsize=15,weight='bold',y=0.98)
-
-# fig.set_size_inches(5,10)
-# fig.canvas.draw()
-
-# plt.show()
 
 
 # #fname='/home/raul/Desktop/fig_windrose_layer_0-500.png'
