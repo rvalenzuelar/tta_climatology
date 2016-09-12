@@ -11,24 +11,18 @@ import parse_data
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import collections
 from tta_analysis2 import tta_analysis
-from rv_utilities import pandas2stack
+from rv_utilities import discrete_cmap
 from matplotlib import rcParams
 
 rcParams['xtick.labelsize'] = 15
 rcParams['ytick.labelsize'] = 15
 rcParams['axes.labelsize'] = 15
-rcParams['ytick.color'] = (0.8, 0.8, 0.8)
 rcParams['mathtext.default'] = 'sf'
-
-sns.set_style('whitegrid')
-
 
 def sin(arg):
     return np.sin(np.radians(arg))
-
 
 def cos(arg):
     return np.cos(np.radians(arg))
@@ -95,20 +89,25 @@ except NameError:
 
     print('Done')
 
-fig, ax = plt.subplots(1, 2, sharey=True)
+fig, ax = plt.subplots(1, 2, sharey=True,sharex=True)
 y = [0]
 y = np.append(y, wpr.hgt)
 
-for thres in results.keys():
+cmap = discrete_cmap(7, base_cmap='Set1')
+colors = [cmap(r) for r in range(len(thres))]
+lw = 3
 
-    U_stack = np.squeeze(pandas2stack(results[thres]['U'])).T
-    V_stack = np.squeeze(pandas2stack(results[thres]['V'])).T
+for thres,cl in zip(results.keys(),colors):
+
+    U_stack = np.array(results[thres]['U'].tolist())
+    V_stack = np.array(results[thres]['V'].tolist())
 
     U_mean = np.nanmean(U_stack, axis=0)
     V_mean = np.nanmean(V_stack, axis=0)
 
-    ax[0].plot(U_mean, y, label=str(thres)+'$^{\circ}$')
-    ax[1].plot(V_mean, y)
+    ax[0].plot(U_mean, y, color=cl, lw=lw,
+               label=str(thres)+'$^{\circ}$')
+    ax[1].plot(V_mean, y, color=cl, lw=lw)
 
 ax[0].set_ylabel('Altitude [m] MSL')
 ax[0].legend(loc=0, fontsize=15)
@@ -117,6 +116,11 @@ ax[0].set_xlabel('$[m\,s^{-1}]$')
 
 ax[1].text(6,4100,'V-comp', ha='center', fontsize=15)
 ax[1].set_xlabel('$[m\,s^{-1}]$')
+
+ax[0].grid(True)
+ax[1].grid(True)
+
+ax[0].set_xlim([-10,15])
 
 plt.subplots_adjust(bottom=0.15)
 
