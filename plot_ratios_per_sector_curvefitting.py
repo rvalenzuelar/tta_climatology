@@ -24,36 +24,32 @@ results = collections.OrderedDict()
 
 txt = open('ratio_rr_persector_results.txt','read')
 lines = txt.readlines()
-join  = ''.join(lines).replace('\n','')
+join  = ''.join(lines).replace('\n', '')
 dictline = join.split(';')
 for dl in dictline:
     line = ast.literal_eval(dl)
-    results[line.keys()[0]]=line.values()[0]
+    results[line.keys()[0]] = line.values()[0]
 txt.close()
 
-x = range(90,280,10)       
+x = range(90, 280, 10)
 k = 'Surf-500m'
 
-out_rto = curv_fit(x=x,y=results[k]['ratio'],
-                model='symmetrical')
+out_rto = curv_fit(x=x, y=results[k]['ratio'],
+                   model='4PL')
 
-out_czd = curv_fit(x=x,y=results[k]['TTczd'],
-                model='gaussian')
+out_czd = curv_fit(x=x, y=results[k]['TTczd'],
+                   model='gaussian')
                 
-out_bby = curv_fit(x=x,y=results[k]['TTbby'],
-                model='gaussian')
+out_bby = curv_fit(x=x, y=results[k]['TTbby'],
+                   model='gaussian')
                 
-
-
-
 la = out_rto.params['la'].value
 gr = out_rto.params['gr'].value
 ce = out_rto.params['ce'].value
 ua = out_rto.params['ua'].value
-tx  = 'bot_asym:    {:2.1f}\ngrowth_rate:{:2.1f}\n'
+tx = 'bot_asym:    {:2.1f}\ngrowth_rate:{:2.1f}\n'
 tx += 'center:         {:2.1f}\nupp_asym:   {:2.1f}'
 tx_rto = tx.format(la,gr,ce,ua)
-
 
 mu_czd = out_czd.params['center'].value
 si_czd = out_czd.params['sigma'].value
@@ -67,10 +63,10 @@ xnew = np.array(range(90,280,1))
 
 scale = 1.4
 fig,axes = plt.subplots(2,1,
-                        figsize=(6*scale,8*scale),
+                        figsize=(6*scale, 8*scale),
                         sharex=True
                         )
-axes=axes.flatten()
+axes = axes.flatten()
 
 
 cmap = discrete_cmap(7, base_cmap='Set1')
@@ -85,12 +81,12 @@ rsq_czd = out_czd.R_sq
 rsq_rto = out_rto.R_sq
 
 axes[0].plot(x,results[k]['TTczd'],'o',
-            color=cmap(1),label='CZD rain')
+             color=cmap(1),label='CZD rain')
 axes[0].plot(x,results[k]['TTbby'],'o',
-            color=cmap(2),label='BBY rain')
+             color=cmap(2),label='BBY rain')
 axes[0].plot(xnew,ynew_czd,lw=lw,
-            color=cmap(1),
-            label='Gaussian fit (R-sq: {:2.2f})'.format(rsq_czd))
+             color=cmap(1),
+             label='Gaussian fit (R-sq: {:2.2f})'.format(rsq_czd))
 axes[0].plot(xnew,ynew_bby,lw=lw,
              color=cmap(2),
              label='Gaussian fit (R-sq: {:2.2f})'.format(rsq_bby))
@@ -125,7 +121,9 @@ plt.suptitle(tx,fontsize=15,weight='bold',y=0.96)
 
 plt.subplots_adjust(hspace=0.05)
 
-#fname='/home/raul/Desktop/relationship_rain_wd.png'
-fname='/Users/raulv/Desktop/relationship_rain_wd.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+plt.show()
+
+# #fname='/home/raul/Desktop/relationship_rain_wd.png'
+# fname='/Users/raulv/Desktop/relationship_rain_wd.png'
+# plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#             bbox_inches='tight')

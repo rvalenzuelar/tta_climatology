@@ -17,7 +17,7 @@ import lmfit
 import numpy as np
 
 
-def logistic_4P(x,la,gr,ce,ua):
+def logistic_4p(x, la, gr, ce, ua):
     '''
         la: lower asymptote
         ua: upper asymptote
@@ -26,7 +26,8 @@ def logistic_4P(x,la,gr,ce,ua):
     '''
     return ua + (la-ua)/(1 + (x/ce)**gr)
 
-def logistic_5P(x,la,gr,ce,ua,sy):
+
+def logistic_5p(x, la, gr, ce, ua, sy):
     '''
         la: lower asymptote
         ua: upper asymptote
@@ -35,39 +36,40 @@ def logistic_5P(x,la,gr,ce,ua,sy):
         sy: symmetry
     '''
     return ua + (la-ua)/(1 + (x/ce)**gr)**sy
-    
-def curv_fit(x=None,y=None,model=None):
+
+
+def curv_fit(x=None, y=None, model=None):
     
     x = np.array(x)    
     y = np.array(y)    
     params = lmfit.Parameters()
     
     if model == 'gaussian':
-        mod  = lmfit.models.GaussianModel()
+        mod = lmfit.models.GaussianModel()
         params = mod.guess(y, x=x)
-        out  = mod.fit(y,params, x=x)
-        R_sq = 1 - out.residual.var()/np.var(y)
+        out = mod.fit(y,params, x=x)
+        r_sq = 1 - out.residual.var()/np.var(y)
         
     elif model == '4PL':
-        mod = lmfit.Model(logistic_4P)
-        params.add('la',value=1.0)
-        params.add('gr',value=120.0, vary=False)
-        params.add('ce',value=150.0)
-        params.add('ua',value=3.0)
-        out = mod.fit(y,params,x=x)
-        R_sq = 1 - out.residual.var()/np.var(y)
+        mod = lmfit.Model(logistic_4p)
+        params.add('la', value=1.0)
+        params.add('gr', value=120.0, vary=False)
+        params.add('ce', value=150.0)
+        params.add('ua', value=3.0)
+        out = mod.fit(y, params,x=x)
+        r_sq = 1 - out.residual.var()/np.var(y)
         
     elif model == '5PL':
-        mod = lmfit.Model(logistic_5P)        
-        params.add('la',value=1.0)
-        params.add('gr',value=1.0)
-        params.add('ce',value=1.0)
-        params.add('ua',value=1.0)
-        params.add('sy',value=1.0)        
-        out = mod.fit(y,params,x=x)
-        R_sq = 1 - out.residual.var()/np.var(y)   
+        mod = lmfit.Model(logistic_5p)
+        params.add('la', value=1.0)
+        params.add('gr', value=1.0)
+        params.add('ce', value=1.0)
+        params.add('ua', value=1.0)
+        params.add('sy', value=1.0)
+        out = mod.fit(y, params, x=x)
+        r_sq = 1 - out.residual.var()/np.var(y)
     
-    out.R_sq = R_sq
+    out.R_sq = r_sq
     return out
 
 def get_params_err(out):

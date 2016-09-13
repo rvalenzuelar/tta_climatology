@@ -12,30 +12,30 @@ from tta_analysis2 import tta_analysis
 years = [1998]
 #years = [1998]+range(2001,2013)
 
-#''' creates one param per wd sector '''               
-#params_wsec = [{ 'wdir_thres':  '[{},{}['.format(a,a+10),
-#                'wdir_layer': [0,500],
-#                'rain_czd':   0.25,
-#                'nhours':     1
-#              } for a in range(85,275,10)]
+''' creates one param per wd sector '''
+params_wsec = [{ 'wdir_thres':  '[{},{}['.format(a,a+10),
+               'wdir_layer': [0,500],
+               'rain_czd':   0.25,
+               'nhours':     1
+             } for a in range(85,275,10)]
+
+params = params_wsec
+
+# ''' creates one param per nhour '''
+# params_nh = [{ 'wdir_thres': 150,
+#                 'wdir_layer': [0,500],
+#                 'rain_czd':   0.25,
+#                 'nhours':     a
+#               } for a in [1,2,4,8]]
 #
-#params = params_wsec
-
-''' creates one param per nhour '''
-params_nh = [{ 'wdir_thres': 150,
-                'wdir_layer': [0,500],
-                'rain_czd':   0.25,
-                'nhours':     a
-              } for a in [1,2,4,8]]
-
-''' creates one param per wdir_thres '''
-params_wth = [{ 'wdir_thres': a,
-                'wdir_layer': [0,500],
-                'rain_czd':   0.25,
-                'nhours':     2
-              } for a in [140,160]]
-
-params = params_nh + params_wth
+# ''' creates one param per wdir_thres '''
+# params_wth = [{ 'wdir_thres': a,
+#                 'wdir_layer': [0,500],
+#                 'rain_czd':   0.25,
+#                 'nhours':     2
+#               } for a in [140,160]]
+#
+# params = params_nh + params_wth
 
 try:
     results

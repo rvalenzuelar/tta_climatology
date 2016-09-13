@@ -57,8 +57,8 @@ except NameError:
         last_bby = bby.dframe.index[-1]
         last_czd = czd.dframe.index[-1]
         last_wpr = wpr.dframe.index[-1]
-        first = max(first_bby ,first_czd ,first_wpr)
-        last  = min(last_bby ,last_czd ,last_wpr)
+        first = max(first_bby, first_czd, first_wpr)
+        last = min(last_bby, last_czd, last_wpr)
 
         ' reduce time interval so all start and end at same time '
         wpr = wpr.dframe.loc[first:last]
@@ -72,7 +72,7 @@ except NameError:
         wdr = wpr.wdir.map(lambda x: [surf_wdr.next()] + x)
 
         ' check nans on precip '
-        precip = pd.concat([bby.precip ,czd.precip] ,axis=1)
+        precip = pd.concat([bby.precip, czd.precip] ,axis=1)
         precip_nans = precip.apply(lambda x: x.isnull().any(),
                                    axis=1 ,reduce=True)
         precip_nans. name ='precip_nan'
@@ -122,22 +122,23 @@ wd_layer[wd_layer > 360] -= 360
 thres = [112, 126, 140, 154, 168]
 cmap = discrete_cmap(7, base_cmap='OrRd')
 colors1 = [cmap(r+2) for r in range(len(thres))]
-cmap = sns.color_palette("GnBu_d",6)
+cmap = sns.color_palette("GnBu_d", 6)
 cmap.reverse()
 colors2 = cmap
 lw = 3
 
 fig, ax = plt.subplots(1, 2, sharey=True,sharex=True)
 
-for th,cl1,cl2 in zip(thres, colors1, colors2):
+for th, cl1, cl2 in zip(thres, colors1, colors2):
 
-    wd_thr = wd_layer[wd_layer < th]
+    ' sensitivity here '
+    wd_thr = wd_layer[wd_layer <= th]
 
     U_thr = U_df[wd_thr.index]
     V_thr = V_df[wd_thr.index]
 
-    U_thr_mean = np.nanmean(np.array(U_thr.tolist()),axis=0)
-    V_thr_mean = np.nanmean(np.array(V_thr.tolist()),axis=0)
+    U_thr_mean = np.nanmean(np.array(U_thr.tolist()), axis=0)
+    V_thr_mean = np.nanmean(np.array(V_thr.tolist()), axis=0)
 
     y = [0]
     y = np.append(y, hgt)
@@ -147,11 +148,11 @@ for th,cl1,cl2 in zip(thres, colors1, colors2):
     else:
         mk = None
     ax[0].plot(U_thr_mean, y, color=cl1, lw=lw,
-               label='$<$'+str(th)+'$^{\circ}$',
+               label='$\leq$'+str(th)+'$^{\circ}$',
                marker=mk)
     ax[1].plot(V_thr_mean, y, color=cl2, lw=lw,
-               label='$<$' + str(th) + '$^{\circ}$',
-                marker=mk)
+               label='$\leq$' + str(th) + '$^{\circ}$',
+               marker=mk)
 
 ax[0].vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
              lw=lw, linestyle='--')
@@ -162,7 +163,7 @@ ax[0].set_ylim([0, 3000])
 
 ax[0].set_ylabel('Altitude [m] MSL')
 ax[0].legend(loc=0, fontsize=12, numpoints=1)
-ax[0].text(0.5,1.03,'U-comp',
+ax[0].text(0.5, 1.03, 'U-comp',
            fontsize=14,
            ha='center',
            va='center',
@@ -170,7 +171,7 @@ ax[0].text(0.5,1.03,'U-comp',
            transform=ax[0].transAxes)
 ax[0].set_xlabel('$[m\,s^{-1}]$')
 ax[1].legend(loc=0, fontsize=12, numpoints=1)
-ax[1].text(0.5,1.03,'V-comp',
+ax[1].text(0.5, 1.03, 'V-comp',
            fontsize=14,
            ha='center',
            va='center',
@@ -193,12 +194,14 @@ ax[0].set_xlim([-10,15])
 
 plt.subplots_adjust(top=0.85, bottom=0.1)
 
-tx = '13-season mean wind component profile\nper wind direction threshold'
+tx = "13-season mean wind component profile" \
+     "\nper wind direction threshold"
 plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
+# plt.show()
 
-# #fname='/home/raul/Desktop/fig_windrose_layer_0-500.png'
-fname = ('/Users/raulvalenzuela/Documents/'
-         'windprof_tta_sensit.png')
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
+local_dir = '/home/raul/Desktop/'
+# local_dir ='/Users/raulvalenzuela/Documents/'
+fname = local_dir+'windprof_tta_sensit.png'
+plt.savefig(fname, dpi=300, format='png', papertype='letter',
            bbox_inches='tight')
