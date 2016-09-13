@@ -667,71 +667,7 @@ class tta_analysis:
                              tta_hours, notta_hours,
                              rain_perc_bby, rain_perc_czd])
 
-def bootstrap_ratio(data1, data2, num_samples, alpha):
 
-    import numpy.random as npr
-
-    '''
-        Returns bootstrap estimate of 100.0*(1-alpha) CI for statistic.
-    '''
-
-    ''' number of data points (data1=data2)
-    '''
-    n = len(data1)
-
-    ''' num_samples arrays with random indices of data
-        allowing repeated indices (sampling with replacement)
-    '''
-    idx = npr.randint(0, n, (num_samples, n))
-
-    ''' get the samples of random indices '''
-    samples1 = data1[idx]
-    samples2 = data2[idx]
-
-    ''' get the statistic along axis 1 and sort it'''
-    stat1 = np.mean(samples1, axis=1)
-    stat2 = np.mean(samples2, axis=1)
-
-    ratio = np.sort(stat1/stat2)
-
-    ''' confidence interval '''
-    bot_CI = ratio[int((alpha/2.0)*num_samples)]
-    top_CI = ratio[int((1-alpha/2.0)*num_samples)]
-
-    return (bot_CI, top_CI)
-
-
-
-def bootstrap(data, num_samples, statistic, alpha):
-    
-    import numpy.random as npr    
-    
-    '''
-        Returns bootstrap estimate of 100.0*(1-alpha) CI for statistic.
-        (source:http://people.duke.edu/~ccc14/pcfb/analysis.html)
-    '''
-    
-    ''' number of data points '''
-    n = len(data)
-    
-    ''' num_samples arrays with random indices of data
-        allowing repeated indices (sampling with replacement)
-    '''
-    idx = npr.randint(0, n, (num_samples, n))
-    
-    ''' get the samples of random indices '''
-    samples = data[idx]
-    
-    ''' get the statistic along axis 1 and sort it'''
-    stat = np.sort(statistic(samples, 1))
-
-    ''' confidence interval '''    
-    bot_CI = stat[int((alpha/2.0)*num_samples)] 
-    top_CI = stat[int((1-alpha/2.0)*num_samples)]
-    
-    return (bot_CI,top_CI)
-
-        
 def parse_operator(target, query):
 
     import operator as op
