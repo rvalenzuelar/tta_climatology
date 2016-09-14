@@ -28,9 +28,11 @@ years = [1998] + range(2001, 2013)
 try:
     wd_layer
 except NameError:
-    out = tta.start(years=years,layer=[0,500])
-    wd_layer = out['wd_layer']
+    out = tta.start(years=years, layer=[0,500])
     precip_good = out['precip_good']
+    precip_good = precip_good[precip_good.czd > 0.25]
+    wd_layer = out['wd_layer']
+    wd_layer = wd_layer[precip_good.index]
 
     bby_rainr = list()
     czd_rainr = list()
@@ -43,7 +45,7 @@ except NameError:
     rto_CI_top = list()
 
     " construct threshold array "
-    del_th = 10
+    del_th = 30
     ini_th = 90
     end_th = 270
     thres = np.array(range(ini_th-del_th/2, end_th+del_th/2, del_th))
@@ -110,7 +112,7 @@ cl_rto = cmap(0)
 mk_size = 40
 scale = 1.4
 fig, ax = plt.subplots(2, 1,
-                       figsize=(6*scale, 8*scale),
+                       figsize=(6*scale, 6*scale),
                        sharey=True, sharex=True)
 
 ' ------ add mean values and CI ------ '
@@ -159,18 +161,21 @@ la = fit_rto.params['la'].value
 gr = fit_rto.params['gr'].value
 ce = fit_rto.params['ce'].value
 ua = fit_rto.params['ua'].value
-tx = 'bot_asym:    {0:2.1f}\ngrowth_rate:{1:2.1f}\n'
-tx += 'center:         {2:2.1f}\nupp_asym:   {3:2.1f}\n'
-tx += '$r^{5}$:{4:2.2f}'
-tx_rto = tx.format(la, gr, ce, ua, fit_rto.R_sq, '2')
+tx = '$\mathit{{u}}$: {3:2.1f}\n' \
+     '$\mathit{{l}}$: {0:2.1f}\n' \
+     '$\mathit{{g}}$: {1:2.1f}\n' \
+     '$\mathit{{c}}$: {2:2.1f}\n' \
+     '$r^{{2}}$:{4:2.2f}'
+tx_rto = tx.format(la, gr, ce, ua, fit_rto.R_sq)
 
 grp = zip([tx_bby, tx_czd, tx_rto],
           [ax[0], ax[0], ax[1]],
           [cl_bby, cl_czd, cl_rto],
           [(245, 0.5), (195, 3.4), (145, 1.6)],
           [(240, 2.0), (210, 4.0), (180, 0.5)],
+          ['k','k',(0,0,0,0)]
           )
-for tx, a, cl, xy1, xy2 in grp:
+for tx, a, cl, xy1, xy2, acl in grp:
     a.annotate(tx,
                xy=xy1,
                xytext=xy2,
@@ -181,8 +186,8 @@ for tx, a, cl, xy1, xy2 in grp:
                weight='bold',
                fontsize=14,
                arrowprops=dict(arrowstyle='-|>',
-                               ec='k',
-                               fc='k',
+                               ec=acl,
+                               fc=acl,
                                )
                )
 
@@ -209,6 +214,10 @@ ax[1].plot(xnew,ynew_rto,lw=lw,
            label=logi_tx)
 
 ' ------ general figure setup ------ '
+ax[0].text(0.9,0.9,'(a)',
+           fontsize=15,
+           weight='bold',
+           transform=ax[0].transAxes)
 ax[0].set_xticks(range(90, 280, 30))
 ax[0].set_xlim([88, 272])
 ax[0].set_ylabel('rain rate $[mm h^{-1}]$')
@@ -222,6 +231,10 @@ leg = ax[0].legend([ha[3], ha[0], ha[2], ha[1]],
                    loc=2)
 leg.get_frame().set_visible(False)
 
+ax[1].text(0.9,0.9,'(b)',
+           fontsize=15,
+           weight='bold',
+           transform=ax[1].transAxes)
 ax[1].set_ylim([0, 6])
 ax[1].set_ylabel('ratio')
 ax[1].set_xlabel('wind direction')
@@ -237,16 +250,20 @@ leg.get_frame().set_visible(False)
 k = 'Surf-500m'
 tx = '13-season relationship between CZD, BBY rain\n'
 tx += 'and wind direction over BBY in the layer-mean {}\n'.format(k)
-tx += '(wind direction bins of '+str(del_th)+'$^{\circ}$)'
-plt.suptitle(tx, fontsize=15, weight='bold', y=0.99)
+tx += '(CZD rain > 0.25mm; wind direction bins of {} )'.format(str(del_th))
+plt.suptitle(tx, fontsize=15, weight='bold', y=1.0)
+ax[0].text(0.82,1.07,'$^{\circ}$',
+           fontsize=15,
+           weight='bold',
+           transform=ax[0].transAxes)
+
 
 plt.subplots_adjust(hspace=0.05)
 
-plt.show()
+# plt.show()
 
-# # place = '/home/raul/Desktop/'
-# place = '/Users/raulvalenzuela/Documents/'
-# fname='relationship_rain_wd_bin{}.png'.format(del_th)
-# # fname='/Users/raulv/Desktop/relationship_rain_wd.png'
-# plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
-#             bbox_inches='tight')
+# place = '/home/raul/Desktop/'
+place = '/Users/raulvalenzuela/Documents/'
+fname='relationship_rain_wd_bin{}.png'.format(del_th)
+plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
+            bbox_inches='tight')

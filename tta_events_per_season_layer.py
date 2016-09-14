@@ -3,6 +3,10 @@
 Created on Fri Sep  2 10:55:16 2016
 
 @author: raul
+
+DEPRECATED
+
+
 """
 
 import numpy as np
@@ -167,12 +171,12 @@ plt.suptitle(tx,fontsize=18,weight='bold',y=0.95)
 
 ax.legend_.remove()
 
-#plt.show()
+plt.show()
 
-#fname='/home/raul/Desktop/fig_events_per_season_wd150_surf-500m.png'
-fname='/Users/raulv/Desktop/fig_events_per_season_wd150_surf-500m.png'
-plt.savefig(fname, dpi=150, format='png',papertype='letter',
-            bbox_inches='tight')
+# #fname='/home/raul/Desktop/fig_events_per_season_wd150_surf-500m.png'
+# fname='/Users/raulv/Desktop/fig_events_per_season_wd150_surf-500m.png'
+# plt.savefig(fname, dpi=150, format='png',papertype='letter',
+#             bbox_inches='tight')
 
 
 

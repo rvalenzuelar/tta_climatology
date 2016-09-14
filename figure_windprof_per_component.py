@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import parse_data
 import matplotlib.gridspec as gridspec
-
+import string
 from matplotlib import rcParams
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from rv_utilities import discrete_cmap
@@ -265,6 +265,22 @@ for row, col, n in zip(anrows,ancols, range(4)):
             rotation=rot[n],
             transform=ax.transAxes)
 
+" panel name"
+if out == 'mean':
+    rows = [0, 0, 0, 1, 1, 1]
+    cols = [0, 1, 2, 0, 1, 2]
+elif out == 'shear':
+    rows = [0, 0, 1, 1]
+    cols = [0, 1, 0, 1]
+pname = iter(list(string.ascii_lowercase)[:len(rows)])
+for p,r,c, in zip(pname,rows,cols):
+    ax = axes[r,c]
+    transf = ax.transAxes
+    ax.text(0.8,0.93,'({})'.format(p),
+            fontsize=15,
+            weight='bold',
+            transform=transf)
+
 if out == 'mean':
     tx = '13-season mean and std_dev wind component profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
@@ -274,6 +290,7 @@ elif out == 'shear':
     plt.subplots_adjust(hspace=0.1, wspace=0.15, right=1.15)
 plt.suptitle(tx,fontsize=15,weight='bold',y=0.98)
 
+# plt.show()
 
 # #fname='/home/raul/Desktop/fig_windrose_layer_0-500.png'
 fname = ('/Users/raulvalenzuela/Documents/'

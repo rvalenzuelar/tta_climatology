@@ -154,29 +154,30 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
                label='$\leq$' + str(th) + '$^{\circ}$',
                marker=mk)
 
-ax[0].vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
-             lw=lw, linestyle='--')
-ax[1].vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
-             lw=lw, linestyle='--')
 
-ax[0].set_ylim([0, 3000])
+for a,ptx,comp in zip(ax,['(a)','(b)'],['U-comp','V-comp']):
+    a.text(0.05, 0.95, ptx,
+           fontsize=15,
+           weight='bold',
+           transform=a.transAxes)
+    a.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
+             lw=lw, linestyle='--')
+    a.text(0.5, 1.03, comp,
+           fontsize=14,
+           ha='center',
+           va='center',
+           weight='bold',
+           transform=a.transAxes)
+    a.set_xlabel('$[m\,s^{-1}]$')
+    a.set_ylim([0, 3000])
+    a.set_xlim([-10, 15])
+    a.grid(True)
 
 ax[0].set_ylabel('Altitude [m] MSL')
 ax[0].legend(loc=0, fontsize=12, numpoints=1)
-ax[0].text(0.5, 1.03, 'U-comp',
-           fontsize=14,
-           ha='center',
-           va='center',
-           weight='bold',
-           transform=ax[0].transAxes)
-ax[0].set_xlabel('$[m\,s^{-1}]$')
-ax[1].legend(loc=0, fontsize=12, numpoints=1)
-ax[1].text(0.5, 1.03, 'V-comp',
-           fontsize=14,
-           ha='center',
-           va='center',
-           weight='bold',
-           transform=ax[1].transAxes)
+
+
+ax[1].legend(loc=6, fontsize=12, numpoints=1)
 tx = 'czd-rain (n={:d})'.format(WD.index.size)
 ax[1].text(1.05, 0.5, tx,
            fontsize=14,
@@ -185,12 +186,6 @@ ax[1].text(1.05, 0.5, tx,
            weight='bold',
            transform=ax[1].transAxes,
            rotation=-90)
-ax[1].set_xlabel('$[m\,s^{-1}]$')
-
-ax[0].grid(True)
-ax[1].grid(True)
-
-ax[0].set_xlim([-10,15])
 
 plt.subplots_adjust(top=0.85, bottom=0.1)
 
@@ -200,8 +195,8 @@ plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
 # plt.show()
 
-local_dir = '/home/raul/Desktop/'
-# local_dir ='/Users/raulvalenzuela/Documents/'
-fname = local_dir+'windprof_tta_sensit.png'
+# place = '/home/raul/Desktop/'
+place ='/Users/raulvalenzuela/Documents/'
+fname = place+'windprof_tta_sensit.png'
 plt.savefig(fname, dpi=300, format='png', papertype='letter',
            bbox_inches='tight')
