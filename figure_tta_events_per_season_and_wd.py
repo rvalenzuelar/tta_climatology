@@ -11,8 +11,8 @@ import numpy as np
 import seaborn as sns
 import tta_analysis3 as tta
 import pandas as pd
+import tta_continuity
 from matplotlib import rcParams
-from rv_utilities import discrete_cmap
 
 # sns.reset_orig()
 sns.set_style("whitegrid")
@@ -32,8 +32,6 @@ except NameError:
     out = tta.start(years=years,layer=[0,500])
     wd_layer = out['wd_layer'][out['WD_rain'].index]
 
-
-
 hours_df = pd.DataFrame()
 events_df = pd.DataFrame()
 
@@ -51,40 +49,15 @@ for th in thres:
             events = np.append(events, [0])
         else:
             target = wd_layer[str(year)][wd_layer[str(year)] < th]
-            target_time = pd.Series(target.index)
-            offset = pd.offsets.Hour(1).delta
-            time_del = target_time - target_time.shift()
-            time_del.index = target.index
-            time_del[0] = offset  # replace NaT
-
-            del_val = time_del.values
-            del_clas = np.array([1])
-            clas = 1
-            ntotal = del_val[1:].size
-            h = np.timedelta64(1, 'h')
-            for n in range(1,ntotal+1):
-
-                cond1 = (del_val[n] != h) and (del_val[n-1] != h)
-                cond2 = (del_val[n] != h) and (del_val[n - 1] == h)
-                if cond1 or cond2:
-                    clas += 1
-
-                del_clas = np.append(del_clas, [clas])
-
-            asd = pd.Series(del_clas)
-            asd.index = time_del.index
-            time_df = pd.concat([time_del,asd], axis=1)
-            time_df.columns = ['time_del','clasf']
-
+            time_df = tta_continuity.get_df(target)
             hist = time_df.clasf.value_counts()
             hours = np.append(hours, hist.sum())
             events = np.append(events, hist.count())
 
-
-    data = {'h':hours,
-            'year':range(1998, 2013),
-            'th':[th]*hours.size}
-    df=pd.DataFrame(data=data)
+    data = {'h': hours,
+            'year': range(1998, 2013),
+            'th': [th]*hours.size}
+    df = pd.DataFrame(data=data)
     hours_df = hours_df.append(df)
 
     data = {'h': events,
