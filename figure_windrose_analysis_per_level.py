@@ -45,7 +45,7 @@ def get_wdir_mode(axes):
     return stat
 
 
-target_hgts = tuple(range(-1,15))
+target_hgts = tuple(range(-1,11))
 #target_hgts = (0,2,4,6,8,10)
 
 #years = [1998]
@@ -58,7 +58,7 @@ except NameError:
     wd = {th:list() for th in target_hgts}
     wdsrf = list()
     
-    select_rain = 'all'    
+    select_rain = 'czd'
     
     for year in years:
           
@@ -100,10 +100,10 @@ except NameError:
                 ws[h].append(s[h])
                 wd[h].append(d[h])
 
-scale = 1.3
-axes = WindroseAxes.from_ax(subplots=(4, 4),
+scale = 1.0
+axes = WindroseAxes.from_ax(subplots=(3, 4),
                             space=(0.05, 0.1),
-                            figsize=(8*scale, 9*scale))
+                            figsize=(8*scale, 7*scale))
 lw = 2
 zorder = 10000
 hgt = np.append(hgt, (43,))
@@ -158,7 +158,6 @@ for h,ax in zip(target_hgts,axes):
         ax.set_yticklabels('')            
         
     ''' add stat line '''
-
 #    stat_wdir = get_wdir_mode(ax)
 #    theta = np.array([-stat_wdir+90,-stat_wdir+90])*np.pi/180.
 #    ax.plot(theta,[0,max_ylim], color='r',
@@ -170,10 +169,13 @@ for h,ax in zip(target_hgts,axes):
 
     
 ''' add legend '''
-axes[12].legend(loc=(0.4,-0.5), ncol=4)
-axes[13].text(1.0,-0.18,'wind speed [$m\,s^{-1}$]',
-              fontsize=15,ha='center',
-              transform=axes[13].transAxes)
+axes[8].legend(bbox_to_anchor=(-0.2, -0.7, 0.1, 0.1),
+               # loc=(-0.1,-0.6),
+               ncol=4,
+               fontsize=12)
+axes[9].text(1.0,-0.2,'wind speed [$m\,s^{-1}$]',
+              fontsize=12,ha='center',
+              transform=axes[9].transAxes)
 
 if select_rain == 'czd':
     select_rain+='-rain'
@@ -182,15 +184,16 @@ elif select_rain == 'bby':
 elif select_rain == 'all':
     select_rain = 'winter-season'
     
-tx  = 'Wind roses at BBY for {} hours'.format(select_rain)
+tx = 'Wind roses at BBY for {} hours'.format(select_rain)
 #tx  = 'Wind roses at BBY for hours with rain CZD '
 #tx += '$\geq$ 0.25 mm'
-plt.suptitle(tx,fontsize=15, weight='bold',y=0.95)
+plt.suptitle(tx,fontsize=15, weight='bold',y=0.99)
 
-#plt.show()
 
-fname=('/home/raul/Desktop/'
-       'windrose_perhgt_0-1449m_{}.png'.format(select_rain))
-#fname='/Users/raulv/Desktop/windrose_perhgt_srf-1500.png'
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
+# plt.show()
+
+# place = '/home/raul/Desktop/'
+place = '/Users/raulvalenzuela/Documents/'
+fname = 'windrose_perhgt_0-1081m_{}.png'.format(select_rain)
+plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
             bbox_inches='tight')

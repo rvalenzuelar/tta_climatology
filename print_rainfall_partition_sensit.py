@@ -9,17 +9,14 @@
 import tta_analysis3 as tta
 import tta_continuity
 
-# years = [1998, 2001]
+# years = [2004]
 years = [1998] + range(2001, 2013)
-
-# params = dict(rain_czd=0.25,nhours=1,
-#               wdir_thres=150,layer=[0, 500])
 
 params_hours = [{'wdir_thres': 150,
                  'wdir_layer': [0,500],
                  'rain_czd': 0.25,
                  'nhours': a
-                 } for a in [1,2,3,4]]
+                 } for a in [1,2,4,8]]
 
 params_wdir = [{'wdir_thres': a,
                  'wdir_layer': [0,500],
@@ -96,3 +93,8 @@ except NameError:
                          czd_tta,bby_tta,tta_ratio,tta_hours,
                          czd_notta,bby_notta,notta_ratio,
                          notta_hours))
+
+        # try:
+        #     print precip_good[precip_good.tta].loc['2004-02-16']
+        # except KeyError:
+        #     pass

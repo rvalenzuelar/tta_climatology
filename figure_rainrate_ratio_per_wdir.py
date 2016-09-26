@@ -45,7 +45,7 @@ except NameError:
     rto_CI_top = list()
 
     " construct threshold array "
-    del_th = 30
+    del_th = 10
     ini_th = 90
     end_th = 270
     thres = np.array(range(ini_th-del_th/2, end_th+del_th/2, del_th))
@@ -252,7 +252,7 @@ tx = '13-season relationship between CZD, BBY rain\n'
 tx += 'and wind direction over BBY in the layer-mean {}\n'.format(k)
 tx += '(CZD rain > 0.25mm; wind direction bins of {} )'.format(str(del_th))
 plt.suptitle(tx, fontsize=15, weight='bold', y=1.0)
-ax[0].text(0.82,1.07,'$^{\circ}$',
+ax[0].text(0.89,1.07,'$^{\circ}$',
            fontsize=15,
            weight='bold',
            transform=ax[0].transAxes)
