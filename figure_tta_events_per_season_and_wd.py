@@ -13,6 +13,7 @@ import tta_analysis3 as tta
 import pandas as pd
 import tta_continuity
 from matplotlib import rcParams
+from rv_utilities import discrete_cmap
 
 # sns.reset_orig()
 sns.set_style("whitegrid")
@@ -35,7 +36,7 @@ except NameError:
 hours_df = pd.DataFrame()
 events_df = pd.DataFrame()
 
-thres = [150]
+thres = [140]
 
 for th in thres:
 
@@ -71,9 +72,10 @@ labs = [str(int(np.mod(y,100.))).zfill(2)
 panels = ('(a)',
           '(b) Events of 1 or more hours',
           '(c)')
-ylims = [[0,250],[0,100],[2,4]]
-cls = sns.color_palette('Set3')
-
+ylims = [[0,250],[0,100],[1.8,4]]
+# cls = sns.color_palette('Set3')
+dcmap = discrete_cmap(7, base_cmap='Set1')
+cls = [dcmap(0),dcmap(1),dcmap(2)]
 scale = 1.3
 fig,axes = plt.subplots(3,1,
                         figsize=(5*scale, 6*scale),
@@ -100,7 +102,7 @@ sns.barplot(x='year',
             data=events_df,
             ax=axes[1],
             # palette='GnBu'
-            color=cls[3]
+            color=cls[1]
             )
 
 for p in axes[1].patches:
@@ -112,7 +114,7 @@ for p in axes[1].patches:
 
 x = hours_df['year'].values
 hpe = hours_df['h']/events_df['h']
-sns.pointplot(x, hpe, ax=axes[2], color=cls[4])
+sns.pointplot(x, hpe, ax=axes[2], color=cls[2])
 
 
 tx = '$\overline{X}$ = '
@@ -126,11 +128,11 @@ for ax, panel_tx, ylim in zip(axes, panels, ylims):
     " mean line "
     if ax.get_gid() == 2:
         ax.hlines(hpe.mean(), -1, 15,
-                  color=cls[4],
+                  color=cls[2],
                   linestyle='--')
         ax.text(0.5, hpe.mean()+0.02,
                 tx+'{:2.1f}'.format(hpe.mean()),
-                color=cls[4],
+                color=cls[2],
                 weight='bold',
                 fontsize=15
                 )
@@ -154,7 +156,7 @@ plt.suptitle(tx,fontsize=18,weight='bold',y=0.95)
 # plt.show()
 
 place = '/Users/raulvalenzuela/Documents/'
-fname = place+'fig_events_per_season_wd150_surf-500m_rain.png'
+fname = place+'fig_events_per_season_wd140_surf-500m_rain.png'
 plt.savefig(fname, dpi=150, format='png',papertype='letter',
             bbox_inches='tight')
 

@@ -213,6 +213,21 @@ ax[1].plot(xnew,ynew_rto,lw=lw,
            color=cl_rto,
            label=logi_tx)
 
+' ------ add thres lines ------ '
+lw=3
+ls='--'
+ax[1].vlines(120,0,7,lw=lw,alpha=0.5,linestyle=ls)
+ax[1].vlines(130,0,7,lw=lw,alpha=0.5,linestyle=ls)
+ax[1].vlines(140,0,7,lw=lw,alpha=0.5,linestyle=ls)
+ax[1].vlines(150,0,7,lw=lw,alpha=0.5,linestyle=ls)
+ax[1].vlines(160,0,7,lw=lw,alpha=0.5,linestyle=ls)
+
+ax[1].text(120,6,'120',rotation=90,ha='right')
+ax[1].text(130,6,'130',rotation=90,ha='right')
+ax[1].text(140,6,'140',rotation=90,ha='right')
+ax[1].text(150,6,'150',rotation=90,ha='right')
+ax[1].text(160,6,'160',rotation=90,ha='right')
+
 ' ------ general figure setup ------ '
 ax[0].text(0.9,0.9,'(a)',
            fontsize=15,
@@ -235,7 +250,7 @@ ax[1].text(0.9,0.9,'(b)',
            fontsize=15,
            weight='bold',
            transform=ax[1].transAxes)
-ax[1].set_ylim([0, 6])
+ax[1].set_ylim([0, 7])
 ax[1].set_ylabel('ratio')
 ax[1].set_xlabel('wind direction')
 ax[1].grid(True)
@@ -244,7 +259,7 @@ leg = ax[1].legend(handles[::-1],
                    labels[::-1],
                    scatterpoints=1,
                    numpoints=1,
-                   loc=2)
+                   loc=(0.45, 0.75))
 leg.get_frame().set_visible(False)
 
 k = 'Surf-500m'

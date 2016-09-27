@@ -215,7 +215,7 @@ wind_mean[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
 wind_std[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
 wind_std[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
 
-out = 'mean-wind'
+out = 'shear-mod'
 
 if out == 'mean-comp':
     fig = plt.figure(figsize=(9,8))
@@ -324,33 +324,6 @@ elif out == 'mean-wind':
     axes[0,2].remove()
     axes[1,2].remove()
 
-    # wspd_all, wdir_all = wind_spd[0], wind_dir[0]
-    # wspd_rai, wdir_rai = wind_spd[1], wind_dir[1]
-
-
-    # u_all = wind_mean[0][90]
-    # v_all = wind_mean[0][180]
-    # u_rai = wind_mean[1][90]
-    # v_rai = wind_mean[1][180]
-    #
-    # spd_all = np.sqrt(u_all**2+v_all**2)
-    # dir_all = 270-np.arctan2(v_all, u_all)*180/np.pi
-    # dir_all[dir_all > 360] -= 360
-    #
-    # spd_rai = np.sqrt(u_rai**2+v_rai**2)
-    # dir_rai = 270-np.arctan2(v_rai, u_rai)*180/np.pi
-    # dir_rai[dir_rai > 360] -= 360
-    #
-    #
-    # wspd_all, wdir_all = wind_spd[0], wind_dir[0]
-    # wspd_rai, wdir_rai = wind_spd[1], wind_dir[1]
-    #
-    # " plot mean values "
-    # ax1.plot(wspd_all,y,color=colors[0],lw=lw)
-    # ax2.plot(dir_all,y,color=colors[1],lw=lw)
-    # ax3.plot(wspd_rai,y,color=colors[0],lw=lw)
-    # ax4.plot(wdir_rai,y,color=colors[1],lw=lw)
-
     WD_stack_all = np.array(WD[0].tolist())
     WS_stack_all = np.array(WS[0].tolist())
     WD_stack_rai = np.array(WD[1].tolist())
@@ -361,37 +334,63 @@ elif out == 'mean-wind':
     df3 = pd.DataFrame(data=WS_stack_rai)
     df4 = pd.DataFrame(data=WD_stack_rai)
 
-    df1.boxplot(vert=False,grid=False,whis=0,
-                showfliers=False,ax=ax1)
-    df2.boxplot(vert=False,grid=False,whis=0,
-                showfliers=False,ax=ax2)
-    df3.boxplot(vert=False,grid=False,whis=0,
-                showfliers=False,ax=ax3)
-    df4.boxplot(vert=False,grid=False,whis=0,
-                showfliers=False,ax=ax4)
+    whis = [5,95]
+    dfs = [df1, df2, df3, df4]
+    axs = [ax1, ax2, ax3, ax4]
+    for df,ax in zip(dfs,axs):
+        box = df.boxplot(vert=False,grid=False,whis=whis,
+                    showfliers=False,
+                    showbox=False,
+                    whiskerprops={'linestyle':'-'},
+                    medianprops={'linestyle':'-'},
+                    ax=ax)
 
-    f = interp1d(hgt.tolist(), range(1,41))
+        whisks = box['whiskers']
+        w1 = whisks[0::2]
+        w2 = whisks[1::2]
+        for l,r in zip(w1,w2):
+            ldata = l.get_xdata()
+            rdata = r.get_xdata()
+            x = [ldata[1],rdata[1]]
+            y = l.get_ydata()
+            ax.plot(x,y,color='b')
 
 
-    ax1.set_xlim([0,25])
-    ax3.set_xlim([0,25])
+    ax1.set_xlim([-1,28])
+    ax3.set_xlim([-1,28])
 
-    ax2.set_xticks(range(90,360,60))
-    ax4.set_xticks(range(90,360,60))
+    ax2.set_xticks(range(0,400,60))
+    ax4.set_xticks(range(0,400,60))
 
-    ax2.set_xlim([90,330])
-    ax4.set_xlim([90,330])
+    ax2.set_xlim([-10,370])
+    ax4.set_xlim([-10,370])
 
     anotU, anotV = ['speed', 'direction']
     anrows = [0, 0, 0, 1]
     ancols = [0, 1, 1, 1]
 
+    mode = df1.mode(axis=0).max().values
+    ax1.scatter(mode, range(1,42))
+
+    mode = df2.mode(axis=0).max().values
+    ax2.scatter(mode, range(1,42))
+
+    mode = df3.mode(axis=0).max().values
+    ax3.scatter(mode, range(1,42))
+
+    mode = df4.mode(axis=0).max().values
+    ax4.scatter(mode, range(1,42))
+
+
+    f = interp1d(hgt.tolist(), range(1,41))
     for ax in axs:
-        ax.grid(True)
+        ax.grid(False)
         newticks = [f(160)]+f(np.arange(570, 3500, 500)).tolist()
         ax.set_yticks(newticks)
         ax.set_yticklabels(np.arange(0, 3500, 500),fontsize=15)
         ax.set_ylim([0, f(3070)])
+
+
 
     ax1.set_xticklabels('')
     ax2.set_xticklabels('')
@@ -525,7 +524,7 @@ elif out == 'mean-wind':
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         right=1.15)
 elif out == 'shear-mod':
-    tx = '13-season shear magnitude profile'
+    tx = '13-season vertical wind shear profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         left=0.15, right=2.1)
 

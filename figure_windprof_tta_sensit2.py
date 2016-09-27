@@ -119,7 +119,8 @@ wd_layer = 270-(np.arctan2(mean_V, mean_U)*180/np.pi)
 wd_layer[wd_layer > 360] -= 360
 
 
-thres = [112, 126, 140, 154, 168]
+# thres = [112, 126, 140, 154, 168]
+thres = range(120,170,10)
 cmap = discrete_cmap(7, base_cmap='OrRd')
 colors1 = [cmap(r+2) for r in range(len(thres))]
 cmap = sns.color_palette("GnBu_d", 6)
@@ -127,18 +128,27 @@ cmap.reverse()
 colors2 = cmap
 lw = 3
 
-fig, ax = plt.subplots(1, 2, sharey=True,sharex=True)
+fig, ax = plt.subplots(2, 2, figsize=(8,8),
+                       sharey=True,sharex=True)
+ax = ax.flatten()
 
 for th, cl1, cl2 in zip(thres, colors1, colors2):
 
     ' sensitivity here '
-    wd_thr = wd_layer[wd_layer <= th]
+    wd_thr_less = wd_layer[wd_layer < th]
+    wd_thr_geq = wd_layer[wd_layer >= th]
 
-    U_thr = U_df[wd_thr.index]
-    V_thr = V_df[wd_thr.index]
+    U_thr_less = U_df[wd_thr_less.index]
+    V_thr_less = V_df[wd_thr_less.index]
 
-    U_thr_mean = np.nanmean(np.array(U_thr.tolist()), axis=0)
-    V_thr_mean = np.nanmean(np.array(V_thr.tolist()), axis=0)
+    U_thr_geq = U_df[wd_thr_geq.index]
+    V_thr_geq = V_df[wd_thr_geq.index]
+
+    U_thr_mean1 = np.nanmean(np.array(U_thr_less.tolist()), axis=0)
+    V_thr_mean1 = np.nanmean(np.array(V_thr_less.tolist()), axis=0)
+
+    U_thr_mean2 = np.nanmean(np.array(U_thr_geq.tolist()), axis=0)
+    V_thr_mean2 = np.nanmean(np.array(V_thr_geq.tolist()), axis=0)
 
     y = [0]
     y = np.append(y, hgt)
@@ -147,16 +157,22 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
         mk = 'o'
     else:
         mk = None
-    ax[0].plot(U_thr_mean, y, color=cl1, lw=lw,
-               label='$\leq$'+str(th)+'$^{\circ}$',
+    ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
+               label='$<$'+str(th)+'$^{\circ}$',
                marker=mk)
-    ax[1].plot(V_thr_mean, y, color=cl2, lw=lw,
-               label='$\leq$' + str(th) + '$^{\circ}$',
+    ax[1].plot(V_thr_mean1, y, color=cl2, lw=lw,
+               label='$<$' + str(th) + '$^{\circ}$',
+               marker=mk)
+    ax[2].plot(U_thr_mean2, y, color=cl1, lw=lw,
+               label='$\geq$' + str(th) + '$^{\circ}$',
+               marker=mk)
+    ax[3].plot(V_thr_mean2, y, color=cl2, lw=lw,
+               label='$\geq$' + str(th) + '$^{\circ}$',
                marker=mk)
 
-
-for a,ptx,comp in zip(ax,['(a)','(b)'],['U-comp','V-comp']):
-    a.text(0.05, 0.95, ptx,
+for a,ptx,comp in zip(ax,['(a)','(b)','(c)','(d)'],
+                      ['U-comp','V-comp','','']):
+    a.text(0.05, 0.9, ptx,
            fontsize=15,
            weight='bold',
            transform=a.transAxes)
@@ -168,29 +184,26 @@ for a,ptx,comp in zip(ax,['(a)','(b)'],['U-comp','V-comp']):
            va='center',
            weight='bold',
            transform=a.transAxes)
-    a.set_xlabel('$[m\,s^{-1}]$')
     a.set_ylim([0, 3000])
     a.set_xlim([-10, 15])
     a.grid(True)
 
+ax[2].set_xlabel('$[m\,s^{-1}]$')
+ax[3].set_xlabel('$[m\,s^{-1}]$')
 ax[0].set_ylabel('Altitude [m] MSL')
+
 ax[0].legend(loc=0, fontsize=12, numpoints=1)
-
-
 ax[1].legend(loc=6, fontsize=12, numpoints=1)
-tx = 'czd-rain (n={:d})'.format(WD.index.size)
-ax[1].text(1.05, 0.5, tx,
-           fontsize=14,
-           ha='center',
-           va='center',
-           weight='bold',
-           transform=ax[1].transAxes,
-           rotation=-90)
+ax[2].legend(loc=6, fontsize=12, numpoints=1)
+ax[3].legend(loc=6, fontsize=12, numpoints=1)
 
-plt.subplots_adjust(top=0.85, bottom=0.1)
+
+plt.subplots_adjust(top=0.9, bottom=0.1,
+                    hspace=0.05,wspace=0.1)
 
 tx = "13-season mean wind component profile" \
-     "\nper wind direction threshold"
+     "\nper wind direction threshold " \
+     "(czd > 0.25mm, n={:d})".format(WD.index.size)
 plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
 # plt.show()
