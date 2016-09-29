@@ -283,7 +283,7 @@ if out in ['mean-comp','shear']:
                 # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
                 ax.set_xlim([-5, 20])
                 if row == 1 and (col == 0 or col == 1):
-                    ax.set_xlabel('$[x1e^{-3}s^{-1}]$')
+                    ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
                 anotU, anotV = ['dU/dZ', 'dV/dZ']
                 anrows = [0, 0, 0, 1]
                 ancols = [0, 1, 1, 1]
@@ -456,7 +456,7 @@ elif out == 'shear-mod':
 
     axs[0].set_xticklabels('')
 
-    axs[3].set_xlabel('$[x1e^{-3}s^{-1}]$')
+    axs[3].set_xlabel('$[x10^{-3}\,s^{-1}]$')
     axs[0].set_ylabel('Altitude [m] MSL')
     axs[0].grid(True)
     axs[0].set_ylim([0, 3000])
