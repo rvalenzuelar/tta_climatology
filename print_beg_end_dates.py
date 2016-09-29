@@ -4,33 +4,34 @@ Created on Thu Jun 16 10:09:25 2016
 
 @author: raul
 """
-from tta_analysis2 import tta_analysis
-
-# params=dict(wdir_surf  = 130,
-#             wdir_wprof = 170,
-#             rain_bby   = None,
-#             rain_czd   = 0.25,
-#             nhours     = 1)
-
-params=dict(wdir_surf  = 360,
-            wdir_wprof = 360,
-            rain_bby   = None,
-            rain_czd   = None,
-            nhours     = 1)
+import tta_analysis3 as tta
 
 
-#years=[1998]
+# years = [1998]
 years = [1998]+range(2001,2013)
-template = '{:^6} - {:^20} - {:^20} - {:^4}'
-print(template.format('Season','Beg','End','Hours'))
-thours = 0
+template = '{:^6} - {:^20} - {:^20} - {:^11} - {:^11}'
+print(template.format('Season','Beg','End','all-hours', 'rainy-hours'))
+all_thours = 0
+rai_thours = 0
+
 for y in years:
-    tta = tta_analysis(y)
-    tta.start_df(**params)
-    year = tta.include_dates[-1].year
-    beg = tta.include_dates[0].strftime('%H%M UTC %d %b %Y')
-    end = tta.include_dates[-1].strftime('%H%M UTC %d %b %Y')
-    hours = tta.count_hrs_include
-    print(template.format(str(year),beg,end,str(hours)))
-    thours += hours
-print('Total hours: {}'.format(thours))
+
+    out = tta.start(years=[y], layer=[0,500],verbose=False)
+    precip_all = out['precip_good']
+    precip_rainy = precip_all[precip_all.czd >0.25]
+
+    year = precip_all.index[-1].year
+    beg = precip_all.index[0].strftime('%H%M UTC %d %b %Y')
+    end = precip_all.index[-1].strftime('%H%M UTC %d %b %Y')
+    all_hours = precip_all.index.size
+    rai_hours = precip_rainy.index.size
+    print(template.format(str(year),
+                          beg,
+                          end,
+                          str(all_hours),
+                          str(rai_hours)))
+    all_thours += all_hours
+    rai_thours += rai_hours
+
+print('Total all_hours: {}'.format(all_thours))
+print('Total rainy_hours: {}'.format(rai_thours))

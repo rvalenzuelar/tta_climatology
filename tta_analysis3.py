@@ -21,7 +21,7 @@
 import numpy as np
 
 
-def start(years=None, layer=None):
+def start(years=None, layer=None, verbose=True):
 
     import pandas as pd
     import parse_data
@@ -68,7 +68,8 @@ def start(years=None, layer=None):
                                    axis=1, reduce=True)
         precip_nans.name = 'precip_nan'
         tx = 'year:{}, any_precip_nan:{:4d}'
-        print(tx.format(year, precip_nans.sum()))
+        if verbose:
+            print(tx.format(year, precip_nans.sum()))
 
         ' check entire profile nans ( same for ws and wd)'
         prof_nans = wsp.apply(lambda x: np.isnan(x).all())
