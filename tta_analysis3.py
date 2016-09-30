@@ -119,6 +119,7 @@ def start(years=None, layer=None, verbose=True):
                 WD_rain=WD_rain,
                 WS_rain=WS_rain,
                 wd_layer=wd_layer,
+                precip=precip,
                 precip_good=precip_good)
 
 
