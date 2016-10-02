@@ -21,7 +21,7 @@
 import numpy as np
 
 
-def start(years=None, layer=None, verbose=True):
+def preprocess(years=None, layer=None, verbose=True):
 
     import pandas as pd
     import parse_data
@@ -121,6 +121,57 @@ def start(years=None, layer=None, verbose=True):
                 wd_layer=wd_layer,
                 precip=precip,
                 precip_good=precip_good)
+
+
+def analyis(indict, param):
+
+    import tta_continuity
+
+    precip_good = indict['precip_good']
+    precip_good = precip_good[precip_good.czd > param['rain_czd']]
+
+    " filter by wind direction "
+    wd_layer = indict['wd_layer']
+    wd_layer = wd_layer[precip_good.index]
+    wd_tta = wd_layer[wd_layer < param['wdir_thres']]
+    # wd_notta = wd_layer[wd_layer >= param['wdir_thres']]
+    precip_good['wd_layer'] = np.round(wd_layer,1)
+
+    " filter by continuity "
+    time_df = tta_continuity.get_df(wd_tta)
+    hist = time_df.clasf.value_counts()
+    query = hist[hist >= param['nhours']].index
+    tta_dates = time_df.loc[time_df['clasf'].isin(query)].index
+
+    " flag timestamps accordingly "
+    precip_good['tta'] = False
+    precip_good['tta'].loc[tta_dates] = True
+
+    tta_hours = precip_good[precip_good.tta].index.size
+    notta_hours = precip_good[~precip_good.tta].index.size
+
+    rain_bby_tta = precip_good.bby[precip_good.tta].sum()
+    rain_czd_tta = precip_good.czd[precip_good.tta].sum()
+    rain_bby_ntta = precip_good.bby[~precip_good.tta].sum()
+    rain_czd_ntta = precip_good.czd[~precip_good.tta].sum()
+
+    bby_tta = np.round(rain_bby_tta / tta_hours, 1)
+    czd_tta = np.round(rain_czd_tta / tta_hours, 1)
+    tta_ratio = czd_tta / bby_tta
+
+    bby_notta = np.round(rain_bby_ntta / notta_hours, 1)
+    czd_notta = np.round(rain_czd_ntta / notta_hours, 1)
+    notta_ratio = czd_notta / bby_notta
+
+    return dict(czd_tta=czd_tta,
+                bby_tta=bby_tta,
+                tta_ratio=tta_ratio,
+                tta_hours=tta_hours,
+                czd_notta=czd_notta,
+                bby_notta=bby_notta,
+                notta_ratio=notta_ratio,
+                notta_hours=notta_hours,
+                precip=precip_good)
 
 
 def bootstrap_ratio(data1, data2, num_samples, alpha):
