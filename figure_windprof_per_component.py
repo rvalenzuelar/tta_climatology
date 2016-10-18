@@ -35,20 +35,18 @@ def cos(arg):
 
 
 def comp2wind(u, v):
-    wdir = 270 - (np.arctan2(v,u)*180/np.pi)
+    wdir = 270 - (np.arctan2(v, u) * 180 / np.pi)
     wdir[wdir > 360] -= 360
-    wspd = np.sqrt(u**2+v**2)
-    return wspd,wdir
+    wspd = np.sqrt(u ** 2 + v ** 2)
+    return wspd, wdir
 
 
-def wind_stddev2(u,v):
-
+def wind_stddev2(u, v):
     '''
         Ackermann (1983,JCAM)
 
         u and v are time series at individual level
     '''
-
 
     m = np.vstack((u, v))
     bad = np.sum(np.isnan(m), axis=0).astype(bool)
@@ -58,51 +56,49 @@ def wind_stddev2(u,v):
     N = ug.size
 
     " mean "
-    U = ug.sum()/N
-    V = vg.sum()/N
+    U = ug.sum() / N
+    V = vg.sum() / N
 
     " variance "
-    sqr_u = (ug - U)**2
-    sqr_v = (vg - V)**2
-    var_u = sqr_u.sum()/N
-    var_v = sqr_v.sum()/N
+    sqr_u = (ug - U) ** 2
+    sqr_v = (vg - V) ** 2
+    var_u = sqr_u.sum() / N
+    var_v = sqr_v.sum() / N
 
     " covariance "
-    a = (ug-U)*(vg-V)
-    covar_uv = a.sum()/N
+    a = (ug - U) * (vg - V)
+    covar_uv = a.sum() / N
 
     " mean wind speed and direction "
-    S = np.sqrt(U**2 + V**2)
-    D = 270 - np.arctan2(V,U)*180/np.pi
+    S = np.sqrt(U ** 2 + V ** 2)
+    D = 270 - np.arctan2(V, U) * 180 / np.pi
 
-    S_std = np.sqrt(U**2*var_u + \
-                       V**2*var_v + \
-                       2*U*V*covar_uv)/S
+    S_std = np.sqrt(U ** 2 * var_u + \
+                    V ** 2 * var_v + \
+                    2 * U * V * covar_uv) / S
 
-    D_std = np.sqrt(V**2*var_u + \
-                       U**2*var_v - \
-                       2*U*V*covar_uv)/S**2
+    D_std = np.sqrt(V ** 2 * var_u + \
+                    U ** 2 * var_v - \
+                    2 * U * V * covar_uv) / S ** 2
 
     return S, S_std, D, D_std
 
 
-
 # years = [1998]
-years = [1998]+range(2001,2013)
+years = [1998] + range(2001, 2013)
 
-#max_hgt_gate = 15  # 1450 [m]
-#max_hgt_gate = 21  # 2000 [m]
+# max_hgt_gate = 15  # 1450 [m]
+# max_hgt_gate = 21  # 2000 [m]
 max_hgt_gate = 40  # 3750 [m] max top
 
 try:
     WS
 except NameError:
 
-    WD = [pd.Series(),pd.Series()]
-    WS = [pd.Series(),pd.Series()]
+    WD = [pd.Series(), pd.Series()]
+    WS = [pd.Series(), pd.Series()]
 
     for year in years:
-
         wpr = parse_data.windprof(year=year)
         bby = parse_data.surface('bby', year=year)
         czd = parse_data.surface('czd', year=year)
@@ -116,12 +112,12 @@ except NameError:
         last_bby = bby.dframe.index[-1]
         last_czd = czd.dframe.index[-1]
         last_wpr = wpr.dframe.index[-1]
-        first = max(first_bby,first_czd,first_wpr)   
-        last  = min(last_bby,last_czd,last_wpr)
+        first = max(first_bby, first_czd, first_wpr)
+        last = min(last_bby, last_czd, last_wpr)
 
         ' reduce time interval so all start and end at same time '
         wpr = wpr.dframe.loc[first:last]
-        bby = bby.dframe.loc[first:last]        
+        bby = bby.dframe.loc[first:last]
         czd = czd.dframe.loc[first:last]
 
         ' append surface values to windprof to make entire profile '
@@ -131,12 +127,12 @@ except NameError:
         wdr = wpr.wdir.map(lambda x: [surf_wdr.next()] + x)
 
         ' check nans on precip '
-        precip = pd.concat([bby.precip,czd.precip],axis=1)
+        precip = pd.concat([bby.precip, czd.precip], axis=1)
         precip_nans = precip.apply(lambda x: x.isnull().any(),
-                                   axis=1,reduce=True)
-        precip_nans.name='precip_nan'
+                                   axis=1, reduce=True)
+        precip_nans.name = 'precip_nan'
         tx = 'year:{}, any_precip_nan:{:4d}'
-        print(tx.format(year,precip_nans.sum()))
+        print(tx.format(year, precip_nans.sum()))
 
         ' check entire profile nans ( same for ws and wd)'
         prof_nans = wsp.apply(lambda x: np.isnan(x).all())
@@ -163,7 +159,6 @@ except NameError:
         WD[1] = WD[1].append(wdr_rain)
         WS[1] = WS[1].append(wsp_rain)
 
-
 ''' component analysis '''
 wind_mean = [dict(), dict()]
 wind_std = [dict(), dict()]
@@ -180,21 +175,20 @@ nans_per_level = [np.array([]).astype(int),
 
 ' for each all/rainy category '
 for n in range(2):
-
     sin_WD = WD[n].apply(lambda x: sin(x))
     cos_WD = WD[n].apply(lambda x: cos(x))
 
-    U_df = -1*WS[n].multiply(sin_WD)
-    V_df = -1*WS[n].multiply(cos_WD)
+    U_df = -1 * WS[n].multiply(sin_WD)
+    V_df = -1 * WS[n].multiply(cos_WD)
 
     U_stack = np.array(U_df.tolist())
     V_stack = np.array(V_df.tolist())
 
     ' statistics per level '
-    wind_mean[n][90] = np.nanmean(U_stack,axis=0)
-    wind_std[n][90] = np.nanstd(U_stack,axis=0)
-    wind_mean[n][180] = np.nanmean(V_stack,axis=0)
-    wind_std[n][180] = np.nanstd(V_stack,axis=0)
+    wind_mean[n][90] = np.nanmean(U_stack, axis=0)
+    wind_std[n][90] = np.nanstd(U_stack, axis=0)
+    wind_mean[n][180] = np.nanmean(V_stack, axis=0)
+    wind_std[n][180] = np.nanstd(V_stack, axis=0)
 
     nans_per_level[n] = np.append(nans_per_level[n],
                                   np.isnan(V_stack).sum(axis=0))
@@ -202,25 +196,24 @@ for n in range(2):
 cmap = discrete_cmap(7, base_cmap='Set1')
 colors = [cmap(0), cmap(1), (0, 0, 0)]
 
-dz = np.array([160]+[92]*(max_hgt_gate-1))
+dz = np.array([160] + [92] * (max_hgt_gate - 1))
 
 y = np.array([0])
 y = np.append(y, hgt[:max_hgt_gate])
-ydz = y[:-1]+(y[1:]-y[:-1])/2.
-
+ydz = y[:-1] + (y[1:] - y[:-1]) / 2.
 
 " percentage of obs for each category "
-wind_mean[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
-wind_mean[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
-wind_std[0][0] = 100*(1-(nans_per_level[0]/float(WD[0].index.size)))
-wind_std[1][0] = 100*(1-(nans_per_level[1]/float(WD[1].index.size)))
+wind_mean[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
+wind_mean[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
+wind_std[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
+wind_std[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 
-out = 'shear-mod'
+out = 'mean-wind'
 
 if out == 'mean-comp':
-    fig = plt.figure(figsize=(9,8))
+    fig = plt.figure(figsize=(9, 8))
 elif out == 'shear':
-    fig = plt.figure(figsize=(7,8))
+    fig = plt.figure(figsize=(7, 8))
 elif out == 'mean-wind':
     fig = plt.figure(figsize=(7, 8))
 elif out == 'shear-mod':
@@ -238,15 +231,15 @@ axes.append(plt.subplot(gs[3]))
 axes.append(plt.subplot(gs[4]))
 axes.append(plt.subplot(gs[5]))
 axes = np.array(axes)
-axes = axes.reshape((2,3))
+axes = axes.reshape((2, 3))
 
 lw = 3
 
-if out in ['mean-comp','shear']:
+if out in ['mean-comp', 'shear']:
     for row in range(2):
-        for col,comp,cl in zip(range(3), [90, 180, 0], colors):
+        for col, comp, cl in zip(range(3), [90, 180, 0], colors):
 
-            ax = axes[row,col]
+            ax = axes[row, col]
             x = wind_mean[row][comp]
             std = wind_std[row][comp]
 
@@ -255,31 +248,31 @@ if out in ['mean-comp','shear']:
                     ' plot mean '
                     ax.plot(x, y, color=cl, lw=lw)
                     ' plot std_dev'
-                    ax.fill_betweenx(y,x-std,
-                                     x2=x+std,
-                                     where=x-std<x+std,
+                    ax.fill_betweenx(y, x - std,
+                                     x2=x + std,
+                                     where=x - std < x + std,
                                      color=cl,
                                      alpha=0.2)
 
                     ax.set_xlim([-10, 20])
                     if row == 1 and (col == 0 or col == 1):
                         ax.set_xlabel('$[m\,s^{-1}]$')
-                    anotU,anotV = ['U','V']
+                    anotU, anotV = ['U', 'V']
                 else:
                     x = wind_flow_mean[row][comp]
                     ax.plot(x, y, color=cl, lw=lw)
                     ax.set_xlim([0, 100])
-                    labels=['0','','40','','80','']
+                    labels = ['0', '', '40', '', '80', '']
                     ax.set_xticklabels(labels)
                 anrows = [0, 0, 0, 1]
                 ancols = [0, 1, 2, 2]
             elif out == 'shear':
-                dx = x[1:]-x[:-1]
-                dxdz = dx/dz
-                ynew = np.linspace(ydz.min(),int(ydz.max()),500)
+                dx = x[1:] - x[:-1]
+                dxdz = dx / dz
+                ynew = np.linspace(ydz.min(), int(ydz.max()), 500)
                 s = Spline(ydz, dxdz)
                 xnew = s(ynew)
-                ax.plot(xnew*1e3, ynew, color=cl, lw=lw)
+                ax.plot(xnew * 1e3, ynew, color=cl, lw=lw)
                 # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
                 ax.set_xlim([-5, 20])
                 if row == 1 and (col == 0 or col == 1):
@@ -304,7 +297,7 @@ if out in ['mean-comp','shear']:
             ax.set_ylim([0, 3000])
 
             if col < 2:
-                ax.vlines(0,0,3000,color=(0.4,0.4,0.4),
+                ax.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
                           lw=lw, linestyle='--')
 
             if out == 'shear':
@@ -319,10 +312,10 @@ elif out == 'mean-wind':
     ax2 = axes[0, 1]
     ax3 = axes[1, 0]
     ax4 = axes[1, 1]
-    axs = [ax1,ax2,ax3,ax4]
+    axs = [ax1, ax2, ax3, ax4]
 
-    axes[0,2].remove()
-    axes[1,2].remove()
+    axes[0, 2].remove()
+    axes[1, 2].remove()
 
     WD_stack_all = np.array(WD[0].tolist())
     WS_stack_all = np.array(WS[0].tolist())
@@ -334,63 +327,134 @@ elif out == 'mean-wind':
     df3 = pd.DataFrame(data=WS_stack_rai)
     df4 = pd.DataFrame(data=WD_stack_rai)
 
-    whis = [5,95]
+    whis = [5, 95]
     dfs = [df1, df2, df3, df4]
     axs = [ax1, ax2, ax3, ax4]
-    for df,ax in zip(dfs,axs):
-        box = df.boxplot(vert=False,grid=False,whis=whis,
-                    showfliers=False,
-                    showbox=False,
-                    whiskerprops={'linestyle':'-'},
-                    medianprops={'linestyle':'-'},
-                    ax=ax)
+    for df, ax in zip(dfs, axs):
+        box = df.boxplot(vert=False, grid=False, whis=whis,
+                         showfliers=False,
+                         showbox=False,
+                         whiskerprops={'linestyle': '-'},
+                         medianprops={'linestyle': '-'},
+                         ax=ax)
 
         whisks = box['whiskers']
         w1 = whisks[0::2]
         w2 = whisks[1::2]
-        for l,r in zip(w1,w2):
+        for l, r in zip(w1, w2):
             ldata = l.get_xdata()
             rdata = r.get_xdata()
-            x = [ldata[1],rdata[1]]
+            x = [ldata[1], rdata[1]]
             y = l.get_ydata()
-            ax.plot(x,y,color='b')
+            ax.plot(x, y, color='b')
 
+    ax1.set_xlim([-1, 28])
+    ax3.set_xlim([-1, 28])
 
-    ax1.set_xlim([-1,28])
-    ax3.set_xlim([-1,28])
+    ax2.set_xticks(range(0, 400, 60))
+    ax4.set_xticks(range(0, 400, 60))
 
-    ax2.set_xticks(range(0,400,60))
-    ax4.set_xticks(range(0,400,60))
-
-    ax2.set_xlim([-10,370])
-    ax4.set_xlim([-10,370])
+    ax2.set_xlim([-10, 370])
+    ax4.set_xlim([-10, 370])
 
     anotU, anotV = ['speed', 'direction']
     anrows = [0, 0, 0, 1]
     ancols = [0, 1, 1, 1]
 
     mode = df1.mode(axis=0).max().values
-    ax1.scatter(mode, range(1,42))
+    ax1.scatter(mode, range(1, 42))
 
     mode = df2.mode(axis=0).max().values
-    ax2.scatter(mode, range(1,42))
+    ax2.scatter(mode, range(1, 42))
 
     mode = df3.mode(axis=0).max().values
-    ax3.scatter(mode, range(1,42))
+    ax3.scatter(mode, range(1, 42))
 
     mode = df4.mode(axis=0).max().values
-    ax4.scatter(mode, range(1,42))
+    ax4.scatter(mode, range(1, 42))
 
-
-    f = interp1d(hgt.tolist(), range(1,41))
+    f = interp1d(hgt.tolist(), range(1, 41))
     for ax in axs:
         ax.grid(False)
-        newticks = [f(160)]+f(np.arange(570, 3500, 500)).tolist()
+        newticks = [f(160)] + f(np.arange(570, 3500, 500)).tolist()
         ax.set_yticks(newticks)
-        ax.set_yticklabels(np.arange(0, 3500, 500),fontsize=15)
+        ax.set_yticklabels(np.arange(0, 3500, 500), fontsize=15)
         ax.set_ylim([0, f(3070)])
 
+    ax1.set_xticklabels('')
+    ax2.set_xticklabels('')
+    ax2.set_yticklabels('')
+    ax4.set_yticklabels('')
 
+    ax3.set_xlabel('$[m\,s^{-1}]$')
+    ax4.set_xlabel('$[degrees]$')
+    ax1.set_ylabel('Altitude [m] MSL')
+
+    panel_name_loc = 0.1
+
+
+elif out == 'weber-wind':
+
+    import wind_weber as wb
+
+    ax1 = axes[0, 0]
+    ax2 = axes[0, 1]
+    ax3 = axes[1, 0]
+    ax4 = axes[1, 1]
+    axs = [ax1, ax2, ax3, ax4]
+
+    axes[0, 2].remove()
+    axes[1, 2].remove()
+
+    WD_stack_all = np.array(WD[0].tolist())
+    WS_stack_all = np.array(WS[0].tolist())
+    WD_stack_rai = np.array(WD[1].tolist())
+    WS_stack_rai = np.array(WS[1].tolist())
+
+    df1 = pd.DataFrame(data=WS_stack_all)
+    df2 = pd.DataFrame(data=WD_stack_all)
+    df3 = pd.DataFrame(data=WS_stack_rai)
+    df4 = pd.DataFrame(data=WD_stack_rai)
+
+    dfs = [df1, df2, df3, df4]
+    axs = [ax1, ax2, ax3, ax4]
+
+    for df, ax in zip(dfs, axs):
+
+
+
+    ax1.set_xlim([-1, 28])
+    ax3.set_xlim([-1, 28])
+
+    ax2.set_xticks(range(0, 400, 60))
+    ax4.set_xticks(range(0, 400, 60))
+
+    ax2.set_xlim([-10, 370])
+    ax4.set_xlim([-10, 370])
+
+    anotU, anotV = ['speed', 'direction']
+    anrows = [0, 0, 0, 1]
+    ancols = [0, 1, 1, 1]
+
+    mode = df1.mode(axis=0).max().values
+    ax1.scatter(mode, range(1, 42))
+
+    mode = df2.mode(axis=0).max().values
+    ax2.scatter(mode, range(1, 42))
+
+    mode = df3.mode(axis=0).max().values
+    ax3.scatter(mode, range(1, 42))
+
+    mode = df4.mode(axis=0).max().values
+    ax4.scatter(mode, range(1, 42))
+
+    f = interp1d(hgt.tolist(), range(1, 41))
+    for ax in axs:
+        ax.grid(False)
+        newticks = [f(160)] + f(np.arange(570, 3500, 500)).tolist()
+        ax.set_yticks(newticks)
+        ax.set_yticklabels(np.arange(0, 3500, 500), fontsize=15)
+        ax.set_ylim([0, f(3070)])
 
     ax1.set_xticklabels('')
     ax2.set_xticklabels('')
@@ -413,7 +477,6 @@ elif out == 'shear-mod':
     u_rai = wind_mean[1][90]
     v_rai = wind_mean[1][180]
 
-
     du = u_all[1:] - u_all[:-1]
     dudz = du / dz
 
@@ -427,7 +490,7 @@ elif out == 'shear-mod':
     s = Spline(ydz, dvdz)
     dvdz_new = s(ynew)
 
-    shear = np.sqrt(dudz_new**2 + dvdz_new**2)
+    shear = np.sqrt(dudz_new ** 2 + dvdz_new ** 2)
     axs[0].plot(shear * 1e3, ynew, color='k', lw=lw)
     axs[0].set_xlim([0, 20])
 
@@ -444,10 +507,9 @@ elif out == 'shear-mod':
     s = Spline(ydz, dvdz)
     dvdz_new = s(ynew)
 
-    shear = np.sqrt(dudz_new**2 + dvdz_new**2)
+    shear = np.sqrt(dudz_new ** 2 + dvdz_new ** 2)
     axs[3].plot(shear * 1e3, ynew, color='k', lw=lw)
     axs[3].set_xlim([0, 20])
-
 
     axs[1].remove()
     axs[2].remove()
@@ -477,7 +539,7 @@ anot = [anotU,
         'All (n={:d})'.format(WD[0].index.size),
         'czd-rain (n={:d})'.format(WD[1].index.size)]
 rot = [0, 0, -90, -90]
-for row, col, n in zip(anrows,ancols, range(4)):
+for row, col, n in zip(anrows, ancols, range(4)):
     ax = axes[row, col]
     ax.text(locx[n],
             locy[n],
@@ -503,10 +565,10 @@ elif out == 'shear-mod':
     rows = [0, 1]
     cols = [0, 0]
 pname = iter(list(string.ascii_lowercase)[:len(rows)])
-for p,r,c, in zip(pname,rows,cols):
-    ax = axes[r,c]
+for p, r, c, in zip(pname, rows, cols):
+    ax = axes[r, c]
     transf = ax.transAxes
-    ax.text(panel_name_loc,0.93,'({})'.format(p),
+    ax.text(panel_name_loc, 0.93, '({})'.format(p),
             fontsize=15,
             weight='bold',
             transform=transf)
@@ -528,11 +590,11 @@ elif out == 'shear-mod':
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         left=0.15, right=2.1)
 
-plt.suptitle(tx,fontsize=15,weight='bold',y=0.98)
+plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
-# plt.show()
+plt.show()
 
-fname = ('/Users/raulvalenzuela/Documents/'
-         'windprof_components_{}.png'.format(out))
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
-           bbox_inches='tight')
+# fname = ('/Users/raulvalenzuela/Documents/'
+#          'windprof_components_{}.png'.format(out))
+# plt.savefig(fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')
