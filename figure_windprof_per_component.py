@@ -227,7 +227,7 @@ elif out == 'shear':
 elif out == 'distr-wind':
     fig = plt.figure(figsize=(7, 8))
 elif out == 'mean-wind':
-    fig = plt.figure(figsize=(7, 8))
+    fig = plt.figure(figsize=(9, 8))
 elif out == 'shear-mod':
     fig = plt.figure(figsize=(6, 8))
 
@@ -433,7 +433,7 @@ elif out == 'mean-wind':
 
             for i in range(41):
                 mean.append(wb.angular_mean(u[:, i],v[:, i]))
-                std.append(wb.angular_stddev3(u[:, i], v[:, i]))
+                std.append(wb.angular_stddev2(u[:, i], v[:, i]))
 
             x = np.array(mean)
             std = np.array(std)
@@ -644,7 +644,8 @@ plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
 # plt.show()
 
-fname = ('/Users/raulvalenzuela/Documents/'
-         'windprof_components_{}.png'.format(out))
-plt.savefig(fname, dpi=300, format='png',papertype='letter',
+# place = '/Users/raulvalenzuela/Documents/'
+place = '/home/raul/Desktop/'
+fname = 'windprof_components_{}.png'.format(out)
+plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
            bbox_inches='tight')

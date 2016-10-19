@@ -28,7 +28,7 @@ years = [1998] + range(2001, 2013)
 try:
     wd_layer
 except NameError:
-    out = tta.start(years=years, layer=[0,500])
+    out = tta.preprocess(years=years, layer=[0, 500])
     precip_good = out['precip_good']
     precip_good = precip_good[precip_good.czd > 0.25]
     wd_layer = out['wd_layer']
@@ -237,7 +237,7 @@ ax[0].set_xticks(range(90, 280, 30))
 ax[0].set_xlim([88, 272])
 ax[0].set_ylabel('rain rate $[mm h^{-1}]$')
 ax[0].set_ylim([0, 6])
-ax[0].grid(True)
+# ax[0].grid(True)
 ha, la = ax[0].get_legend_handles_labels()
 leg = ax[0].legend([ha[3], ha[0], ha[2], ha[1]],
                    [la[3], la[0], la[2], la[1]],
@@ -253,7 +253,7 @@ ax[1].text(0.9,0.9,'(b)',
 ax[1].set_ylim([0, 7])
 ax[1].set_ylabel('ratio')
 ax[1].set_xlabel('wind direction')
-ax[1].grid(True)
+# ax[1].grid(True)
 handles, labels = ax[1].get_legend_handles_labels()
 leg = ax[1].legend(handles[::-1],
                    labels[::-1],
@@ -275,10 +275,10 @@ ax[0].text(0.89,1.07,'$^{\circ}$',
 
 plt.subplots_adjust(hspace=0.05)
 
-# plt.show()
+plt.show()
 
 # place = '/home/raul/Desktop/'
-place = '/Users/raulvalenzuela/Documents/'
-fname='relationship_rain_wd_bin{}.png'.format(del_th)
-plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
-            bbox_inches='tight')
+# # place = '/Users/raulvalenzuela/Documents/'
+# fname='relationship_rain_wd_bin{}.png'.format(del_th)
+# plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
+#             bbox_inches='tight')
