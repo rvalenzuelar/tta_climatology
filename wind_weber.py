@@ -15,11 +15,11 @@ import numpy as np
 
 
 def sin(x):
-    return np.sin(np.radians(x))
+    return np.sin(np.radians(~np.isnan(x)))
 
 
 def cos(x):
-    return np.cos(np.radians(x))
+    return np.cos(np.radians(~np.isnan(x)))
 
 
 def var(x):
@@ -88,14 +88,22 @@ def e_fun(delta):
     return a
 
 
+def deltaf(u, v):
+    return np.sqrt(x_var(u, v)) / np.sqrt(y_var(u, v))
+
+
+def gammaf(u, v):
+    return x_mean(u, v) / np.sqrt(x_var(u, v))
+
+
 def angular_stddev1(u, v):
 
     '''
     Equation 37
     '''
 
-    gamma = x_mean(u, v) / np.sqrt(x_var(u, v))
-    delta = np.sqrt(x_var(u, v)) / np.sqrt(y_var(u, v))
+    gamma = gammaf(u, v)
+    delta = deltaf(u, v)
 
     if x_var(u, v) < 0:
         print('Warning: variance of X < 0 -> {}'.format(x_var(u,v)))
