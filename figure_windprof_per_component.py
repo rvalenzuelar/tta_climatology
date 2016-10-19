@@ -173,6 +173,9 @@ wind_dir_p95 = {0: [], 1: []}
 nans_per_level = [np.array([]).astype(int),
                   np.array([]).astype(int)]
 
+U_stack2 = dict()
+V_stack2 = dict()
+
 ' for each all/rainy category '
 for n in range(2):
     sin_WD = WD[n].apply(lambda x: sin(x))
@@ -183,6 +186,13 @@ for n in range(2):
 
     U_stack = np.array(U_df.tolist())
     V_stack = np.array(V_df.tolist())
+
+    if n == 0:
+        m='all'
+    else:
+        m='rain'
+    U_stack2[m] = U_stack
+    V_stack2[m] = V_stack
 
     ' statistics per level '
     wind_mean[n][90] = np.nanmean(U_stack, axis=0)
@@ -213,6 +223,8 @@ out = 'mean-wind'
 if out == 'mean-comp':
     fig = plt.figure(figsize=(9, 8))
 elif out == 'shear':
+    fig = plt.figure(figsize=(7, 8))
+elif out == 'distr-wind':
     fig = plt.figure(figsize=(7, 8))
 elif out == 'mean-wind':
     fig = plt.figure(figsize=(7, 8))
@@ -259,7 +271,7 @@ if out in ['mean-comp', 'shear']:
                         ax.set_xlabel('$[m\,s^{-1}]$')
                     anotU, anotV = ['U', 'V']
                 else:
-                    x = wind_flow_mean[row][comp]
+                    x = wind_mean[row][comp]
                     ax.plot(x, y, color=cl, lw=lw)
                     ax.set_xlim([0, 100])
                     labels = ['0', '', '40', '', '80', '']
@@ -306,7 +318,7 @@ if out in ['mean-comp', 'shear']:
 
     panel_name_loc = 0.8
 
-elif out == 'mean-wind':
+elif out == 'distr-wind':
 
     ax1 = axes[0, 0]
     ax2 = axes[0, 1]
@@ -353,7 +365,6 @@ elif out == 'mean-wind':
 
     ax2.set_xticks(range(0, 400, 60))
     ax4.set_xticks(range(0, 400, 60))
-
     ax2.set_xlim([-10, 370])
     ax4.set_xlim([-10, 370])
 
@@ -393,76 +404,103 @@ elif out == 'mean-wind':
     panel_name_loc = 0.1
 
 
-elif out == 'weber-wind':
+elif out == 'mean-wind':
 
     import wind_weber as wb
 
     ax1 = axes[0, 0]
     ax2 = axes[0, 1]
-    ax3 = axes[1, 0]
-    ax4 = axes[1, 1]
-    axs = [ax1, ax2, ax3, ax4]
+    ax4 = axes[1, 0]
+    ax5 = axes[1, 1]
+    axs = [ax1, ax2, ax4, ax5]
 
-    axes[0, 2].remove()
-    axes[1, 2].remove()
-
-    WD_stack_all = np.array(WD[0].tolist())
-    WS_stack_all = np.array(WS[0].tolist())
-    WD_stack_rai = np.array(WD[1].tolist())
-    WS_stack_rai = np.array(WS[1].tolist())
-
-    df1 = pd.DataFrame(data=WS_stack_all)
-    df2 = pd.DataFrame(data=WD_stack_all)
-    df3 = pd.DataFrame(data=WS_stack_rai)
-    df4 = pd.DataFrame(data=WD_stack_rai)
-
-    dfs = [df1, df2, df3, df4]
-    axs = [ax1, ax2, ax3, ax4]
-
-    for df, ax in zip(dfs, axs):
+    ax3 = axes[0, 2]
+    ax6 = axes[1, 2]
 
 
+    for n,ax in enumerate(axs):
 
-    ax1.set_xlim([-1, 28])
-    ax3.set_xlim([-1, 28])
+        if n in [1,3]:
+            mean = list()
+            std = list()
+            cl = cmap(1)
+            if n == 1:
+                u = U_stack2['all']
+                v = V_stack2['all']
+            else:
+                u = U_stack2['rain']
+                v = V_stack2['rain']
 
-    ax2.set_xticks(range(0, 400, 60))
-    ax4.set_xticks(range(0, 400, 60))
+            for i in range(41):
+                mean.append(wb.angular_mean(u[:, i],v[:, i]))
+                std.append(wb.angular_stddev3(u[:, i], v[:, i]))
 
-    ax2.set_xlim([-10, 370])
-    ax4.set_xlim([-10, 370])
+            x = np.array(mean)
+            std = np.array(std)
+        else:
+            cl = cmap(0)
+            if n == 0:
+                spd = np.array(WS[0].tolist())
+                x = np.nanmean(spd,axis=0)
+                std = np.nanstd(spd,axis=0)
+            else:
+                spd = np.array(WS[1].tolist())
+                x = np.nanmean(spd,axis=0)
+                std = np.nanstd(spd,axis=0)
+
+        ' plot mean '
+        ax.plot(x, y, color=cl, lw=lw)
+        ' plot std_dev'
+        ax.fill_betweenx(y, x - std,
+                         x2=x + std,
+                         where=x - std < x + std,
+                         color=cl,
+                         alpha=0.2)
+
+        ax.set_ylim([0,3000])
+        ax.grid(True)
+
+    for n,ax in enumerate([ax3,ax6]):
+        x = wind_mean[n][0]
+        ax.plot(x, y, color='k', lw=lw)
+        ax.set_xlim([0, 100])
+        ax.grid(True)
+        ax.set_ylim([0, 3000])
+        ax.set_xticklabels('')
+
+    labels = ['0', '', '40', '', '80', '']
+    ax6.set_xlabel('[%]')
+    ax6.set_xticklabels(labels)
+
+    ax2.axvline(360,0,3000,
+                color=(0.3,0.3,0.3),
+                linestyle='--',
+                lw=2)
+
+    ax1.set_xlim([-1, 25])
+    ax4.set_xlim([-1, 25])
+
+    ax2.set_xticks(range(60, 400, 60))
+    ax5.set_xticks(range(60, 400, 60))
+
+    ax2.set_xlim([50, 410])
+    ax5.set_xlim([50, 410])
 
     anotU, anotV = ['speed', 'direction']
+    # anrows = [0, 0, 0, 1]
+    # ancols = [0, 1, 1, 1]
     anrows = [0, 0, 0, 1]
-    ancols = [0, 1, 1, 1]
-
-    mode = df1.mode(axis=0).max().values
-    ax1.scatter(mode, range(1, 42))
-
-    mode = df2.mode(axis=0).max().values
-    ax2.scatter(mode, range(1, 42))
-
-    mode = df3.mode(axis=0).max().values
-    ax3.scatter(mode, range(1, 42))
-
-    mode = df4.mode(axis=0).max().values
-    ax4.scatter(mode, range(1, 42))
-
-    f = interp1d(hgt.tolist(), range(1, 41))
-    for ax in axs:
-        ax.grid(False)
-        newticks = [f(160)] + f(np.arange(570, 3500, 500)).tolist()
-        ax.set_yticks(newticks)
-        ax.set_yticklabels(np.arange(0, 3500, 500), fontsize=15)
-        ax.set_ylim([0, f(3070)])
+    ancols = [0, 1, 2, 2]
 
     ax1.set_xticklabels('')
     ax2.set_xticklabels('')
     ax2.set_yticklabels('')
-    ax4.set_yticklabels('')
+    ax3.set_yticklabels('')
+    ax5.set_yticklabels('')
+    ax6.set_yticklabels('')
 
-    ax3.set_xlabel('$[m\,s^{-1}]$')
-    ax4.set_xlabel('$[degrees]$')
+    ax4.set_xlabel('$[m\,s^{-1}]$')
+    ax5.set_xlabel('$[degrees]$')
     ax1.set_ylabel('Altitude [m] MSL')
 
     panel_name_loc = 0.1
@@ -558,9 +596,14 @@ if out == 'mean-comp':
 elif out == 'shear':
     rows = [0, 0, 1, 1]
     cols = [0, 1, 0, 1]
-elif out == 'mean-wind':
+elif out == 'distr-wind':
     rows = [0, 0, 1, 1]
     cols = [0, 1, 0, 1]
+elif out == 'mean-wind':
+    # rows = [0, 0, 1, 1]
+    # cols = [0, 1, 0, 1]
+    rows = [0, 0, 0, 1, 1, 1]
+    cols = [0, 1, 2, 0, 1, 2]
 elif out == 'shear-mod':
     rows = [0, 1]
     cols = [0, 0]
@@ -571,7 +614,8 @@ for p, r, c, in zip(pname, rows, cols):
     ax.text(panel_name_loc, 0.93, '({})'.format(p),
             fontsize=15,
             weight='bold',
-            transform=transf)
+            transform=transf,
+            color=(0.3,0.3,0.3))
 
 if out == 'mean-comp':
     tx = '13-season mean and std_dev wind component profile'
@@ -581,10 +625,16 @@ elif out == 'shear':
     tx = '13-season mean vertical wind-shear profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         right=1.15)
-elif out == 'mean-wind':
+elif out == 'distr-wind':
     tx = '13-season wind distribution profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
                         right=1.15)
+elif out == 'mean-wind':
+    tx = '13-season mean and std_dev wind profile'
+    # plt.subplots_adjust(hspace=0.1, wspace=0.15,
+    #                     right=1.15)
+    plt.subplots_adjust(hspace=0.1, wspace=0.15,
+                        left=0.1, right=0.95)
 elif out == 'shear-mod':
     tx = '13-season vertical wind shear profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
@@ -592,9 +642,9 @@ elif out == 'shear-mod':
 
 plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
-plt.show()
+# plt.show()
 
-# fname = ('/Users/raulvalenzuela/Documents/'
-#          'windprof_components_{}.png'.format(out))
-# plt.savefig(fname, dpi=300, format='png',papertype='letter',
-#            bbox_inches='tight')
+fname = ('/Users/raulvalenzuela/Documents/'
+         'windprof_components_{}.png'.format(out))
+plt.savefig(fname, dpi=300, format='png',papertype='letter',
+           bbox_inches='tight')
