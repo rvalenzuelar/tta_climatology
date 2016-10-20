@@ -45,8 +45,8 @@ def get_wdir_mode(axes):
     return stat
 
 
-target_hgts = tuple(range(-1,11))
-#target_hgts = (0,2,4,6,8,10)
+# target_hgts = tuple(range(-1, 11))
+target_hgts = (-1, 0, 2, 4, 6, 8, 10, 13, 15, 20, 26, 31)
 
 #years = [1998]
 years = [1998]+range(2001,2013)
@@ -117,9 +117,9 @@ for h,ax in zip(target_hgts,axes):
                 normed=True)
 
     if h == -1:
-        txt='Surface'
+        txt = 'Surface'
     else:
-        txt='{:2.0f}m'.format(hgt[h])
+        txt = '{:2.0f}m'.format(hgt[h])
     ax.text(0.5, 1.05, txt,
             weight='bold',
             fontsize=15,
@@ -178,9 +178,9 @@ axes[9].text(1.0,-0.2,'wind speed [$m\,s^{-1}$]',
               transform=axes[9].transAxes)
 
 if select_rain == 'czd':
-    select_rain+='-rain'
+    select_rain += '-rain'
 elif select_rain == 'bby':
-    select_rain+='-rain'
+    select_rain += '-rain'
 elif select_rain == 'all':
     select_rain = 'winter-season'
     
@@ -192,8 +192,8 @@ plt.suptitle(tx,fontsize=15, weight='bold',y=0.99)
 
 # plt.show()
 
-# place = '/home/raul/Desktop/'
-place = '/Users/raulvalenzuela/Documents/'
-fname = 'windrose_perhgt_0-1081m_{}.png'.format(select_rain)
+place = '/home/raul/Desktop/'
+# place = '/Users/raulvalenzuela/Documents/'
+fname = 'windrose_perhgt_0-3013m_{}.png'.format(select_rain)
 plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
             bbox_inches='tight')

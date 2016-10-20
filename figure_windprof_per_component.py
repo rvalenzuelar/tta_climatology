@@ -34,62 +34,13 @@ def cos(arg):
     return np.cos(np.radians(arg))
 
 
-def comp2wind(u, v):
-    wdir = 270 - (np.arctan2(v, u) * 180 / np.pi)
-    wdir[wdir > 360] -= 360
-    wspd = np.sqrt(u ** 2 + v ** 2)
-    return wspd, wdir
-
-
-def wind_stddev2(u, v):
-    '''
-        Ackermann (1983,JCAM)
-
-        u and v are time series at individual level
-    '''
-
-    m = np.vstack((u, v))
-    bad = np.sum(np.isnan(m), axis=0).astype(bool)
-    ug = u[~bad]
-    vg = v[~bad]
-
-    N = ug.size
-
-    " mean "
-    U = ug.sum() / N
-    V = vg.sum() / N
-
-    " variance "
-    sqr_u = (ug - U) ** 2
-    sqr_v = (vg - V) ** 2
-    var_u = sqr_u.sum() / N
-    var_v = sqr_v.sum() / N
-
-    " covariance "
-    a = (ug - U) * (vg - V)
-    covar_uv = a.sum() / N
-
-    " mean wind speed and direction "
-    S = np.sqrt(U ** 2 + V ** 2)
-    D = 270 - np.arctan2(V, U) * 180 / np.pi
-
-    S_std = np.sqrt(U ** 2 * var_u + \
-                    V ** 2 * var_v + \
-                    2 * U * V * covar_uv) / S
-
-    D_std = np.sqrt(V ** 2 * var_u + \
-                    U ** 2 * var_v - \
-                    2 * U * V * covar_uv) / S ** 2
-
-    return S, S_std, D, D_std
-
-
 # years = [1998]
 years = [1998] + range(2001, 2013)
 
 # max_hgt_gate = 15  # 1450 [m]
 # max_hgt_gate = 21  # 2000 [m]
 max_hgt_gate = 40  # 3750 [m] max top
+
 
 try:
     WS
@@ -188,9 +139,9 @@ for n in range(2):
     V_stack = np.array(V_df.tolist())
 
     if n == 0:
-        m='all'
+        m = 'all'
     else:
-        m='rain'
+        m = 'rain'
     U_stack2[m] = U_stack
     V_stack2[m] = V_stack
 
