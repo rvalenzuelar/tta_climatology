@@ -169,7 +169,7 @@ wind_mean[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 wind_std[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
 wind_std[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 
-out = 'mean-wind'
+out = 'mean-comp'
 
 if out == 'mean-comp':
     fig = plt.figure(figsize=(9, 8))
@@ -593,10 +593,10 @@ elif out == 'shear-mod':
 
 plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
-# plt.show()
+plt.show()
 
-# place = '/Users/raulvalenzuela/Documents/'
-place = '/home/raul/Desktop/'
-fname = 'windprof_components_{}.png'.format(out)
-plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
-           bbox_inches='tight')
+# # place = '/Users/raulvalenzuela/Documents/'
+# place = '/home/raul/Desktop/'
+# fname = 'windprof_components_{}.png'.format(out)
+# plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')

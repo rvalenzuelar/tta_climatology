@@ -192,6 +192,11 @@ ax[2].set_xlabel('$[m\,s^{-1}]$')
 ax[3].set_xlabel('$[m\,s^{-1}]$')
 ax[0].set_ylabel('Altitude [m] MSL')
 
+ax[1].text(1.02,0.5,'TTA',fontsize=15,weight='bold',
+           transform=ax[1].transAxes,rotation=-90)
+ax[3].text(1.02,0.5,'NO-TTA',fontsize=15,weight='bold',
+           transform=ax[3].transAxes,rotation=-90)
+
 ax[0].legend(loc=0, fontsize=12, numpoints=1)
 ax[1].legend(loc=6, fontsize=12, numpoints=1)
 ax[2].legend(loc=6, fontsize=12, numpoints=1)
