@@ -72,9 +72,9 @@ except NameError:
         wdr = wpr.wdir.map(lambda x: [surf_wdr.next()] + x)
 
         ' check nans on precip '
-        precip = pd.concat([bby.precip, czd.precip] ,axis=1)
+        precip = pd.concat([bby.precip, czd.precip], axis=1)
         precip_nans = precip.apply(lambda x: x.isnull().any(),
-                                   axis=1 ,reduce=True)
+                                   axis=1, reduce=True)
         precip_nans. name ='precip_nan'
         tx = 'year:{}, any_precip_nan:{:4d}'
         print(tx.format(year ,precip_nans.sum()))
@@ -119,20 +119,24 @@ wd_layer = 270-(np.arctan2(mean_V, mean_U)*180/np.pi)
 wd_layer[wd_layer > 360] -= 360
 
 
-# thres = [112, 126, 140, 154, 168]
-thres = range(120,170,10)
+thres = range(120, 170, 10)
+# thres = [140]
 cmap = discrete_cmap(7, base_cmap='OrRd')
 colors1 = [cmap(r+2) for r in range(len(thres))]
 cmap = sns.color_palette("GnBu_d", 6)
 cmap.reverse()
 colors2 = cmap
+# colors1, colors2 = [cmap(0), cmap(1)]
 lw = 3
 
-fig, ax = plt.subplots(2, 2, figsize=(8,8),
-                       sharey=True,sharex=True)
+fig, ax = plt.subplots(2, 2, figsize=(8, 8),
+                       sharey=True, sharex=True)
 ax = ax.flatten()
 
 for th, cl1, cl2 in zip(thres, colors1, colors2):
+
+    if th != 140:
+        continue
 
     ' sensitivity here '
     wd_thr_less = wd_layer[wd_layer < th]
@@ -154,7 +158,7 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
     y = np.append(y, hgt)
 
     if th == 140:
-        mk = 'o'
+        mk = None
     else:
         mk = None
     ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
@@ -170,8 +174,8 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
                label='$\geq$' + str(th) + '$^{\circ}$',
                marker=mk)
 
-for a,ptx,comp in zip(ax,['(a)','(b)','(c)','(d)'],
-                      ['U-comp','V-comp','','']):
+for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
+                      ['U-comp', 'V-comp', '', '']):
     a.text(0.05, 0.9, ptx,
            fontsize=15,
            weight='bold',
@@ -192,15 +196,15 @@ ax[2].set_xlabel('$[m\,s^{-1}]$')
 ax[3].set_xlabel('$[m\,s^{-1}]$')
 ax[0].set_ylabel('Altitude [m] MSL')
 
-ax[1].text(1.02,0.5,'TTA',fontsize=15,weight='bold',
-           transform=ax[1].transAxes,rotation=-90)
-ax[3].text(1.02,0.5,'NO-TTA',fontsize=15,weight='bold',
-           transform=ax[3].transAxes,rotation=-90)
+ax[1].text(1.02, 0.5, 'TTA', fontsize=15, weight='bold',
+           transform=ax[1].transAxes, rotation=-90)
+ax[3].text(1.02, 0.5, 'NO-TTA', fontsize=15, weight='bold',
+           transform=ax[3].transAxes, rotation=-90)
 
-ax[0].legend(loc=0, fontsize=12, numpoints=1)
-ax[1].legend(loc=6, fontsize=12, numpoints=1)
-ax[2].legend(loc=6, fontsize=12, numpoints=1)
-ax[3].legend(loc=6, fontsize=12, numpoints=1)
+# ax[0].legend(loc=0, fontsize=12, numpoints=1)
+# ax[1].legend(loc=6, fontsize=12, numpoints=1)
+# ax[2].legend(loc=6, fontsize=12, numpoints=1)
+# ax[3].legend(loc=6, fontsize=12, numpoints=1)
 
 
 plt.subplots_adjust(top=0.9, bottom=0.1,
@@ -213,8 +217,8 @@ plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
 # plt.show()
 
-# place = '/home/raul/Desktop/'
-place ='/Users/raulvalenzuela/Documents/'
+place = '/home/raul/Desktop/'
+# place ='/Users/raulvalenzuela/Documents/'
 fname = place+'windprof_tta_sensit.png'
 plt.savefig(fname, dpi=300, format='png', papertype='letter',
            bbox_inches='tight')

@@ -216,17 +216,17 @@ ax[1].plot(xnew,ynew_rto,lw=lw,
 ' ------ add thres lines ------ '
 lw=3
 ls='--'
-ax[1].vlines(120,0,7,lw=lw,alpha=0.5,linestyle=ls)
-ax[1].vlines(130,0,7,lw=lw,alpha=0.5,linestyle=ls)
+# ax[1].vlines(120,0,7,lw=lw,alpha=0.5,linestyle=ls)
+# ax[1].vlines(130,0,7,lw=lw,alpha=0.5,linestyle=ls)
 ax[1].vlines(140,0,7,lw=lw,alpha=0.5,linestyle=ls)
-ax[1].vlines(150,0,7,lw=lw,alpha=0.5,linestyle=ls)
-ax[1].vlines(160,0,7,lw=lw,alpha=0.5,linestyle=ls)
+# ax[1].vlines(150,0,7,lw=lw,alpha=0.5,linestyle=ls)
+# ax[1].vlines(160,0,7,lw=lw,alpha=0.5,linestyle=ls)
 
-ax[1].text(120,6,'120',rotation=90,ha='right')
-ax[1].text(130,6,'130',rotation=90,ha='right')
+# ax[1].text(120,6,'120',rotation=90,ha='right')
+# ax[1].text(130,6,'130',rotation=90,ha='right')
 ax[1].text(140,6,'140',rotation=90,ha='right')
-ax[1].text(150,6,'150',rotation=90,ha='right')
-ax[1].text(160,6,'160',rotation=90,ha='right')
+# ax[1].text(150,6,'150',rotation=90,ha='right')
+# ax[1].text(160,6,'160',rotation=90,ha='right')
 
 ' ------ general figure setup ------ '
 ax[0].text(0.9,0.9,'(a)',
@@ -273,12 +273,12 @@ ax[0].text(0.89,1.07,'$^{\circ}$',
            transform=ax[0].transAxes)
 
 
-plt.subplots_adjust(hspace=0.05)
+plt.subplots_adjust(hspace=0.08)
 
-plt.show()
+# plt.show()
 
-# place = '/home/raul/Desktop/'
-# # place = '/Users/raulvalenzuela/Documents/'
-# fname='relationship_rain_wd_bin{}.png'.format(del_th)
-# plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
-#             bbox_inches='tight')
+place = '/home/raul/Desktop/'
+# place = '/Users/raulvalenzuela/Documents/'
+fname='relationship_rain_wd_bin{}.png'.format(del_th)
+plt.savefig(place+fname, dpi=300, format='png', papertype='letter',
+            bbox_inches='tight')
