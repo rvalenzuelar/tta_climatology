@@ -135,8 +135,8 @@ ax = ax.flatten()
 
 for th, cl1, cl2 in zip(thres, colors1, colors2):
 
-    if th != 140:
-        continue
+    # if th != 140:
+        # continue
 
     ' sensitivity here '
     wd_thr_less = wd_layer[wd_layer < th]
@@ -190,7 +190,7 @@ for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
            transform=a.transAxes)
     a.set_ylim([0, 3000])
     a.set_xlim([-10, 15])
-    a.grid(True)
+    # a.grid(True)
 
 ax[2].set_xlabel('$[m\,s^{-1}]$')
 ax[3].set_xlabel('$[m\,s^{-1}]$')
@@ -201,10 +201,10 @@ ax[1].text(1.02, 0.5, 'TTA', fontsize=15, weight='bold',
 ax[3].text(1.02, 0.5, 'NO-TTA', fontsize=15, weight='bold',
            transform=ax[3].transAxes, rotation=-90)
 
-# ax[0].legend(loc=0, fontsize=12, numpoints=1)
-# ax[1].legend(loc=6, fontsize=12, numpoints=1)
-# ax[2].legend(loc=6, fontsize=12, numpoints=1)
-# ax[3].legend(loc=6, fontsize=12, numpoints=1)
+ax[0].legend(loc=0, fontsize=12, numpoints=1)
+ax[1].legend(loc=6, fontsize=12, numpoints=1)
+ax[2].legend(loc=6, fontsize=12, numpoints=1)
+ax[3].legend(loc=6, fontsize=12, numpoints=1)
 
 
 plt.subplots_adjust(top=0.9, bottom=0.1,
@@ -217,8 +217,8 @@ plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
 # plt.show()
 
-place = '/home/raul/Desktop/'
-# place ='/Users/raulvalenzuela/Documents/'
+# place = '/home/raul/Desktop/'
+place ='/Users/raulvalenzuela/Documents/'
 fname = place+'windprof_tta_sensit.png'
 plt.savefig(fname, dpi=300, format='png', papertype='letter',
            bbox_inches='tight')

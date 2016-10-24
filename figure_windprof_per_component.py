@@ -170,11 +170,11 @@ wind_mean[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 wind_std[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
 wind_std[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 
-out = 'shear'
+out = 'mean-wind'
 
 if out == 'mean-comp':
     fig, axs = axb.specs(rows=2, cols=2,
-                         id_panels=False,
+                         id_panels=True,
                          hide_xlabels_in=[0, 1],
                          hide_ylabels_in=[1, 3],
                          hspace=0.07,
@@ -182,14 +182,14 @@ if out == 'mean-comp':
                          left=0.15,
                          right=0.9,
                          show_grid=False,
-                         figsize=(9, 8))
+                         figsize=(7, 8))
 elif out == 'shear':
     fig, axs = axb.specs(rows=2, cols=3,
                          id_panels=True,
                          hide_xlabels_in=[0, 1, 2],
                          hide_ylabels_in=[1, 2, 4, 5],
                          hspace=0.07,
-                         wspace=0.1,
+                         wspace=0.15,
                          left=0.1,
                          right=0.95,
                          show_grid=False,
@@ -319,6 +319,10 @@ elif out == 'shear':
             tx = '$\sqrt{(dU/dZ)^{2}+(dV/dZ)^{2}}$'
             ax.text(0.5, 1.03, tx, transform=ax.transAxes,
                     ha='center')
+
+        if n == 0:
+            ax.set_ylabel('Altitude [m] MSL')
+
 
 elif out == 'distr-wind':
 
@@ -594,8 +598,8 @@ plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
 # plt.show()
 
-# place = '/Users/raulvalenzuela/Documents/'
-place = '/home/raul/Desktop/'
+place = '/Users/raulvalenzuela/Documents/'
+# place = '/home/raul/Desktop/'
 fname = 'windprof_components_{}.png'.format(out)
 plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
            bbox_inches='tight')
