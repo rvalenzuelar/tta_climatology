@@ -11,6 +11,7 @@ import pandas as pd
 import parse_data
 import matplotlib.gridspec as gridspec
 import string
+import axis_builder as axb
 from matplotlib import rcParams
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from scipy.interpolate import interp1d
@@ -169,105 +170,228 @@ wind_mean[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 wind_std[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
 wind_std[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 
-out = 'mean-comp'
+out = 'shear'
 
 if out == 'mean-comp':
-    fig = plt.figure(figsize=(9, 8))
+    fig, axs = axb.specs(rows=2, cols=2,
+                         id_panels=True,
+                         hide_xlabels_in=[0, 1],
+                         hide_ylabels_in=[1, 3],
+                         hspace=0.07,
+                         wspace=0.1,
+                         left=0.1,
+                         right=0.95,
+                         show_grid=False,
+                         figsize=(9, 8))
 elif out == 'shear':
-    fig = plt.figure(figsize=(7, 8))
+    fig, axs = axb.specs(rows=2, cols=3,
+                         id_panels=True,
+                         hide_xlabels_in=[0, 1, 2],
+                         hide_ylabels_in=[1, 2, 4, 5],
+                         hspace=0.07,
+                         wspace=0.1,
+                         left=0.1,
+                         right=0.95,
+                         show_grid=False,
+                         figsize=(9, 8))
+
 elif out == 'distr-wind':
     fig = plt.figure(figsize=(7, 8))
 elif out == 'mean-wind':
-    fig = plt.figure(figsize=(9, 8))
+    fig,axs = axb.specs(rows=2, cols=3,
+                        id_panels=True,
+                        col_ratio=[2,2,1],
+                        hide_xlabels_in=[0,1,2],
+                        hide_ylabels_in=[1,2,4,5],
+                        hspace=0.07,
+                        wspace=0.1,
+                        left=0.1,
+                        right=0.95,
+                        show_grid=False,
+                        figsize=(9, 8))
 elif out == 'shear-mod':
     fig = plt.figure(figsize=(6, 8))
 
-gs = gridspec.GridSpec(2, 3,
-                       width_ratios=[2, 2, 1],
-                       )
-
-axes = list()
-axes.append(plt.subplot(gs[0]))
-axes.append(plt.subplot(gs[1]))
-axes.append(plt.subplot(gs[2]))
-axes.append(plt.subplot(gs[3]))
-axes.append(plt.subplot(gs[4]))
-axes.append(plt.subplot(gs[5]))
-axes = np.array(axes)
-axes = axes.reshape((2, 3))
+# gs = gridspec.GridSpec(2, 3,
+#                        width_ratios=[2, 2, 1],
+#                        )
+#
+# axes = list()
+# axes.append(plt.subplot(gs[0]))
+# axes.append(plt.subplot(gs[1]))
+# axes.append(plt.subplot(gs[2]))
+# axes.append(plt.subplot(gs[3]))
+# axes.append(plt.subplot(gs[4]))
+# axes.append(plt.subplot(gs[5]))
+# axes = np.array(axes)
+# axes = axes.reshape((2, 3))
 
 lw = 3
 
-if out in ['mean-comp', 'shear']:
-    for row in range(2):
-        for col, comp, cl in zip(range(3), [90, 180, 0], colors):
+# if out in ['mean-comp', 'shear']:
+#     for row in range(2):
+#         for col, comp, cl in zip(range(3), [90, 180, 0], colors):
+#
+#             ax = axes[row, col]
+#             x = wind_mean[row][comp]
+#             std = wind_std[row][comp]
+#
+#             if out == 'mean-comp':
+#                 if col < 2:
+#                     ' plot mean '
+#                     ax.plot(x, y, color=cl, lw=lw)
+#                     ' plot std_dev'
+#                     ax.fill_betweenx(y, x - std,
+#                                      x2=x + std,
+#                                      where=x - std < x + std,
+#                                      color=cl,
+#                                      alpha=0.2)
+#
+#                     ax.set_xlim([-10, 20])
+#                     if row == 1 and (col == 0 or col == 1):
+#                         ax.set_xlabel('$[m\,s^{-1}]$')
+#                     anotU, anotV = ['U', 'V']
+#                 else:
+#                     x = wind_mean[row][comp]
+#                     ax.plot(x, y, color=cl, lw=lw)
+#                     ax.set_xlim([0, 100])
+#                     labels = ['0', '', '40', '', '80', '']
+#                     ax.set_xticklabels(labels)
+#                 anrows = [0, 0, 0, 1]
+#                 ancols = [0, 1, 2, 2]
+#             elif out == 'shear':
+#                 dx = x[1:] - x[:-1]
+#                 dxdz = dx / dz
+#                 ynew = np.linspace(ydz.min(), int(ydz.max()), 500)
+#                 s = Spline(ydz, dxdz)
+#                 xnew = s(ynew)
+#                 ax.plot(xnew * 1e3, ynew, color=cl, lw=lw)
+#                 # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
+#                 ax.set_xlim([-5, 20])
+#                 if row == 1 and (col == 0 or col == 1):
+#                     ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
+#                 anotU, anotV = ['dU/dZ', 'dV/dZ']
+#                 anrows = [0, 0, 0, 1]
+#                 ancols = [0, 1, 1, 1]
+#
+#             if row == 0:
+#                 ax.set_xticklabels('')
+#
+#             if col > 0:
+#                 ax.set_yticklabels('')
+#
+#             if row == 0 and col == 0:
+#                 ax.set_ylabel('Altitude [m] MSL')
+#
+#             if row == 1 and col == 2:
+#                 ax.set_xlabel('[%]')
+#
+#             ax.grid(True)
+#             ax.set_ylim([0, 3000])
+#
+#             if col < 2:
+#                 ax.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
+#                           lw=lw, linestyle='--')
+#
+#             if out == 'shear':
+#                 if (row == 0 or row == 1) and col == 2:
+#                     ax.remove()
 
-            ax = axes[row, col]
-            x = wind_mean[row][comp]
-            std = wind_std[row][comp]
 
-            if out == 'mean-comp':
-                if col < 2:
-                    ' plot mean '
-                    ax.plot(x, y, color=cl, lw=lw)
-                    ' plot std_dev'
-                    ax.fill_betweenx(y, x - std,
-                                     x2=x + std,
-                                     where=x - std < x + std,
-                                     color=cl,
-                                     alpha=0.2)
 
-                    ax.set_xlim([-10, 20])
-                    if row == 1 and (col == 0 or col == 1):
-                        ax.set_xlabel('$[m\,s^{-1}]$')
-                    anotU, anotV = ['U', 'V']
-                else:
-                    x = wind_mean[row][comp]
-                    ax.plot(x, y, color=cl, lw=lw)
-                    ax.set_xlim([0, 100])
-                    labels = ['0', '', '40', '', '80', '']
-                    ax.set_xticklabels(labels)
-                anrows = [0, 0, 0, 1]
-                ancols = [0, 1, 2, 2]
-            elif out == 'shear':
-                dx = x[1:] - x[:-1]
-                dxdz = dx / dz
-                ynew = np.linspace(ydz.min(), int(ydz.max()), 500)
-                s = Spline(ydz, dxdz)
-                xnew = s(ynew)
-                ax.plot(xnew * 1e3, ynew, color=cl, lw=lw)
-                # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
-                ax.set_xlim([-5, 20])
-                if row == 1 and (col == 0 or col == 1):
-                    ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
-                anotU, anotV = ['dU/dZ', 'dV/dZ']
-                anrows = [0, 0, 0, 1]
-                ancols = [0, 1, 1, 1]
+if out == 'mean-comp':
 
-            if row == 0:
-                ax.set_xticklabels('')
+    for n, ax in enumerate(axs):
 
-            if col > 0:
-                ax.set_yticklabels('')
+        if n == 0:
+            group, comp = [0,90]
+            cl = colors[0]
+        elif n == 1:
+            group, comp = [0,180]
+            cl = colors[1]
+        elif n == 2:
+            group, comp = [1,90]
+            cl = colors[0]
+        elif n == 3:
+            group, comp = [1, 180]
+            cl = colors[1]
 
-            if row == 0 and col == 0:
-                ax.set_ylabel('Altitude [m] MSL')
+        x = wind_mean[group][comp]
+        std = wind_std[group][comp]
+        ' plot mean '
+        ax.plot(x, y, color=cl, lw=lw)
+        ' plot std_dev'
+        ax.fill_betweenx(y, x - std,
+                         x2=x + std,
+                         where=x - std < x + std,
+                         color=cl,
+                         alpha=0.2)
 
-            if row == 1 and col == 2:
-                ax.set_xlabel('[%]')
+        ax.set_xlim([-10, 20])
+        ax.set_ylim([0, 3000])
 
-            ax.grid(True)
-            ax.set_ylim([0, 3000])
+        if n in [2,3]:
+            ax.set_xlabel('$[m\,s^{-1}]$')
+        anotU, anotV = ['U', 'V']
 
-            if col < 2:
-                ax.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
-                          lw=lw, linestyle='--')
+        if n == 0:
+            ax.set_ylabel('Altitude [m] MSL')
 
-            if out == 'shear':
-                if (row == 0 or row == 1) and col == 2:
-                    ax.remove()
+        ax.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
+                  lw=lw, linestyle='--')
 
-    panel_name_loc = 0.8
+        anot_grid_pos = [0, 1, 1, 3]
+        panel_name_loc = 0.8
+
+elif out == 'shear':
+
+    for n, ax in enumerate(axs):
+
+        if n == 0:
+            x = wind_mean[0][90]
+            dx = x[1:] - x[:-1]
+            dxdz = dx / dz
+        elif n == 1:
+            x = wind_mean[0][180]
+            dx = x[1:] - x[:-1]
+            dxdz = dx / dz
+        elif n == 2:
+            x = wind_mean[0][90]
+            dx = x[1:] - x[:-1]
+            dx1dz = dx / dz
+            x = wind_mean[0][180]
+            dx = x[1:] - x[:-1]
+            dx2dz = dx / dz
+            dxdz = np.sqrt(dx1dz**2+dx2dz**2)
+        elif n == 3:
+            x = wind_mean[1][90]
+            dx = x[1:] - x[:-1]
+            dxdz = dx / dz
+        elif n == 4:
+            x = wind_mean[1][180]
+            dx = x[1:] - x[:-1]
+            dxdz = dx / dz
+        elif n == 5:
+            x = wind_mean[1][90]
+            dx = x[1:] - x[:-1]
+            dx1dz = dx / dz
+            x = wind_mean[1][180]
+            dx = x[1:] - x[:-1]
+            dx2dz = dx / dz
+            dxdz = np.sqrt(dx1dz**2+dx2dz**2)
+
+        cl=(0,0,0)
+        ynew = np.linspace(ydz.min(), int(ydz.max()), 500)
+        s = Spline(ydz, dxdz)
+        xnew = s(ynew)
+        ax.plot(xnew * 1e3, ynew, color=cl, lw=lw)
+        # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
+        ax.set_xlim([-5, 20])
+        if n in [3,4,5]:
+            ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
+        anotU, anotV = ['dU/dZ', 'dV/dZ']
+
+        anot_grid_pos = [0, 1, 2, 5]
 
 elif out == 'distr-wind':
 
@@ -359,100 +483,80 @@ elif out == 'mean-wind':
 
     import wind_weber as wb
 
-    ax1 = axes[0, 0]
-    ax2 = axes[0, 1]
-    ax4 = axes[1, 0]
-    ax5 = axes[1, 1]
-    axs = [ax1, ax2, ax4, ax5]
-
-    ax3 = axes[0, 2]
-    ax6 = axes[1, 2]
-
-
     for n,ax in enumerate(axs):
 
-        if n in [1,3]:
-            mean = list()
-            std = list()
-            cl = cmap(1)
-            if n == 1:
-                u = U_stack2['all']
-                v = V_stack2['all']
-            else:
-                u = U_stack2['rain']
-                v = V_stack2['rain']
+        if n in [0,1,3,4]:
+            if n in [1,4]:
+                mean = list()
+                std = list()
+                cl = cmap(1)
+                if n == 1:
+                    u = U_stack2['all']
+                    v = V_stack2['all']
+                else:
+                    u = U_stack2['rain']
+                    v = V_stack2['rain']
 
-            for i in range(41):
-                mean.append(wb.angular_mean(u[:, i],v[:, i]))
-                std.append(wb.angular_stddev2(u[:, i], v[:, i]))
+                for i in range(41):
+                    mean.append(wb.angular_mean(u[:, i],v[:, i]))
+                    std.append(wb.angular_stddev2(u[:, i], v[:, i]))
 
-            x = np.array(mean)
-            std = np.array(std)
+                x = np.array(mean)
+                std = np.array(std)
+            elif n in [0,3]:
+                cl = cmap(0)
+                if n == 0:
+                    spd = np.array(WS[0].tolist())
+                    x = np.nanmean(spd,axis=0)
+                    std = np.nanstd(spd,axis=0)
+                else:
+                    spd = np.array(WS[1].tolist())
+                    x = np.nanmean(spd,axis=0)
+                    std = np.nanstd(spd,axis=0)
+
+            ' plot mean '
+            ax.plot(x, y, color=cl, lw=lw)
+            ' plot std_dev'
+            ax.fill_betweenx(y, x - std,
+                             x2=x + std,
+                             where=x - std < x + std,
+                             color=cl,
+                             alpha=0.2)
+
+            ax.set_ylim([0,3000])
         else:
-            cl = cmap(0)
-            if n == 0:
-                spd = np.array(WS[0].tolist())
-                x = np.nanmean(spd,axis=0)
-                std = np.nanstd(spd,axis=0)
+            if n == 2:
+                x = wind_mean[0][0]
             else:
-                spd = np.array(WS[1].tolist())
-                x = np.nanmean(spd,axis=0)
-                std = np.nanstd(spd,axis=0)
-
-        ' plot mean '
-        ax.plot(x, y, color=cl, lw=lw)
-        ' plot std_dev'
-        ax.fill_betweenx(y, x - std,
-                         x2=x + std,
-                         where=x - std < x + std,
-                         color=cl,
-                         alpha=0.2)
-
-        ax.set_ylim([0,3000])
-        ax.grid(True)
-
-    for n,ax in enumerate([ax3,ax6]):
-        x = wind_mean[n][0]
-        ax.plot(x, y, color='k', lw=lw)
-        ax.set_xlim([0, 100])
-        ax.grid(True)
-        ax.set_ylim([0, 3000])
-        ax.set_xticklabels('')
+                x = wind_mean[1][0]
+            ax.plot(x, y, color='k', lw=lw)
+            ax.set_xlim([0, 100])
+            ax.set_ylim([0, 3000])
+            ax.set_xticklabels('')
 
     labels = ['0', '', '40', '', '80', '']
-    ax6.set_xlabel('[%]')
-    ax6.set_xticklabels(labels)
+    axs[5].set_xlabel('[%]')
+    axs[5].set_xticklabels(labels)
 
-    ax2.axvline(360,0,3000,
+    axs[1].axvline(360,0,3000,
                 color=(0.3,0.3,0.3),
                 linestyle='--',
                 lw=2)
 
-    ax1.set_xlim([-1, 25])
-    ax4.set_xlim([-1, 25])
+    axs[0].set_xlim([-1, 25])
+    axs[3].set_xlim([-1, 25])
 
-    ax2.set_xticks(range(60, 400, 60))
-    ax5.set_xticks(range(60, 400, 60))
+    axs[1].set_xticks(range(60, 400, 60))
+    axs[4].set_xticks(range(60, 400, 60))
 
-    ax2.set_xlim([50, 410])
-    ax5.set_xlim([50, 410])
+    axs[1].set_xlim([50, 410])
+    axs[4].set_xlim([50, 410])
 
     anotU, anotV = ['speed', 'direction']
-    # anrows = [0, 0, 0, 1]
-    # ancols = [0, 1, 1, 1]
-    anrows = [0, 0, 0, 1]
-    ancols = [0, 1, 2, 2]
-
-    ax1.set_xticklabels('')
-    ax2.set_xticklabels('')
-    ax2.set_yticklabels('')
-    ax3.set_yticklabels('')
-    ax5.set_yticklabels('')
-    ax6.set_yticklabels('')
-
-    ax4.set_xlabel('$[m\,s^{-1}]$')
-    ax5.set_xlabel('$[degrees]$')
-    ax1.set_ylabel('Altitude [m] MSL')
+    anot_grid_pos = [0,1,2,5]
+    axs[3].set_xlabel('$[m\,s^{-1}]$')
+    axs[4].set_xlabel('$[degrees]$')
+    axs[0].set_ylabel('Altitude [m] MSL')
 
     panel_name_loc = 0.1
 
@@ -528,9 +632,9 @@ anot = [anotU,
         'All (n={:d})'.format(WD[0].index.size),
         'czd-rain (n={:d})'.format(WD[1].index.size)]
 rot = [0, 0, -90, -90]
-for row, col, n in zip(anrows, ancols, range(4)):
-    ax = axes[row, col]
-    ax.text(locx[n],
+for gpos, n in zip(anot_grid_pos, range(4)):
+    # ax = axs[gpos]
+    axs[gpos].text(locx[n],
             locy[n],
             anot[n],
             fontsize=14,
@@ -538,35 +642,35 @@ for row, col, n in zip(anrows, ancols, range(4)):
             va='center',
             weight='bold',
             rotation=rot[n],
-            transform=ax.transAxes)
+            transform=axs[gpos].transAxes)
 
-" panel name"
-if out == 'mean-comp':
-    rows = [0, 0, 0, 1, 1, 1]
-    cols = [0, 1, 2, 0, 1, 2]
-elif out == 'shear':
-    rows = [0, 0, 1, 1]
-    cols = [0, 1, 0, 1]
-elif out == 'distr-wind':
-    rows = [0, 0, 1, 1]
-    cols = [0, 1, 0, 1]
-elif out == 'mean-wind':
-    # rows = [0, 0, 1, 1]
-    # cols = [0, 1, 0, 1]
-    rows = [0, 0, 0, 1, 1, 1]
-    cols = [0, 1, 2, 0, 1, 2]
-elif out == 'shear-mod':
-    rows = [0, 1]
-    cols = [0, 0]
-pname = iter(list(string.ascii_lowercase)[:len(rows)])
-for p, r, c, in zip(pname, rows, cols):
-    ax = axes[r, c]
-    transf = ax.transAxes
-    ax.text(panel_name_loc, 0.93, '({})'.format(p),
-            fontsize=15,
-            weight='bold',
-            transform=transf,
-            color=(0.3,0.3,0.3))
+# " panel name"
+# if out == 'mean-comp':
+#     rows = [0, 0, 0, 1, 1, 1]
+#     cols = [0, 1, 2, 0, 1, 2]
+# elif out == 'shear':
+#     rows = [0, 0, 1, 1]
+#     cols = [0, 1, 0, 1]
+# elif out == 'distr-wind':
+#     rows = [0, 0, 1, 1]
+#     cols = [0, 1, 0, 1]
+# elif out == 'mean-wind':
+#     # rows = [0, 0, 1, 1]
+#     # cols = [0, 1, 0, 1]
+#     rows = [0, 0, 0, 1, 1, 1]
+#     cols = [0, 1, 2, 0, 1, 2]
+# elif out == 'shear-mod':
+#     rows = [0, 1]
+#     cols = [0, 0]
+# pname = iter(list(string.ascii_lowercase)[:len(rows)])
+# for p, r, c, in zip(pname, rows, cols):
+#     ax = axes[r, c]
+#     transf = ax.transAxes
+#     ax.text(panel_name_loc, 0.93, '({})'.format(p),
+#             fontsize=15,
+#             weight='bold',
+#             transform=transf,
+#             color=(0.3,0.3,0.3))
 
 if out == 'mean-comp':
     tx = '13-season mean and std_dev wind component profile'
@@ -574,8 +678,8 @@ if out == 'mean-comp':
                         left=0.1, right=0.95)
 elif out == 'shear':
     tx = '13-season mean vertical wind-shear profile'
-    plt.subplots_adjust(hspace=0.1, wspace=0.15,
-                        right=1.15)
+    # plt.subplots_adjust(hspace=0.1, wspace=0.15,
+    #                     right=1.15)
 elif out == 'distr-wind':
     tx = '13-season wind distribution profile'
     plt.subplots_adjust(hspace=0.1, wspace=0.15,
@@ -584,12 +688,12 @@ elif out == 'mean-wind':
     tx = '13-season mean and std_dev wind profile'
     # plt.subplots_adjust(hspace=0.1, wspace=0.15,
     #                     right=1.15)
-    plt.subplots_adjust(hspace=0.1, wspace=0.15,
-                        left=0.1, right=0.95)
+    # plt.subplots_adjust(hspace=0.1, wspace=0.15,
+                        # left=0.1, right=0.95)
 elif out == 'shear-mod':
     tx = '13-season vertical wind shear profile'
-    plt.subplots_adjust(hspace=0.1, wspace=0.15,
-                        left=0.15, right=2.1)
+    # plt.subplots_adjust(hspace=0.1, wspace=0.15,
+    #                     left=0.15, right=2.1)
 
 plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
