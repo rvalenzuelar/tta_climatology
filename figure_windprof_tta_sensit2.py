@@ -218,10 +218,10 @@ tx = "13-season mean wind component profile" \
      "(czd > 0.25mm, n={:d})".format(WD.index.size)
 plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
-# plt.show()
+plt.show()
 
-# place = '/home/raul/Desktop/'
-place ='/Users/raulvalenzuela/Documents/'
-fname = place+'windprof_tta_sensit.png'
-plt.savefig(fname, dpi=300, format='png', papertype='letter',
-           bbox_inches='tight')
+# # place = '/home/raul/Desktop/'
+# place ='/Users/raulvalenzuela/Documents/'
+# fname = place+'windprof_tta_sensit.png'
+# plt.savefig(fname, dpi=300, format='png', papertype='letter',
+#            bbox_inches='tight')

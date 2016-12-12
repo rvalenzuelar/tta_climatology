@@ -128,7 +128,9 @@ def analyis(indict, param):
     import tta_continuity
 
     precip_good = indict['precip_good']
-    precip_good = precip_good[precip_good.czd > param['rain_czd']]
+
+    if param['rain_czd'] is not None:
+        precip_good = precip_good[precip_good.czd > param['rain_czd']]
 
     " filter by wind direction "
     wd_layer = indict['wd_layer']

@@ -14,13 +14,13 @@ params_hours = [{'wdir_thres': 140,
                  'wdir_layer': [0, 500],
                  'rain_czd': 0.25,
                  'nhours': a
-                 } for a in [1,2,4,8]]
+                 } for a in [1, 2, 4, 8]]
 
 params_wdir = [{'wdir_thres': a,
                 'wdir_layer': [0, 500],
                 'rain_czd': 0.25,
                 'nhours': 1
-                } for a in [120,130,150,160]]
+                } for a in [120, 130, 150, 160]]
 
 params_layer = [{'wdir_thres': 140,
                  'wdir_layer': [0, 1000],
