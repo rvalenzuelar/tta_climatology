@@ -121,19 +121,22 @@ wd_layer[wd_layer > 360] -= 360
 
 thres = range(120, 170, 10)
 # thres = [140]
-cmap = discrete_cmap(7, base_cmap='OrRd')
-colors1 = [cmap(r+2) for r in range(len(thres))]
-cmap = sns.color_palette("GnBu_d", 6)
+# cmap = discrete_cmap(7, base_cmap='Set1')
+# colors1 = [cmap(r+2) for r in range(len(thres))]
+flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
+cmap = sns.color_palette(flatui)
+colors1 = cmap
+cmap = sns.color_palette('Paired')
 cmap.reverse()
 colors2 = cmap
 # colors1, colors2 = [cmap(0), cmap(1)]
-lw = 3
+lws = [2,2,2,2,2]
 
 fig, ax = plt.subplots(2, 2, figsize=(8, 8),
                        sharey=True, sharex=True)
 ax = ax.flatten()
 
-for th, cl1, cl2 in zip(thres, colors1, colors2):
+for th, cl1, cl2,lw in zip(thres, colors1, colors2,lws):
 
     # if th != 140:
         # continue
@@ -158,16 +161,16 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
     y = np.append(y, hgt)
 
     if th == 140:
-        mk = None
+        mk = '^'
     else:
         mk = None
     ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
                label='$<$'+str(th)+'$^{\circ}$',
                marker=mk)
-    ax[1].plot(V_thr_mean1, y, color=cl2, lw=lw,
+    ax[1].plot(V_thr_mean1, y, color=cl1, lw=lw,
                label='$<$' + str(th) + '$^{\circ}$',
                marker=mk)
-    ax[2].plot(U_thr_mean2, y, color=cl1, lw=lw,
+    ax[2].plot(U_thr_mean2, y, color=cl2, lw=lw,
                label='$\geq$' + str(th) + '$^{\circ}$',
                marker=mk)
     ax[3].plot(V_thr_mean2, y, color=cl2, lw=lw,
@@ -175,7 +178,7 @@ for th, cl1, cl2 in zip(thres, colors1, colors2):
                marker=mk)
 
 for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
-                      ['U-comp', 'V-comp', '', '']):
+                      ['U', 'V', '', '']):
     a.text(0.05, 0.9, ptx,
            fontsize=15,
            weight='bold',
@@ -202,9 +205,9 @@ ax[3].text(1.02, 0.5, 'NO-TTA', fontsize=15, weight='bold',
            transform=ax[3].transAxes, rotation=-90)
 
 ax[0].legend(loc=0, fontsize=12, numpoints=1)
-ax[1].legend(loc=6, fontsize=12, numpoints=1)
+# ax[1].legend(loc=6, fontsize=12, numpoints=1)
 ax[2].legend(loc=6, fontsize=12, numpoints=1)
-ax[3].legend(loc=6, fontsize=12, numpoints=1)
+# ax[3].legend(loc=6, fontsize=12, numpoints=1)
 
 
 plt.subplots_adjust(top=0.9, bottom=0.1,

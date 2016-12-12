@@ -229,7 +229,7 @@ ax[1].text(140,6,'140',rotation=90,ha='right')
 # ax[1].text(160,6,'160',rotation=90,ha='right')
 
 ' ------ general figure setup ------ '
-ax[0].text(0.9,0.9,'(a)',
+ax[0].text(0.93,0.9,'(a)',
            fontsize=15,
            weight='bold',
            transform=ax[0].transAxes)
@@ -246,13 +246,13 @@ leg = ax[0].legend([ha[3], ha[0], ha[2], ha[1]],
                    loc=2)
 leg.get_frame().set_visible(False)
 
-ax[1].text(0.9,0.9,'(b)',
+ax[1].text(0.93,0.9,'(b)',
            fontsize=15,
            weight='bold',
            transform=ax[1].transAxes)
 ax[1].set_ylim([0, 7])
 ax[1].set_ylabel('ratio')
-ax[1].set_xlabel('wind direction')
+ax[1].set_xlabel('$\overline{WDIR}_{500}$')
 # ax[1].grid(True)
 handles, labels = ax[1].get_legend_handles_labels()
 leg = ax[1].legend(handles[::-1],
@@ -277,8 +277,8 @@ plt.subplots_adjust(hspace=0.08)
 
 # plt.show()
 
-place = '/home/raul/Desktop/'
-# place = '/Users/raulvalenzuela/Documents/'
+# place = '/home/raul/Desktop/'
+place = '/Users/raulvalenzuela/Documents/'
 fname='relationship_rain_wd_bin{}.png'.format(del_th)
 plt.savefig(place+fname, dpi=300, format='png', papertype='letter',
             bbox_inches='tight')

@@ -58,7 +58,7 @@ except NameError:
     wd = {th:list() for th in target_hgts}
     wdsrf = list()
     
-    select_rain = 'czd'
+    select_rain = 'all'
     
     for year in years:
           
@@ -108,10 +108,11 @@ lw = 2
 zorder = 10000
 hgt = np.append(hgt, (43,))
 first = True
-for h,ax in zip(target_hgts,axes):
+panel = ['a','b','c','d','e','f','g','h','i','j','k','l']
+for h,ax,pan in zip(target_hgts,axes,panel):
     
     ax.contourf(wd[h], ws[h],
-                bins=range(0,24,3),  # speed bins
+                bins=range(0,30,3),  # speed bins
                 nsector=36,
                 cmap=cm.viridis,
                 normed=True)
@@ -120,11 +121,17 @@ for h,ax in zip(target_hgts,axes):
         txt = 'Surface'
     else:
         txt = '{:2.0f}m'.format(hgt[h])
-    ax.text(0.5, 1.05, txt,
+    ax.text(0.5, 1.05, '('+pan+') '+txt,
             weight='bold',
             fontsize=15,
             ha='center',
             transform=ax.transAxes)
+
+    # ax.text(0.05, 0.05, '('+pan+')',
+    #         weight='bold',
+    #         fontsize=15,
+    #         ha='center',
+    #         transform=ax.transAxes)
 
     if h == 0:
         xtcklab = ax.get_xticklabels()
@@ -169,11 +176,11 @@ for h,ax in zip(target_hgts,axes):
 
     
 ''' add legend '''
-axes[8].legend(bbox_to_anchor=(-0.2, -0.7, 0.1, 0.1),
+axes[8].legend(bbox_to_anchor=(0.5, -0.9, 0.1, 0.1),
                # loc=(-0.1,-0.6),
-               ncol=4,
+               ncol=3,
                fontsize=12)
-axes[9].text(1.0,-0.2,'wind speed [$m\,s^{-1}$]',
+axes[9].text(1.1,-0.2,'wind speed [$m\,s^{-1}$]',
               fontsize=12,ha='center',
               transform=axes[9].transAxes)
 
@@ -192,8 +199,8 @@ plt.suptitle(tx,fontsize=15, weight='bold',y=0.99)
 
 # plt.show()
 
-place = '/home/raul/Desktop/'
-# place = '/Users/raulvalenzuela/Documents/'
+# place = '/home/raul/Desktop/'
+place = '/Users/raulvalenzuela/Documents/'
 fname = 'windrose_perhgt_0-3013m_{}.png'.format(select_rain)
 plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
             bbox_inches='tight')
