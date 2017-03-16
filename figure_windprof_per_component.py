@@ -170,7 +170,41 @@ wind_mean[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 wind_std[0][0] = 100 * (1 - (nans_per_level[0] / float(WD[0].index.size)))
 wind_std[1][0] = 100 * (1 - (nans_per_level[1] / float(WD[1].index.size)))
 
-out = 'mean-wind'
+
+" compute wind shear "
+dU = U_stack2['all'][:, 1:] - U_stack2['all'][:, :-1]
+dUdz_all = dU/dz
+dUdz_mean_all = np.nanmean(dUdz_all, axis=0)
+dUdz_std_all = np.nanstd(dUdz_all, axis=0)
+
+dV = V_stack2['all'][:, 1:] - V_stack2['all'][:, :-1]
+dVdz_all = dV/dz
+dVdz_mean_all = np.nanmean(dVdz_all, axis=0)
+dVdz_std_all = np.nanstd(dVdz_all, axis=0)
+
+module_all = np.sqrt(dUdz_all**2 + dVdz_all**2)
+module_mean_all = np.nanmean(module_all, axis=0)
+# module_mean_all = np.sqrt(dUdz_mean_all**2 + dVdz_mean_all**2)
+module_std_all = np.nanstd(module_all, axis=0)
+# module_std_all = np.sqrt(dUdz_std_all**2 + dVdz_std_all**2)
+
+dU = U_stack2['rain'][:, 1:] - U_stack2['rain'][:, :-1]
+dUdz_rain = dU/dz
+dUdz_mean_rain = np.nanmean(dUdz_rain, axis=0)
+dUdz_std_rain = np.nanstd(dUdz_rain, axis=0)
+
+dV = V_stack2['rain'][:, 1:] - V_stack2['rain'][:, :-1]
+dVdz_rain = dV/dz
+dVdz_mean_rain = np.nanmean(dVdz_rain, axis=0)
+dVdz_std_rain = np.nanstd(dVdz_rain, axis=0)
+
+module_rain = np.sqrt(dUdz_rain**2 + dVdz_rain**2)
+module_mean_rain = np.nanmean(module_rain, axis=0)
+# module_mean_rain = np.sqrt(dUdz_mean_rain**2 + dVdz_mean_rain**2)
+module_std_rain = np.nanstd(module_rain, axis=0)
+# module_std_all = np.sqrt(dUdz_std_rain**2 + dVdz_std_rain**2)
+
+out = 'shear_boxplot'
 
 if out == 'mean-comp':
     fig, axs = axb.specs(rows=2, cols=2,
@@ -183,11 +217,13 @@ if out == 'mean-comp':
                          right=0.9,
                          show_grid=False,
                          figsize=(7, 8))
-elif out == 'shear':
+
+elif out in ['shear_line','shear_boxplot']:
     fig, axs = axb.specs(rows=2, cols=3,
                          id_panels=True,
                          hide_xlabels_in=[0, 1, 2],
                          hide_ylabels_in=[1, 2, 4, 5],
+                         name_loc='upper-right',
                          hspace=0.07,
                          wspace=0.15,
                          left=0.1,
@@ -197,6 +233,7 @@ elif out == 'shear':
 
 elif out == 'distr-wind':
     fig = plt.figure(figsize=(7, 8))
+
 elif out == 'mean-wind':
     fig,axs = axb.specs(rows=2, cols=3,
                         id_panels=True,
@@ -209,6 +246,7 @@ elif out == 'mean-wind':
                         right=0.95,
                         show_grid=False,
                         figsize=(9, 8))
+
 elif out == 'shear-mod':
     fig = plt.figure(figsize=(6, 8))
 
@@ -259,42 +297,43 @@ if out == 'mean-comp':
         anot_grid_pos = [0, 1, 1, 3]
         panel_name_loc = 0.8
 
-elif out == 'shear':
+elif out == 'shear_line':
 
     for n, ax in enumerate(axs):
 
         if n == 0:
-            x = wind_mean[0][90]
-            dx = x[1:] - x[:-1]
-            dxdz = dx / dz
+            dxdz = dUdz_mean_all
+
+            e1_dxdz = dUdz_mean_all - dUdz_std_all
+            e2_dxdz = dUdz_mean_all + dUdz_std_all
+
         elif n == 1:
-            x = wind_mean[0][180]
-            dx = x[1:] - x[:-1]
-            dxdz = dx / dz
+            dxdz = dVdz_mean_all
+            e1_dxdz = dVdz_mean_all - dVdz_std_all
+            e2_dxdz = dVdz_mean_all + dVdz_std_all
+
         elif n == 2:
-            x = wind_mean[0][90]
-            dx = x[1:] - x[:-1]
-            dx1dz = dx / dz
-            x = wind_mean[0][180]
-            dx = x[1:] - x[:-1]
-            dx2dz = dx / dz
-            dxdz = np.sqrt(dx1dz**2+dx2dz**2)
+
+            dxdz = module_mean_all
+            e1_dxdz = module_mean_all - module_std_all
+            e2_dxdz = module_mean_all + module_std_all
+
         elif n == 3:
-            x = wind_mean[1][90]
-            dx = x[1:] - x[:-1]
-            dxdz = dx / dz
+            dxdz = dUdz_mean_rain
+            e1_dxdz = dUdz_mean_rain - dUdz_std_rain
+            e2_dxdz = dUdz_mean_rain + dUdz_std_rain
+
         elif n == 4:
-            x = wind_mean[1][180]
-            dx = x[1:] - x[:-1]
-            dxdz = dx / dz
+            dxdz = dVdz_mean_rain
+            e1_dxdz = dVdz_mean_rain - dVdz_std_rain
+            e2_dxdz = dVdz_mean_rain + dVdz_std_rain
+
         elif n == 5:
-            x = wind_mean[1][90]
-            dx = x[1:] - x[:-1]
-            dx1dz = dx / dz
-            x = wind_mean[1][180]
-            dx = x[1:] - x[:-1]
-            dx2dz = dx / dz
-            dxdz = np.sqrt(dx1dz**2+dx2dz**2)
+            # dxdz = np.sqrt(dUdz_mean_rain**2+dVdz_mean_rain**2)
+            dxdz = module_mean_rain
+            e1_dxdz = module_mean_rain - module_std_rain
+            e2_dxdz = module_mean_rain + module_std_rain
+
 
         if n in [0, 3]:
             cl = cmap(0)
@@ -308,8 +347,22 @@ elif out == 'shear':
         xnew = s(ynew)
         ax.plot(xnew * 1e3, ynew, color=cl, lw=lw)
         # ax.plot(dxdz*1e3, ydz, color=cl, lw=lw)
-        ax.set_xlim([-5, 20])
+
+        ''' std envelop '''
+        s = Spline(ydz, e1_dxdz)
+        xnew1 = s(ynew)
+        s = Spline(ydz, e2_dxdz)
+        xnew2 = s(ynew)
+        ax.fill_betweenx(ydz, e1_dxdz * 1e3,
+                         x2=e2_dxdz * 1e3,
+                         where=e1_dxdz < e2_dxdz,
+                         color=(0, 0, 0),
+                         alpha=0.2)
+
         ax.set_ylim([0, 3000])
+        ax.vlines(x=0, ymin=0, ymax=3000, linestyle='--',
+                  color='k', zorder=10000)
+
         if n in [3, 4, 5]:
             ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
         anotU, anotV = ['$dU/dZ$', '$dV/dZ$']
@@ -323,6 +376,84 @@ elif out == 'shear':
         if n == 0:
             ax.set_ylabel('Altitude [m] MSL')
 
+
+elif out == 'shear_boxplot':
+
+    for n, ax in enumerate(axs):
+
+        if n == 0:
+            dxdz = dUdz_all * 1e3
+
+        elif n == 1:
+            dxdz = dVdz_all * 1e3
+
+        elif n == 2:
+            dxdz = module_all * 1e3
+
+        elif n == 3:
+            dxdz = dUdz_rain * 1e3
+
+        elif n == 4:
+            dxdz = dVdz_rain * 1e3
+
+        elif n == 5:
+            dxdz = module_rain * 1e3
+
+        if n in [0, 3]:
+            cl = cmap(0)
+        elif n in [1, 4]:
+            cl = cmap(1)
+        else:
+            cl = (0, 0, 0)
+
+        for i in range(40):
+            foo = ax.boxplot(dxdz[~np.isnan(dxdz[:, i])],
+                                whis=[25, 75], # <- no whisker
+                                sym='',
+                                showmeans=True,
+                                showcaps=False,
+                                vert=False,
+                                whiskerprops={
+                                    'linestyle': '-',
+                                    'color': 'k'},
+                                meanprops={
+                                    'marker': 'd',
+                                    'markersize': 5,
+                                    'markeredgecolor': None,
+                                    'markerfacecolor': cl},
+                                medianprops={'color': cl},
+                                boxprops={'color': cl}
+                             )
+
+        f = interp1d(ydz.tolist(), range(1, 41))
+        newticks = [1] + f(range(500,3500,500)).tolist()
+        ax.set_yticks(newticks)
+        if n in [0,3]:
+            ax.set_yticklabels([0] + range(500, 3500, 500),
+                               fontsize=15)
+        else:
+            ax.set_yticklabels('')
+        ax.set_ylim([0, f(3020)])
+        if n in [2,5]:
+            ax.set_xlim([0, 40])
+        else:
+            ax.set_xlim([-15, 40])
+            # ax.vlines(x=0, ymin=0, ymax=3000, linestyle='--',
+            #           color='k', zorder=10000)
+
+        if n in [3, 4, 5]:
+            ax.set_xlabel('$[x10^{-3}\,s^{-1}]$')
+
+        if n == 2:
+            tx = '$\sqrt{(dU/dZ)^{2}+(dV/dZ)^{2}}$'
+            ax.text(0.5, 1.03, tx, transform=ax.transAxes,
+                    ha='center')
+
+        if n == 0:
+            ax.set_ylabel('Altitude [m] MSL')
+
+        anotU, anotV = ['$dU/dZ$', '$dV/dZ$']
+        anot_grid_pos = [0, 1, 2, 5]
 
 elif out == 'distr-wind':
 
@@ -495,7 +626,7 @@ elif out == 'mean-wind':
 
 elif out == 'shear-mod':
 
-    axs = axes.flatten()
+    axs = axs.flatten()
 
     u_all = wind_mean[0][90]
     v_all = wind_mean[0][180]
@@ -580,7 +711,7 @@ for gpos, n in zip(anot_grid_pos, range(4)):
 if out == 'mean-comp':
     tx = '13-season mean and std_dev wind component profile'
 
-elif out == 'shear':
+elif out in ['shear_line','shear_boxplot']:
     tx = '13-season mean vertical wind-shear profile'
 
 elif out == 'distr-wind':

@@ -30,13 +30,17 @@ years = [1998] + range(2001, 2013)
 try:
     wd_layer
 except NameError:
-    out = tta.start(years=years,layer=[0,500])
+    out = tta.preprocess(years=years,layer=[0,500])
     wd_layer = out['wd_layer'][out['WD_rain'].index]
 
 hours_df = pd.DataFrame()
 events_df = pd.DataFrame()
 
 thres = [140]
+max_events = 55
+n_event = range(1, max_events)
+catalog_df = pd.DataFrame(index=n_event,
+                          columns=years)
 
 for th in thres:
 
@@ -54,6 +58,8 @@ for th in thres:
             hist = time_df.clasf.value_counts()
             hours = np.append(hours, hist.sum())
             events = np.append(events, hist.count())
+
+            catalog_df[year][hist.index] = hist.values
 
     data = {'h': hours,
             'year': range(1998, 2013),
@@ -153,11 +159,11 @@ tx  = 'Layer-mean Surf-500m hourly winds '
 tx += '$<$ {}$^\circ$'.format(thres[0])
 plt.suptitle(tx,fontsize=18,weight='bold',y=0.95)
 
-# plt.show()
+plt.show()
 
-place = '/Users/raulvalenzuela/Documents/'
-fname = place+'fig_events_per_season_wd140_surf-500m_rain.png'
-plt.savefig(fname, dpi=150, format='png',papertype='letter',
-            bbox_inches='tight')
+# place = '/Users/raulvalenzuela/Documents/'
+# fname = place+'fig_events_per_season_wd140_surf-500m_rain.png'
+# plt.savefig(fname, dpi=150, format='png',papertype='letter',
+#             bbox_inches='tight')
 
 

@@ -20,6 +20,7 @@ from rv_utilities import discrete_cmap
 sns.reset_orig()
 
 rcParams['xtick.labelsize'] = 15
+rcParams['ytick.color']='k'
 rcParams['ytick.labelsize'] = 15
 rcParams['axes.labelsize'] = 15
 rcParams['mathtext.default'] = 'sf'
@@ -130,13 +131,13 @@ cmap = sns.color_palette('Paired')
 cmap.reverse()
 colors2 = cmap
 # colors1, colors2 = [cmap(0), cmap(1)]
-lws = [2,2,2,2,2]
+lws = [2, 2, 2, 2, 2]
 
 fig, ax = plt.subplots(2, 2, figsize=(8, 8),
                        sharey=True, sharex=True)
 ax = ax.flatten()
 
-for th, cl1, cl2,lw in zip(thres, colors1, colors2,lws):
+for th, cl1, cl2,lw in zip(thres, colors1, colors1, lws):
 
     # if th != 140:
         # continue
@@ -157,6 +158,13 @@ for th, cl1, cl2,lw in zip(thres, colors1, colors2,lws):
     U_thr_mean2 = np.nanmean(np.array(U_thr_geq.tolist()), axis=0)
     V_thr_mean2 = np.nanmean(np.array(V_thr_geq.tolist()), axis=0)
 
+    if th == 140:
+        U_thr_std1 = np.nanstd(np.array(U_thr_less.tolist()), axis=0)
+        V_thr_std1 = np.nanstd(np.array(V_thr_less.tolist()), axis=0)
+
+        U_thr_std2 = np.nanstd(np.array(U_thr_geq.tolist()), axis=0)
+        V_thr_std2 = np.nanstd(np.array(V_thr_geq.tolist()), axis=0)
+
     y = [0]
     y = np.append(y, hgt)
 
@@ -164,6 +172,7 @@ for th, cl1, cl2,lw in zip(thres, colors1, colors2,lws):
         mk = '^'
     else:
         mk = None
+
     ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
                label='$<$'+str(th)+'$^{\circ}$',
                marker=mk)
@@ -176,6 +185,38 @@ for th, cl1, cl2,lw in zip(thres, colors1, colors2,lws):
     ax[3].plot(V_thr_mean2, y, color=cl2, lw=lw,
                label='$\geq$' + str(th) + '$^{\circ}$',
                marker=mk)
+
+    ' plot std_dev'
+    if th == 140:
+        x = U_thr_mean1
+        std = U_thr_std1
+        ax[0].fill_betweenx(y, x - std,
+                             x2=x + std,
+                             where=x - std < x + std,
+                             color=(0, 0, 0),
+                             alpha=0.2)
+        x = V_thr_mean1
+        std = V_thr_std1
+        ax[1].fill_betweenx(y, x - std,
+                            x2=x + std,
+                            where=x - std < x + std,
+                            color=(0, 0, 0),
+                            alpha=0.2)
+        x = U_thr_mean2
+        std = U_thr_std2
+        ax[2].fill_betweenx(y, x - std,
+                            x2=x + std,
+                            where=x - std < x + std,
+                            color=(0, 0, 0),
+                            alpha=0.2)
+        x = V_thr_mean2
+        std = V_thr_std2
+        ax[3].fill_betweenx(y, x - std,
+                            x2=x + std,
+                            where=x - std < x + std,
+                            color=(0, 0, 0),
+                            alpha=0.2)
+
 
 for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
                       ['U', 'V', '', '']):
@@ -192,19 +233,25 @@ for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
            weight='bold',
            transform=a.transAxes)
     a.set_ylim([0, 3000])
-    a.set_xlim([-10, 15])
+    a.set_xlim([-15, 20])
     # a.grid(True)
 
 ax[2].set_xlabel('$[m\,s^{-1}]$')
 ax[3].set_xlabel('$[m\,s^{-1}]$')
 ax[0].set_ylabel('Altitude [m] MSL')
 
-ax[1].text(1.02, 0.5, 'TTA', fontsize=15, weight='bold',
+ax[1].text(1.02, 0.5, 'TTA (n={})'.format(U_thr_less.size),
+           fontsize=15,
+           weight='bold',
+           va='center',
            transform=ax[1].transAxes, rotation=-90)
-ax[3].text(1.02, 0.5, 'NO-TTA', fontsize=15, weight='bold',
+ax[3].text(1.02, 0.5, 'NO-TTA (n={})'.format(U_thr_geq.size),
+           fontsize=15,
+           weight='bold',
+           va='center',
            transform=ax[3].transAxes, rotation=-90)
 
-ax[0].legend(loc=0, fontsize=12, numpoints=1)
+ax[0].legend(loc=4, fontsize=12, numpoints=1)
 # ax[1].legend(loc=6, fontsize=12, numpoints=1)
 ax[2].legend(loc=6, fontsize=12, numpoints=1)
 # ax[3].legend(loc=6, fontsize=12, numpoints=1)
@@ -218,10 +265,10 @@ tx = "13-season mean wind component profile" \
      "(czd > 0.25mm, n={:d})".format(WD.index.size)
 plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
 
-plt.show()
+# plt.show()
 
-# # place = '/home/raul/Desktop/'
-# place ='/Users/raulvalenzuela/Documents/'
-# fname = place+'windprof_tta_sensit.png'
-# plt.savefig(fname, dpi=300, format='png', papertype='letter',
-#            bbox_inches='tight')
+# place = '/home/raul/Desktop/'
+place ='/Users/raulvalenzuela/Documents/'
+fname = place+'windprof_tta_sensit.png'
+plt.savefig(fname, dpi=300, format='png', papertype='letter',
+           bbox_inches='tight')

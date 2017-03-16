@@ -114,7 +114,7 @@ for h,ax,pan in zip(target_hgts,axes,panel):
     ax.contourf(wd[h], ws[h],
                 bins=range(0,30,3),  # speed bins
                 nsector=36,
-                cmap=cm.viridis,
+                cmap=cm.nipy_spectral,
                 normed=True)
 
     if h == -1:
@@ -176,11 +176,13 @@ for h,ax,pan in zip(target_hgts,axes,panel):
 
     
 ''' add legend '''
-axes[8].legend(bbox_to_anchor=(0.5, -0.9, 0.1, 0.1),
+axes[8].legend(bbox_to_anchor=(-0.2, -0.9, 0.1, 0.1),
                # loc=(-0.1,-0.6),
                ncol=3,
-               fontsize=12)
-axes[9].text(1.1,-0.2,'wind speed [$m\,s^{-1}$]',
+               fontsize=12,
+               symbol='ws')
+
+axes[9].text(1.1,-0.2,'wind speed (ws) [$m\,s^{-1}$]',
               fontsize=12,ha='center',
               transform=axes[9].transAxes)
 
