@@ -204,9 +204,9 @@ module_mean_rain = np.nanmean(module_rain, axis=0)
 module_std_rain = np.nanstd(module_rain, axis=0)
 # module_std_all = np.sqrt(dUdz_std_rain**2 + dVdz_std_rain**2)
 
-out = 'shear_boxplot'
+out = 'mean-comp_boxplot'
 
-if out == 'mean-comp':
+if out in ['mean-comp','mean-comp_boxplot']:
     fig, axs = axb.specs(rows=2, cols=2,
                          id_panels=True,
                          hide_xlabels_in=[0, 1],
@@ -234,7 +234,7 @@ elif out in ['shear_line','shear_boxplot']:
 elif out == 'distr-wind':
     fig = plt.figure(figsize=(7, 8))
 
-elif out == 'mean-wind':
+elif out in ['mean-wind','mean-wind_boxplot']:
     fig,axs = axb.specs(rows=2, cols=3,
                         id_panels=True,
                         col_ratio=[2,2,1],
@@ -296,6 +296,70 @@ if out == 'mean-comp':
 
         anot_grid_pos = [0, 1, 1, 3]
         panel_name_loc = 0.8
+
+elif out == 'mean-comp_boxplot':
+
+    for n, ax in enumerate(axs):
+
+        if n == 0:
+            data = U_stack2['all']
+            cl = colors[0]
+        elif n == 1:
+            data = V_stack2['all']
+            cl = colors[1]
+        elif n == 2:
+            data = U_stack2['rain']
+            cl = colors[0]
+        elif n == 3:
+            data = V_stack2['rain']
+            cl = colors[1]
+
+        for i in range(40):
+            foo = ax.boxplot(data[~np.isnan(data[:, i])],
+                             whis=[25, 75],  # <- no whisker
+                             sym='',
+                             showmeans=True,
+                             showcaps=False,
+                             vert=False,
+                             whiskerprops={
+                                 'linestyle': '-',
+                                 'color': 'k'},
+                             meanprops={
+                                 'marker': 'd',
+                                 'markersize': 5,
+                                 'markeredgecolor': None,
+                                 'markerfacecolor': cl},
+                             medianprops={'color': cl},
+                             boxprops={'color': cl}
+                             )
+
+        f = interp1d(ydz.tolist(), range(1, 41))
+        newticks = [1] + f(range(500, 3500, 500)).tolist()
+        ax.set_yticks(newticks)
+        if n in [0, 2]:
+            ax.set_yticklabels([0] + range(500, 3500, 500),
+                               fontsize=15)
+        else:
+            ax.set_yticklabels('')
+        ax.set_ylim([0, f(3020)])
+
+
+        ax.set_xlim([-10, 20])
+
+        if n in [2,3]:
+            ax.set_xlabel('$[m\,s^{-1}]$')
+        anotU, anotV = ['U', 'V']
+
+        if n == 0:
+            ax.set_ylabel('Altitude [m] MSL')
+
+        " vertical line "
+        ax.vlines(0, 0, 3000, color=(0.4, 0.4, 0.4),
+                  lw=lw, linestyle='--')
+
+        anot_grid_pos = [0, 1, 1, 3]
+        panel_name_loc = 0.8
+
 
 elif out == 'shear_line':
 
@@ -434,6 +498,7 @@ elif out == 'shear_boxplot':
         else:
             ax.set_yticklabels('')
         ax.set_ylim([0, f(3020)])
+
         if n in [2,5]:
             ax.set_xlim([0, 40])
         else:
@@ -623,6 +688,107 @@ elif out == 'mean-wind':
 
     panel_name_loc = 0.1
 
+elif out == 'mean-wind_boxplot':
+
+    import wind_weber as wb
+
+    for n, ax in enumerate(axs):
+
+        if n in [0, 1, 3, 4]:
+            if n in [1, 4]:
+                ''' wind direction '''
+                mean = list()
+                std = list()
+                cl = cmap(1)
+                if n == 1:
+                    u = U_stack2['all']
+                    v = V_stack2['all']
+                else:
+                    u = U_stack2['rain']
+                    v = V_stack2['rain']
+
+                x = 270 - (np.arctan2(v, u) * 180 / np.pi)
+                xmeans = wb.angular_mean(u, v, axis=0)
+
+            elif n in [0, 3]:
+                ''' wind speed '''
+                cl = cmap(0)
+                if n == 0:
+                    u = U_stack2['all']
+                    v = V_stack2['all']
+                else:
+                    u = U_stack2['rain']
+                    v = V_stack2['rain']
+
+                x = np.sqrt(u**2 + v**2)
+                xmeans = np.nanmean(x,axis=0)
+
+            for i in range(41):
+                foo = ax.boxplot(x[~np.isnan(x[:, i])],
+                                 whis=[25, 75],  # <- no whisker
+                                 sym='',
+                                 showmeans=False,
+                                 showcaps=False,
+                                 vert=False,
+                                 whiskerprops={
+                                     'linestyle': '-',
+                                     'color': 'k'},
+                                 meanprops={
+                                     'marker': 'd',
+                                     'markersize': 5,
+                                     'markeredgecolor': None,
+                                     'markerfacecolor': cl},
+                                 medianprops={'color': cl},
+                                 boxprops={'color': cl}
+                                 )
+                # if n in [1, 4]:
+                    # foo['means'][i].set_xdata(xmeans[i])
+                    # foo['means'][i].set_xdata(300)
+            ax.scatter(xmeans, range(1,42), marker='d', s=20,
+                       c=cl, edgecolors=cl, zorder=1000000)
+
+
+            f = interp1d(ydz.tolist(), range(1, 41))
+            newticks = [1] + f(range(500, 3500, 500)).tolist()
+            ax.set_yticks(newticks)
+            if n in [0, 3]:
+                ax.set_yticklabels([0] + range(500, 3500, 500),
+                                   fontsize=15)
+            else:
+                ax.set_yticklabels('')
+            ax.set_ylim([0, f(3020)])
+
+
+        else:
+            if n == 2:
+                x = wind_mean[0][0]
+            else:
+                x = wind_mean[1][0]
+            ax.plot(x, y, color='k', lw=lw)
+            ax.set_xlim([0, 100])
+            ax.set_ylim([0, 3000])
+            ax.set_xticklabels('')
+
+    labels = ['0', '', '40', '', '80', '']
+    axs[5].set_xlabel('[%]')
+    axs[5].set_xticklabels(labels)
+
+    for n in [0, 3]:
+        axs[n].set_xlim([-1, 25])
+
+    for n in [1, 4]:
+        axs[n].set_xticks(range(60, 360, 60))
+        axs[n].set_xlim([50, 360])
+
+    anotU, anotV = ['speed', 'direction']
+    anot_grid_pos = [0, 1, 2, 5]
+    axs[3].set_xlabel('$[m\,s^{-1}]$')
+    axs[4].set_xlabel('$[degrees]$')
+    axs[0].set_ylabel('Altitude [m] MSL')
+
+    panel_name_loc = 0.1
+
+
 
 elif out == 'shear-mod':
 
@@ -711,6 +877,9 @@ for gpos, n in zip(anot_grid_pos, range(4)):
 if out == 'mean-comp':
     tx = '13-season mean and std_dev wind component profile'
 
+elif out == 'mean-comp_boxplot':
+    tx = '13-season mean wind component profile'
+
 elif out in ['shear_line','shear_boxplot']:
     tx = '13-season mean vertical wind-shear profile'
 
@@ -720,6 +889,9 @@ elif out == 'distr-wind':
                         right=1.15)
 elif out == 'mean-wind':
     tx = '13-season mean and std_dev wind profile'
+
+elif out == 'mean-wind_boxplot':
+    tx = '13-season mean wind profile'
 
 elif out == 'shear-mod':
     tx = '13-season vertical wind shear profile'

@@ -26,12 +26,20 @@ def var(x):
     return np.nanvar(x)
 
 
-def mean(x):
-    return np.nanmean(x)
+def mean(x,axis=None):
+
+    if axis is not None:
+        return np.nanmean(x, axis=axis)
+    else:
+        return np.nanmean(x)
 
 
-def angular_mean(u, v):
-    return 270 - (np.arctan2(mean(v), mean(u)) * 180 / np.pi)
+def angular_mean(u, v, axis=None):
+    if axis is not None:
+        return 270 - (np.arctan2(mean(v,axis=axis),
+                                 mean(u,axis=axis)) * 180 / np.pi)
+    else:
+        return 270 - (np.arctan2(mean(v), mean(u)) * 180 / np.pi)
 
 
 def x_mean(u, v):
@@ -163,4 +171,4 @@ def angular_stddev3(u, v):
 
     P = persistance(u,v)
 
-    return 105.75*(1-P)**0.5337
+    return 105.75 * (1-P) ** 0.5337
