@@ -19,7 +19,6 @@ rcParams['ytick.labelsize'] = 15
 rcParams['axes.labelsize'] = 15
 rcParams['mathtext.default'] = 'sf'
 
-
 # years = [1998]
 years = [1998] + range(2001, 2013)
 
@@ -54,8 +53,6 @@ for th in thres:
             hist = time_df.clasf.value_counts()
 
             catalog[year][hist.index] = hist.values
-
-
 
 dcmap = discrete_cmap(7, base_cmap='Set1')
 cls = [dcmap(0),dcmap(1),dcmap(2)]
@@ -108,18 +105,24 @@ bp = ax.boxplot(data,
                      'color': 'k'},
                  meanprops={
                      'marker': 'd',
-                     'markersize': 6,
+                     'markersize': 0,
                      'markeredgecolor': None,
                      'markerfacecolor': 'r'},
                  medianprops={'color': 'r',
-                              'linewidth':1.5},
+                              'linewidth':0},
                  boxprops={'color': 'k'}
                  )
 labs = [str(int(np.mod(y,100.))).zfill(2)
         for y in years]
 
-median = np.mean([p.get_ydata()[0] for p in bp['medians']])
-mean = np.mean([p.get_ydata()[0] for p in bp['means']])
+# median = np.mean([p.get_ydata()[0] for p in bp['medians']])
+# mean = np.mean([p.get_ydata()[0] for p in bp['means']])
+
+d=list()
+for l in data:
+    d.extend(l)
+median = np.median(d)
+mean = np.mean(d)
 
 ax.hlines(y=median, xmin=0, xmax=22, linestyle='--',
           color='r', zorder=10000)
@@ -127,7 +130,7 @@ ax.hlines(y=median, xmin=0, xmax=22, linestyle='--',
 ax.hlines(y=mean, xmin=0, xmax=22, linestyle='-',
           color='r', zorder=10000)
 
-yticks = [0]+[np.round(median,1), np.round(mean,1)]+range(5,25,5)
+yticks = [0] + [np.round(median,1), np.round(mean,1)] + range(5,25,5)
 
 ax.set_yticks(yticks)
 
