@@ -1,4 +1,4 @@
-'''
+"""
     Raul Valenzuela
     raul.valenzuela@colorado.edu
 
@@ -16,7 +16,17 @@
 
     Moved bootstrap functions from tta_analysis2.py
 
-'''
+
+    Example:
+        
+        import tta_analysis3 as ta3
+        out1 = ta3.preprocess(years=[2003], layer=[0,500])
+        params = dict(wdir_thres=150,
+                      rain_czd=0.25,
+                      nhours=2
+                      )
+        out2 = ta3.analysis(out1,params) 
+"""
 
 import numpy as np
 
