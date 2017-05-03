@@ -133,7 +133,7 @@ def preprocess(years=None, layer=None, verbose=True):
                 precip_good=precip_good)
 
 
-def analyis(indict, param):
+def analysis(indict, param):
 
     import tta_continuity
 
