@@ -901,8 +901,8 @@ plt.suptitle(tx, fontsize=15, weight='bold', y=0.98)
 
 # plt.show()
 
-place = '/Users/raulvalenzuela/Documents/'
-# place = '/home/raul/Desktop/'
-fname = 'windprof_components_{}.png'.format(out)
-plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
-           bbox_inches='tight')
+# place = '/Users/raulvalenzuela/Documents/'
+# # place = '/home/raul/Desktop/'
+# fname = 'windprof_components_{}.png'.format(out)
+# plt.savefig(place+fname, dpi=300, format='png',papertype='letter',
+#            bbox_inches='tight')

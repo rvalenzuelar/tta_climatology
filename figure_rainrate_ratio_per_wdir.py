@@ -8,13 +8,10 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import tta_analysis3 as tta
 from matplotlib import rcParams
 from rv_utilities import discrete_cmap
 from curve_fitting import curv_fit
-
-sns.reset_orig()
 
 rcParams['xtick.labelsize'] = 15
 rcParams['ytick.labelsize'] = 15
@@ -123,7 +120,8 @@ ax[0].errorbar(thres+del_th/2, bby_rainr,
                color=cl_bby,
                fmt='o',
                label='BBY rain rate (95% CI)',
-               lw=2)
+               lw=2,
+               markeredgecolor='k')
 
 ax[0].errorbar(thres+del_th/2, czd_rainr,
                yerr=[czd_rainr-czd_CI_bot,
@@ -132,7 +130,8 @@ ax[0].errorbar(thres+del_th/2, czd_rainr,
                color=cl_czd,
                fmt='o',
                label='CZD rain rate (95% CI)',
-               lw=2)
+               lw=2,
+               markeredgecolor='k')
 
 ax[1].errorbar(thres+del_th/2, ratio,
                yerr=[ratio-rto_CI_bot,
@@ -141,7 +140,8 @@ ax[1].errorbar(thres+del_th/2, ratio,
                color=cl_rto,
                fmt='o',
                label='CZD/BBY ratio (95% CI)',
-               lw=2)
+               lw=2,
+               markeredgecolor='k')
 
 ' ------ annotate model parameters fitted  ------ '
 mu_czd = fit_czd.params['center'].value
@@ -265,12 +265,10 @@ leg.get_frame().set_visible(False)
 k = 'Surf-500m'
 tx = '13-season relationship between CZD, BBY rain\n'
 tx += 'and wind direction over BBY in the layer-mean {}\n'.format(k)
-tx += '(CZD rain > 0.25mm; wind direction bins of {} )'.format(str(del_th))
+tx += '(CZD$\geq$0.25mm; wind direction bins of {}$^\circ$)'.format(
+    str(del_th))
 plt.suptitle(tx, fontsize=15, weight='bold', y=1.0)
-ax[0].text(0.89,1.07,'$^{\circ}$',
-           fontsize=15,
-           weight='bold',
-           transform=ax[0].transAxes)
+
 
 
 plt.subplots_adjust(hspace=0.08)

@@ -11,7 +11,6 @@ import pandas as pd
 import parse_data
 import seaborn as sns
 from matplotlib import rcParams
-from rv_utilities import discrete_cmap
 
 # if seaborn-style plot shows up need
 # to use:
@@ -92,7 +91,7 @@ except NameError:
         include = ~any_nan
 
         ' rainy days at CZD '
-        rain_czd = czd.precip > 0
+        rain_czd = czd.precip > 0.25
         rain_dates = rain_czd.loc[rain_czd.values].index
 
         ' reduce and save to big Series '
@@ -137,7 +136,7 @@ fig, ax = plt.subplots(2, 2, figsize=(8, 8),
                        sharey=True, sharex=True)
 ax = ax.flatten()
 
-for th, cl1, cl2,lw in zip(thres, colors1, colors1, lws):
+for th, cl1, cl2, lw in zip(thres, colors1, colors1, lws):
 
     # if th != 140:
         # continue
@@ -173,50 +172,73 @@ for th, cl1, cl2,lw in zip(thres, colors1, colors1, lws):
     else:
         mk = None
 
-    ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
-               label='$<$'+str(th)+'$^{\circ}$',
-               marker=mk)
-    ax[1].plot(V_thr_mean1, y, color=cl1, lw=lw,
-               label='$<$' + str(th) + '$^{\circ}$',
-               marker=mk)
-    ax[2].plot(U_thr_mean2, y, color=cl2, lw=lw,
-               label='$\geq$' + str(th) + '$^{\circ}$',
-               marker=mk)
-    ax[3].plot(V_thr_mean2, y, color=cl2, lw=lw,
-               label='$\geq$' + str(th) + '$^{\circ}$',
-               marker=mk)
-
     ' plot std_dev'
     if th == 140:
-        x = U_thr_mean1
-        std = U_thr_std1
-        ax[0].fill_betweenx(y, x - std,
-                             x2=x + std,
-                             where=x - std < x + std,
-                             color=(0, 0, 0),
-                             alpha=0.2)
-        x = V_thr_mean1
-        std = V_thr_std1
-        ax[1].fill_betweenx(y, x - std,
-                            x2=x + std,
-                            where=x - std < x + std,
-                            color=(0, 0, 0),
-                            alpha=0.2)
-        x = U_thr_mean2
-        std = U_thr_std2
-        ax[2].fill_betweenx(y, x - std,
-                            x2=x + std,
-                            where=x - std < x + std,
-                            color=(0, 0, 0),
-                            alpha=0.2)
-        x = V_thr_mean2
-        std = V_thr_std2
-        ax[3].fill_betweenx(y, x - std,
-                            x2=x + std,
-                            where=x - std < x + std,
-                            color=(0, 0, 0),
-                            alpha=0.2)
+        # x = U_thr_mean1
+        # std = U_thr_std1
+        # ax[0].fill_betweenx(y, x - std,
+        #                      x2=x + std,
+        #                      where=x - std < x + std,
+        #                      color=(0, 0, 0),
+        #                      alpha=0.2)
+        # x = V_thr_mean1
+        # std = V_thr_std1
+        # ax[1].fill_betweenx(y, x - std,
+        #                     x2=x + std,
+        #                     where=x - std < x + std,
+        #                     color=(0, 0, 0),
+        #                     alpha=0.2)
+        # x = U_thr_mean2
+        # std = U_thr_std2
+        # ax[2].fill_betweenx(y, x - std,
+        #                     x2=x + std,
+        #                     where=x - std < x + std,
+        #                     color=(0, 0, 0),
+        #                     alpha=0.2)
+        # x = V_thr_mean2
+        # std = V_thr_std2
+        # ax[3].fill_betweenx(y, x - std,
+        #                     x2=x + std,
+        #                     where=x - std < x + std,
+        #                     color=(0, 0, 0),
+        #                     alpha=0.2)
 
+        mylist = [U_thr_less, V_thr_less,
+                  U_thr_geq, V_thr_geq]
+        cl = 'k'
+        for i, l in zip(range(4), mylist):
+            data = np.array(l.tolist())
+            for j in range(40):
+                foo = ax[i].boxplot(data[~np.isnan(data[:, j])],
+                                 positions=y,
+                                 manage_xticks=False,
+                                 whis=[25, 75],  # <- no whisker
+                                 sym='',
+                                 showmeans=False,
+                                 showcaps=False,
+                                 vert=False,
+                                 boxprops={'color': cl},
+                                 )
+        zorder = 100000
+    else:
+        zorder = 1000
+
+    ax[0].plot(U_thr_mean1, y, color=cl1, lw=lw,
+               label='$<$' + str(th) + '$^{\circ}$',
+               marker=mk, zorder=zorder,
+               markeredgecolor='k')
+    ax[1].plot(V_thr_mean1, y, color=cl1, lw=lw,
+               label='$<$' + str(th) + '$^{\circ}$',
+               marker=mk, zorder=zorder,
+               markeredgecolor='k')
+    ax[2].plot(U_thr_mean2, y, color=cl2, lw=lw,
+               label='$\geq$' + str(th) + '$^{\circ}$',
+               marker=mk, zorder=zorder,
+               markeredgecolor='k')
+    ax[3].plot(V_thr_mean2, y, color=cl2, lw=lw,
+               label='$\geq$' + str(th) + '$^{\circ}$',
+               marker=mk, zorder=zorder,
+               markeredgecolor='k')
 
 for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
                       ['U', 'V', '', '']):
@@ -232,7 +254,7 @@ for a, ptx, comp in zip(ax, ['(a)', '(b)', '(c)', '(d)'],
            va='center',
            weight='bold',
            transform=a.transAxes)
-    a.set_ylim([0, 3000])
+    a.set_ylim([-50, 3000])
     a.set_xlim([-15, 20])
     # a.grid(True)
 
@@ -262,10 +284,8 @@ plt.subplots_adjust(top=0.9, bottom=0.1,
 
 tx = "13-season mean wind component profile" \
      "\nper wind direction threshold " \
-     "(czd > 0.25mm, n={:d})".format(WD.index.size)
-plt.suptitle(tx,fontsize=15,weight='bold',y=1.0)
-
-# plt.show()
+     "(CZD$\geq$0.25mm, n={:d})".format(WD.index.size)
+plt.suptitle(tx, fontsize=15, weight='bold', y=1.0)
 
 # place = '/home/raul/Desktop/'
 place ='/Users/raulvalenzuela/Documents/'
